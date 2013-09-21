@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="88">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>BurstNode.h</itemPath>
+      <itemPath>Dequeue.h</itemPath>
+      <itemPath>DeviceDescriptor.h</itemPath>
+      <itemPath>ProcessControlBlock.h</itemPath>
+      <itemPath>ProcessQueue.h</itemPath>
+      <itemPath>VirtualCpu.h</itemPath>
+      <itemPath>debug.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>BurstNode.c</itemPath>
+      <itemPath>DeviceDescriptor.c</itemPath>
+      <itemPath>ProcessControlBlock.c</itemPath>
+      <itemPath>ProcessQueue.c</itemPath>
+      <itemPath>VirtualCpu.c</itemPath>
+      <itemPath>main.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+      </compileType>
+      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
