@@ -8,16 +8,17 @@
 #ifndef PROCESSQUEUE_H
 #define	PROCESSQUEUE_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include "ProcessControlBlock.h"
 
+// Structure of PQ (Process Queue)
+typedef struct PQ{
+    int queue_id;
+    int quantum;
+    enum State device_state;
+    dequeue_PCB queue;
+} PQ;
 
-
-
-#ifdef	__cplusplus
-}
-#endif
+DEQUEUE_PROTOTYPE(PQ);
 
 #endif	/* PROCESSQUEUE_H */
 
