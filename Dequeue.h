@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-// Contains the dequeueue, dequeue nodes and iterator
+// Contains the dequeue, dequeue nodes and iterator
 #define DEFINE_DEQUEUE(type) \
     typedef struct dequeueN_##type { \
         struct dequeueN_##type* next; \
@@ -40,7 +40,6 @@
     type* dequeue_##type##_pollL(dequeue_##type* container); \
     \
     type* dequeue_##type##_peekF(dequeue_##type* container); \
-    type* dequeue_##type##_peekA(dequeueN_##type* node, type* data); \
     type* dequeue_##type##_peekL(dequeue_##type* container); \
     \
     bool  dequeue_##type##_empty(dequeue_##type* container); \
@@ -63,10 +62,10 @@
     } \
     \
     void dequeue_##type##_pushF(dequeue_##type * container, type* data) { \
-        if (container->head==NULL)\
+        if (container->head==NULL) \
             dequeue_##type##_first_insert(container, data); \
         else { \
-            dequeue_##type##_insert_after(container->head, data); \
+            dequeue_##type##_pushA(container->head, data); \
             container->head=container->head->prev; \
         } \
     } \
@@ -83,7 +82,7 @@
         if (container->tail==NULL)\
             dequeue_##type##_first_insert(container, data); \
         else { \
-            dequeue_##type##_insert_before(container->tail, data); \
+            dequeue_##type##_pushB(container->tail, data); \
             container->tail=container->tail->next; \
         } \
     } \
@@ -93,7 +92,7 @@
         newnode->data = data; \
         newnode->next = node; \
         dequeueN_##type* prevnode = node->prev; \
-        if (prevnode != null) prevnode->next = newnode; \
+        if (prevnode != NULL) prevnode->next = newnode; \
         node->next = newnode; \
     }
 
@@ -106,7 +105,7 @@
         type* data = first->data; \
         free(first); \
         if (container->head==NULL) container->tail=NULL; \
-        return data;\
+        return data; \
     } \
     \
     type* dequeue_##type##_pollL(dequeue_##type* container){ \
@@ -137,13 +136,13 @@
         return length; \
     } \
     \
-    int dequeue_##type##_peekF(dequeue_##type* container){ \
-        if (container->head==NULL) return null; \
+    type* dequeue_##type##_peekF(dequeue_##type* container){ \
+        if (container->head==NULL) return NULL; \
         return container->head->data; \
     } \
     \
-    int dequeue_##type##_peekL(dequeue_##type* container){ \
-        if (container->tail==NULL) return null; \
+    type* dequeue_##type##_peekL(dequeue_##type* container){ \
+        if (container->tail==NULL) return NULL; \
         return container->tail->data; \
     }
 
@@ -154,19 +153,19 @@
         it->container = container; \
     } \
     \
-    type* dequeueI_##type##_next(dequeueI_##type* it) {\
+    type* dequeueI_##type##_next(dequeueI_##type* it) { \
         if (it->current == NULL) return NULL; \
         it->current = it->current->next; \
-        return dequeue_##type##_examine(it); \
+        return dequeueI_##type##_examine(it); \
     } \
     \
-    type* dequeueI_##type##_examine(dequeueI_##type* it) {\
+    type* dequeueI_##type##_examine(dequeueI_##type* it) { \
         if (it->current != NULL) \
             return it->current->data; \
         return NULL; \
     } \
     \
-    type* dequeueI_##type##_remove(dequeueI_##type* it) {\
+    type* dequeueI_##type##_remove(dequeueI_##type* it) { \
         if (it->current==NULL) return NULL; \
         if (it->current->prev==NULL) \
             return dequeue_##type##_pollF(it->container); \
