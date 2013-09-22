@@ -7,13 +7,33 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include <err.h>
+
 #include "Dequeue.h"
+#include "FileToProcessQueue.h"
+
 
 /*
  * 
  */
 int main(int argc, char** argv) {
 
-    printf("hello world!");
+    char filename[30];
+    if (argc != 2) {
+        printf("Put Usage Detail here\n");
+        return 1;
+    }
+    strcpy(filename, argv[1]);
+
+    printf("Reading File!\n");
+    return read_lines(filename, 80, print_line) ? 0 : 1;
+
 }
 
