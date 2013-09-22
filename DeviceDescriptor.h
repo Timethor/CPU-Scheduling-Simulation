@@ -8,16 +8,16 @@
 #ifndef DEVICEDESCRIPTOR_H
 #define	DEVICEDESCRIPTOR_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include "ProcessControlBlock.h"
 
+// Structure of DD Device Descriptor
+typedef struct DD{
+    int device_id;
+    enum State device_state;
+    dequeue_PCB queue;
+} DD;
 
-
-
-#ifdef	__cplusplus
-}
-#endif
+DEQUEUE_PROTOTYPE(DD);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 

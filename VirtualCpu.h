@@ -8,16 +8,14 @@
 #ifndef VIRTUALCPU_H
 #define	VIRTUALCPU_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+// Structure of DD Device Descriptor
+typedef struct DD{
+    int device_id;
+    enum State device_state;
+    dequeue_PCB queue;
+} DD;
 
-
-
-
-#ifdef	__cplusplus
-}
-#endif
+DEQUEUE_PROTOTYPE(DD);
 
 #endif	/* VIRTUALCPU_H */
 
