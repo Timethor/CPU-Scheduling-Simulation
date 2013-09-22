@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/BurstNode.o \
 	${OBJECTDIR}/DeviceDescriptor.o \
+	${OBJECTDIR}/FileToProcessQueue.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
 	${OBJECTDIR}/ProcessQueue.o \
 	${OBJECTDIR}/VirtualCpu.o \
@@ -70,32 +71,37 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator: ${OBJECTFILE
 ${OBJECTDIR}/BurstNode.o: BurstNode.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
 
 ${OBJECTDIR}/DeviceDescriptor.o: DeviceDescriptor.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
+
+${OBJECTDIR}/FileToProcessQueue.o: FileToProcessQueue.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileToProcessQueue.o FileToProcessQueue.c
 
 ${OBJECTDIR}/ProcessControlBlock.o: ProcessControlBlock.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
 
 ${OBJECTDIR}/ProcessQueue.o: ProcessQueue.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
 
 ${OBJECTDIR}/VirtualCpu.o: VirtualCpu.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
 
 # Subprojects
 .build-subprojects:
