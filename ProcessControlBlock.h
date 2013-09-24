@@ -12,7 +12,7 @@
 #include "Dequeue.h"
 #include "BurstNode.h"
 
-enum State {
+enum PCBState {
     NEW,
     READY,
     RUNNING,

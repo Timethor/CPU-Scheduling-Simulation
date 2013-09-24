@@ -14,7 +14,7 @@
 typedef struct PQ{
     int queue_id;
     int quantum;
-    enum State device_state;
+    enum PCBState device_state;
     dequeue_PCB queue;
 } PQ;
 

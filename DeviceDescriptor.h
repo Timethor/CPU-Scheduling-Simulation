@@ -13,7 +13,7 @@
 // Structure of DD Device Descriptor
 typedef struct DD{
     int device_id;
-    enum State device_state;
+    enum PCBState device_state;
     dequeue_PCB queue;
 } DD;
 

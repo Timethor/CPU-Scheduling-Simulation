@@ -1,19 +1,18 @@
 #include "FileToProcessQueue.h"
 
-
 /*
  * 
  */
 char* print_line(const char* begin, const char* end, const int line_size) {
     char p[line_size];
-    memset(p, 0, sizeof(p));
-    strncpy(p, begin, end - begin + 1);
+    memset(p, 0, sizeof (p));
+    strncpy(p, begin, (end - begin + 1) < line_size ? (end - begin + 1) : line_size);
     printf("Begin: %s\n", p);
 
     return p;
 }
 
-int read_lines(const char * fname, int line_size, int (*call_back)(const char*, const char*, const int)) {
+int read_lines(const char* fname, int line_size, int (*call_back)(const char*, const char*, const int)) {
     int fd = open(fname, O_RDONLY);
     struct stat fs;
     char *buf, *buf_end;
@@ -29,7 +28,6 @@ int read_lines(const char * fname, int line_size, int (*call_back)(const char*, 
         return 0;
     }
 
-    /* fs.st_size could have been 0 actually */
     buf = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if (buf == (void*) - 1) {
         err(1, "mmap: %s", fname);
