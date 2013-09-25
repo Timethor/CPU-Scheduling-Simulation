@@ -12,7 +12,7 @@ char* print_line(const char* begin, const char* end, const int line_size) {
     return p;
 }
 
-int read_lines(const char* fname, int line_size, int (*call_back)(const char*, const char*, const int)) {
+int read_lines(const char* fname, int line_size, char* (*call_back)(const char*, const char*, const int)) {
     int fd = open(fname, O_RDONLY);
     struct stat fs;
     char *buf, *buf_end;

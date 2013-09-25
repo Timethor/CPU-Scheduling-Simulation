@@ -21,8 +21,8 @@
 
 #include "ProcessControlBlock.h"
 
-int read_lines(const char * fname, int line_size, int (*call_back)(const char*, const char*, const int));
 char* print_line(const char* begin, const char* end, const int line_size);
+int read_lines(const char* fname, int line_size, char* (*call_back)(const char*, const char*, const int));
 
 #endif	/* FILETOPROCESSQUEUE_H */
 
