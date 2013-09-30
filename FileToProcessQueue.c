@@ -8,7 +8,7 @@
 void print_line(const char* begin, const char* end, char* line_buffer, const int line_size) {
     int copyend = (end - begin + 1) < line_size ? (end - begin + 1) : line_size;
     strncpy(line_buffer, begin, copyend);
-    line_buffer[copyend] = NULL;
+    line_buffer[copyend] = 0;
 }
 
 int read_lines(const char* fname, int line_size, void (*call_back)(const char*, const char*, char*, const int)) {
@@ -38,6 +38,9 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
 
     begin = end = buf;
     printf("Looping!\n");
+    interpreterState state;
+    state.empty_lines = 0;
+    state.in_comment = false;
     while (1) {
         if (!(*end == '\r' || *end == '\n')) {
             if (++end < buf_end) continue;
@@ -57,17 +60,7 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
             err(1, "[callback] %s", fname);
             break;
         } else {
-            if (r[0] == ' ' || r[0] == '\r' || r[0] == '\n') {
-                printf("====================================Empty line!\n");
-            } else if (r[0] == '/' && r[1] == '*') {
-                printf("====================================Comment line started\n");
-            } else {
-                size_t len = strlen(r);
-                if (r[len - 1] == '/' && r[len - 2] == '*') {
-                    printf("====================================Comment line ended\n");
-                }
-            }
-            printf("Caught String: %s\n", r);
+            interpretLine(r, &state);
         }
 
         if ((begin = ++end) >= buf_end)
@@ -77,4 +70,69 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
     munmap(buf, fs.st_size);
     close(fd);
     return 1;
+}
+
+void interpretLine(char* r, interpreterState* state) {
+    if (isEmptyLine(r)) {
+        state->empty_lines++;
+        printf("=====================================Empty line!\n");
+    } else {
+        state->empty_lines = 0;
+        if (isStartMultiLineComment(r)) {
+            if (!isEndMultiLineComment(r)) {
+                state->in_comment = true;
+                printf("======MLSRT==========================Comment line\n");
+            } else {
+                printf("======MLSLC==========================Comment line\n");
+            }
+        } else if (isEndMultiLineComment(r)) {
+            state->in_comment = false;
+            printf("======MLEND==========================Comment line\n");
+        } else if (state->in_comment == true) {
+            printf("======MLINC==========================Comment line\n");
+        } else if (isSingleLineComment(r)) {
+            printf("======SINGL==========================Comment line\n");
+        } else {
+            // This line is useful
+            printf("%s\n", r);
+        }
+    }
+}
+
+bool isEmptyLine(char* line) {
+    return (line[0] == ' ' || line[0] == '\r' || line[0] == '\n');
+}
+
+bool isEndMultiLineComment(char* line) {
+    int len = strlen(line);
+    int x = 0;
+    while (x <= 5) {
+        if (x >= len - 1) {
+            break;
+        }
+        if (line[len - x++] == '/' && line[len - x] == '*') {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isSingleLineComment(char* line) {
+    if (strlen(line) <= 1) {
+        return false;
+    }
+    if (line[0] == '/' && line[1] == '/') {
+        return true;
+    }
+    return false;
+}
+
+bool isStartMultiLineComment(char* line) {
+    if (strlen(line) <= 1) {
+        return false;
+    }
+    if (line[0] == '/' && line[1] == '*') {
+        return true;
+    }
+    return false;
 }
