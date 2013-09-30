@@ -3,15 +3,44 @@
 #include <regex.h>
 
 /*
- * 
+ * Callback function for mmap file read, approprietely sets line_buffer to the value
+ * of the memory location passed
  */
-void print_line(const char* begin, const char* end, char* line_buffer, const int line_size) {
-    int copyend = (end - begin + 1) < line_size ? (end - begin + 1) : line_size;
+void interpret_line(const char* begin, const char* end, interpreterState* state) {
+    //>>	Copy values from memory at beginning -> end into line_buffer
+    char line_buffer[end - begin + 1];
+    int copyend = (end - begin + 1);
     strncpy(line_buffer, begin, copyend);
     line_buffer[copyend] = 0;
+
+    if (isEmptyLine(line_buffer)) {
+        state->empty_lines++;
+        printf("=====================================Empty line!\n");
+    } else {
+        state->empty_lines = 0;
+        if (isStartMultiLineComment(line_buffer)) {
+            if (!isEndMultiLineComment(line_buffer)) {
+                state->in_comment = true;
+                printf("======MLSRT==========================Comment line\n");
+            } else {
+                printf("======MLSLC==========================Comment line\n");
+            }
+        } else if (isEndMultiLineComment(line_buffer)) {
+            state->in_comment = false;
+            printf("======MLEND==========================Comment line\n");
+        } else if (state->in_comment == true) {
+            printf("======MLINC==========================Comment line\n");
+        } else if (isSingleLineComment(line_buffer)) {
+            printf("======SINGL==========================Comment line\n");
+        } else {
+            // This line is useful, pass to VPCU
+            printf("%s\n", line_buffer);
+        }
+    }
 }
 
-int read_lines(const char* fname, int line_size, void (*call_back)(const char*, const char*, char*, const int)) {
+int read_lines(const char* fname, void (*call_back)(const char*, const char*, interpreterState*)) {
+    //>>	
     int fd = open(fname, O_RDONLY);
     struct stat fs;
     char *buf, *buf_end;
@@ -37,10 +66,12 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
     buf_end = buf + fs.st_size;
 
     begin = end = buf;
-    printf("Looping!\n");
+    //>>	Keep track of what we have seen so far
     interpreterState state;
     state.empty_lines = 0;
     state.in_comment = false;
+
+    //>>	Main loop for each line in file
     while (1) {
         if (!(*end == '\r' || *end == '\n')) {
             if (++end < buf_end) continue;
@@ -50,18 +81,10 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
             if ((c == '\r' || c == '\n') && c != *end)
                 ++end;
         }
-
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
-        char r[line_size];
-        memset(r, 33, sizeof (r) - 1);
-        call_back(begin, end, r, line_size);
-        if (r == NULL) {
-            err(1, "[callback] %s", fname);
-            break;
-        } else {
-            interpretLine(r, &state);
-        }
+        //memset(r, 32, sizeof (r) - 1);
+        call_back(begin, end, &state);
 
         if ((begin = ++end) >= buf_end)
             break;
@@ -70,33 +93,6 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
     munmap(buf, fs.st_size);
     close(fd);
     return 1;
-}
-
-void interpretLine(char* r, interpreterState* state) {
-    if (isEmptyLine(r)) {
-        state->empty_lines++;
-        printf("=====================================Empty line!\n");
-    } else {
-        state->empty_lines = 0;
-        if (isStartMultiLineComment(r)) {
-            if (!isEndMultiLineComment(r)) {
-                state->in_comment = true;
-                printf("======MLSRT==========================Comment line\n");
-            } else {
-                printf("======MLSLC==========================Comment line\n");
-            }
-        } else if (isEndMultiLineComment(r)) {
-            state->in_comment = false;
-            printf("======MLEND==========================Comment line\n");
-        } else if (state->in_comment == true) {
-            printf("======MLINC==========================Comment line\n");
-        } else if (isSingleLineComment(r)) {
-            printf("======SINGL==========================Comment line\n");
-        } else {
-            // This line is useful
-            printf("%s\n", r);
-        }
-    }
 }
 
 bool isEmptyLine(char* line) {
