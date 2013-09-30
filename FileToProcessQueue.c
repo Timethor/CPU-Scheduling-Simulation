@@ -6,7 +6,9 @@
  * 
  */
 void print_line(const char* begin, const char* end, char* line_buffer, const int line_size) {
-    strncpy(line_buffer, begin, (end - begin + 1) < line_size ? (end - begin + 1) : line_size);
+    int copyend = (end - begin + 1) < line_size ? (end - begin + 1) : line_size;
+    strncpy(line_buffer, begin, copyend);
+    line_buffer[copyend] = NULL;
 }
 
 int read_lines(const char* fname, int line_size, void (*call_back)(const char*, const char*, char*, const int)) {
@@ -49,12 +51,22 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
         char r[line_size];
-        memset(r, 0, sizeof (r));
+        memset(r, 33, sizeof (r) - 1);
         call_back(begin, end, r, line_size);
         if (r == NULL) {
             err(1, "[callback] %s", fname);
             break;
         } else {
+            if (r[0] == ' ' || r[0] == '\r' || r[0] == '\n') {
+                printf("====================================Empty line!\n");
+            } else if (r[0] == '/' && r[1] == '*') {
+                printf("====================================Comment line started\n");
+            } else {
+                size_t len = strlen(r);
+                if (r[len - 1] == '/' && r[len - 2] == '*') {
+                    printf("====================================Comment line ended\n");
+                }
+            }
             printf("Caught String: %s\n", r);
         }
 
@@ -65,32 +77,4 @@ int read_lines(const char* fname, int line_size, void (*call_back)(const char*, 
     munmap(buf, fs.st_size);
     close(fd);
     return 1;
-}
-
-bool matches(char* needle, char* haystack) {
-    regex_t regext;
-    int reti;
-    char msgbuf[100];
-
-    /* Compile regular expression */
-    reti = regcomp(&regext, needle, REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
-    if (reti) {
-        fprintf(stderr, "Could not compile regex\n");
-        exit(1);
-    }
-
-    /* Execute regular expression */
-    reti = regexec(&regext, haystack, 0, NULL, 0);
-    if (!reti) {
-        puts("Match");
-    } else if (reti == REG_NOMATCH) {
-        puts("No match");
-    } else {
-        regerror(reti, &regext, msgbuf, sizeof (msgbuf));
-        fprintf(stderr, "Regex match failed: %s\n", msgbuf);
-        exit(1);
-    }
-
-    /* Free compiled regular expression if you want to use the regex_t again */
-    regfree(&regext);
 }
