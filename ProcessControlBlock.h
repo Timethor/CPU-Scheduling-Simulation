@@ -13,11 +13,11 @@
 #include "BurstNode.h"
 
 enum PCBState {
-    NEW,
-    READY,
-    RUNNING,
-    WAITING,
-    TERMINATED
+    PCB_NEW,
+    PCB_READY,
+    PCB_RUNNING,
+    PCB_WAITING,
+    PCB_TERMINATED
 };
 
 // Structure of PCB (process control block)
@@ -33,7 +33,7 @@ typedef struct PCB{
     //>>	The internal time that this process completed at
     int completion_time;
     //>>	A linked list of 
-    BN* schedule;
+    BurstNode* schedule;
 } PCB;
 
 DEQUEUE_PROTOTYPE(PCB);

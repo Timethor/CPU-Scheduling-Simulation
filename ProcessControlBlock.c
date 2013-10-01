@@ -1,5 +1,4 @@
-#include "stdlib.h"
-#include "Dequeue.h"
+#include <stdlib.h>
 #include "ProcessControlBlock.h"
 
 //#define DEBUG

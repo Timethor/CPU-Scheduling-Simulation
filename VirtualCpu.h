@@ -8,14 +8,19 @@
 #ifndef VIRTUALCPU_H
 #define	VIRTUALCPU_H
 
+#include "Dequeue.h"
+#include "DeviceDescriptor.h"
+#include "ProcessQueue.h"
 // Structure of DD Device Descriptor
-typedef struct DD{
-    int device_id;
-    enum State device_state;
-    dequeue_PCB queue;
-} DD;
 
-DEQUEUE_PROTOTYPE(DD);
+typedef struct VirtualCPU {
+    int clockTime;
+    DD_dequeue devices;
+    PQ_dequeue queues;
+} VirtualCPU;
+
+void initCPU(VirtualCPU* cpu);
+
 
 #endif	/* VIRTUALCPU_H */
 

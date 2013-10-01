@@ -12,6 +12,7 @@
       <itemPath>ProcessQueue.h</itemPath>
       <itemPath>VirtualCpu.h</itemPath>
       <itemPath>debug.h</itemPath>
+      <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -85,6 +86,8 @@
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="procA.list" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
@@ -139,6 +142,8 @@
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="procA.list" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
@@ -183,6 +188,8 @@
       <item path="debug.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="main.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="procA.list" ex="false" tool="3" flavor2="0">
       </item>

@@ -10,14 +10,18 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include "main.h"
 #include "Dequeue.h"
 #include "FileToProcessQueue.h"
-
+#include "VirtualCpu.h"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
+   
+    VirtualCPU cpu;
+    initCPU(&cpu);
 
     char filename[30];
     if (argc != 2) {

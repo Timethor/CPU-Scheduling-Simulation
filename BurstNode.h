@@ -13,12 +13,12 @@
 #include "Dequeue.h"
 
 enum burstType {
-   CPU,
-   IO,
+   BT_CPU,
+   BT_IO,
 };
 
 // Structure of PCB (process control block)
-typedef struct BN{
+typedef struct BurstNode{
     //>>	The type of Burst this Node is representing
     enum burstType type;
     //>>	The duration of the burst
@@ -26,9 +26,9 @@ typedef struct BN{
     //>>	The ID of the queue to start on for CPU type, device_id for IO type
     //>>	0: pick best option
     int queue_id;
-} BN;
+} BurstNode;
 
-DEQUEUE_PROTOTYPE(BN);
+DEQUEUE_PROTOTYPE(BurstNode);
 
 #endif	/* BURSTNODE_H */
 
