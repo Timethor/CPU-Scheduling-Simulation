@@ -62,11 +62,15 @@
         type##_dequeueN* newnode = malloc(sizeof(*newnode)); \
         newnode->data= data; \
         newnode->next=NULL; \
+        newnode->prev=NULL; \
         container->head = newnode; \
         container->tail = newnode; \
     } \
     \
     void type##_dequeue_pushF(type##_dequeue * container, type* data) { \
+        if (data == NULL){ \
+            printf("ERROR:: Pushing NULL not allowed: %s_Deque Empty\n", #type); \
+        } \
         if (container->head==NULL) { \
             if (container->trace) \
                 printf("TRACE:: Pushing to First Place: %s_Deque Empty\n", #type); \
@@ -74,7 +78,7 @@
         } else { \
             if (container->trace) \
                 printf("TRACE:: Pushing to First Place: %s_Deque !Empty\n", #type); \
-            type##_dequeue_pushA(container->head, data); \
+            type##_dequeue_pushB(container->head, data); \
             container->head=container->head->prev; \
         } \
     } \
@@ -84,10 +88,15 @@
         newnode->data = data; \
         type##_dequeueN* nextnode = node->next; \
         newnode->next = nextnode; \
+        if (nextnode != NULL) nextnode->prev = newnode; \
+        newnode->prev = node; \
         node->next = newnode; \
     } \
     \
     void type##_dequeue_pushL(type##_dequeue * container, type* data) { \
+        if (data == NULL){ \
+            printf("ERROR:: Pushing NULL not allowed: %s_Deque Empty\n", #type); \
+        } \
         if (container->tail==NULL) { \
             if (container->trace) \
                 printf("TRACE:: Pushing to Last Place: %s_Deque Empty\n", #type); \
@@ -95,7 +104,7 @@
         } else { \
             if (container->trace) \
                 printf("TRACE:: Pushing to Last Place: %s_Deque !Empty\n", #type); \
-            type##_dequeue_pushB(container->tail, data); \
+            type##_dequeue_pushA(container->tail, data); \
             container->tail=container->tail->next; \
         } \
     } \
@@ -105,37 +114,57 @@
         newnode->data = data; \
         newnode->next = node; \
         type##_dequeueN* prevnode = node->prev; \
+        newnode->prev = prevnode; \
         if (prevnode != NULL) prevnode->next = newnode; \
-        node->next = newnode; \
+        node->prev = newnode; \
     }
 
 // Defines type specific removal functions (pollF, pollL)
 #define DEQUEUE_REMOVAL(type) \
     type* type##_dequeue_pollF(type##_dequeue* container){ \
-        if (container->head==NULL) return NULL; \
+        if (container->head==NULL){ \
+            if (container->trace) \
+                    printf("TRACE:: Polling First Place: %s_Deque Empty\n", #type); \
+            return NULL; \
+        } \
         type##_dequeueN* first = container->head; \
         container->head=first->next; \
         type* data = first->data; \
+        if (container->head!=NULL) container->head->prev = NULL; \
+        else container->tail=NULL; \
         free(first); \
-        if (container->head==NULL) container->tail=NULL; \
+        if (container->trace) \
+                    printf("TRACE:: Polling First Place: %s_Deque !Empty\n", #type); \
         return data; \
     } \
     \
     type* type##_dequeue_pollL(type##_dequeue* container){ \
-        if (container->tail==NULL) return NULL; \
+        if (container->tail==NULL) { \
+            if (container->trace) \
+                        printf("TRACE:: Polling Last Place: %s_Deque Empty\n", #type); \
+            return NULL; \
+        } \
         type##_dequeueN* last = container->tail; \
         container->tail=last->prev; \
         type* data = last->data; \
-        free(last); \
         if (container->tail==NULL) container->head=NULL; \
+        else container->tail->next = NULL; \
+        free(last); \
+        if (container->trace) \
+                    printf("TRACE:: Polling Last Place: %s_Deque !Empty\n", #type); \
         return data; \
     }
 
 // Defines type specific status function
 #define DEQUEUE_STATUS(type) \
     bool type##_dequeue_empty(type##_dequeue* container){ \
-        if (container->head==NULL) \
+        if (container->head==NULL) { \
+            if (container->trace) \
+                        printf("TRACE:: Checking Empty?: %s_Deque Empty\n", #type); \
             return true; \
+        } \
+        if (container->trace) \
+                        printf("TRACE:: Checking Empty?: %s_Deque !Empty\n", #type); \
         return false; \
     } \
     \
@@ -184,6 +213,7 @@
             return type##_dequeue_pollF(it->container); \
         type##_dequeueN* temp = it->current; \
         temp->prev->next = temp->next; \
+        temp->next->prev = temp->prev; \
         it->current = temp->next; \
         type* data = temp->data; \
         free(temp); \

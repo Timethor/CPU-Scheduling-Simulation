@@ -19,6 +19,10 @@ typedef struct VirtualCPU {
     PQ_dequeue queues;
 } VirtualCPU;
 
-void VCPU_init(VirtualCPU* cpu);
+void VCPU_init(VirtualCPU* cpu, InputState* istate);
+void VCPU_MergeWithInputState(VirtualCPU* this, InputState* istate);
+
+void VCPU_doClockCycle(VirtualCPU* this, PCB_dequeue* notYetArrived);
+
 #endif	/* VIRTUALCPU_H */
 

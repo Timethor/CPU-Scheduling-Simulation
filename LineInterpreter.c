@@ -15,6 +15,7 @@ void InputState_init(InputState* state) {
     PQ_dequeue_init(&state->proto_queues, false, true);
     PCB_dequeue_init(&state->notYetArrived, false, true);
     state->call_back = IS_processInputLine;
+    state->bn = NULL;
 }
 
 
@@ -30,6 +31,7 @@ void IS_processInputLine(InputState* this, const char* begin, const char* end) {
     line[copyend] = 0;
 
     //>>	Determine what kind of line we have
+    printf("============================================================\n|\tSTAGE ::: %d\n============================================================\n", this->stage);
     if (IS_hasNonProcessableLine(this, line)) {
         return;
     }
@@ -108,28 +110,30 @@ bool IS_processLineForProcessArrival(InputState* this, char* line) {
 }
 
 bool IS_processLineForProcessSchedule(InputState* this, char* line) {
+    printf("ENTER PROCESS SCHEDULE\n");
     BurstNode_dequeue* sched = &PCB_dequeue_peekL(&this->notYetArrived)->schedule;
     sched->trace = true;
     int found = IS_hasCpuBurst(line);
-    if (BurstNode_dequeue_empty(sched) || BurstNode_fullyFormed(BurstNode_dequeue_peekL(sched))) {
+    if (this->bn == NULL) {
         this->seen_stage_req = 0;
-        BurstNode* newBurst = initBurstNode();
-        BurstNode_dequeue_pushL(sched, newBurst);
+        printf("REINIT BURSTNODE\n");
+        this->bn = initBurstNode();
     }
+    BurstNode* peek = this->bn;
+    printf("State Found BEFORE: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
     if (found != -1) {
         int cpuBurst = strtol((line + found), NULL, 10);
         printf("CPU Burst Found: `%d`\n", cpuBurst);
         this->seen_stage_req |= (1 << 0);
-        BurstNode_dequeue_peekL(sched)->type = BT_CPU;
-        BurstNode_dequeue_peekL(sched)->duration = cpuBurst;
+        peek->type = BT_CPU;
+        peek->duration = cpuBurst;
     }
     found = IS_hasIOBurst(line);
     if (found != -1) {
         int ioBurst = strtol((line + found), NULL, 10);
         printf("IO Burst Found: `%d`\n", ioBurst);
         this->seen_stage_req |= (1 << 1);
-        BurstNode_dequeue_peekL(sched)->type = BT_IO;
-        BurstNode_dequeue_peekL(sched)->duration = ioBurst;
+        peek->duration = ioBurst;
     }
     found = IS_hasIODevice(line);
     if (found != -1) {
@@ -139,12 +143,18 @@ bool IS_processLineForProcessSchedule(InputState* this, char* line) {
         if (DD_dequeue_empty(&this->proto_devices) || !SearchDeviceIds(&this->proto_devices, ioID)) {
             DD_dequeue_pushL(&this->proto_devices, DD_init(ioID));
         }
-        BurstNode_dequeue_peekL(sched)->type = BT_IO;
-        BurstNode_dequeue_peekL(sched)->queue_id = ioID;
+        peek->type = BT_IO;
+        peek->queue_id = ioID;
     }
+    printf("STATE Found AFTER: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
     if (this->seen_stage_req > 0) {
-        if (BurstNode_fullyFormed(BurstNode_dequeue_peekL(sched))) {
+        printf("REQUIREMENT MET\n");
+        if (BurstNode_fullyFormed(peek)) {
+            printf("BURSTNODE FULLY FORMED\n");
             this->seen_stage_req = -1;
+            BurstNode_dequeue_pushL(sched, peek);
+            printf("\tLENGTH: %d\n", BurstNode_dequeue_length(sched));
+            this->bn = NULL;
         }
         return true;
     }
@@ -169,7 +179,7 @@ int IS_hasIODevice(char* line) {
 bool IS_hasNonProcessableLine(InputState* this, char* line) {
     if (IS_isEmptyLine(line)) {
         this->in_comment = false;
-        printf("=====================================Empty line!\n");
+        //printf("=====================================Empty line!\n");
         if (this->stage != FS_PN_SCHEDULE && this->seen_stage_req != -1) {
             this->stage++;
             this->seen_stage_req = -1;
@@ -181,20 +191,20 @@ bool IS_hasNonProcessableLine(InputState* this, char* line) {
     if (IS_isStartMultiLineComment(line)) {
         if (!IS_isEndMultiLineComment(line)) {
             this->in_comment = true;
-            printf("======MLSRT==========================Comment line\n");
+            //printf("======MLSRT==========================Comment line\n");
         } else {
-            printf("======MLSLC==========================Comment line\n");
+            //printf("======MLSLC==========================Comment line\n");
         }
         return true;
     } else if (IS_isEndMultiLineComment(line)) {
         this->in_comment = false;
-        printf("======MLEND==========================Comment line\n");
+        //printf("======MLEND==========================Comment line\n");
         return true;
     } else if (this->in_comment == true) {
-        printf("======MLINC==========================Comment line\n");
+        //printf("======MLINC==========================Comment line\n");
         return true;
     } else if (IS_isSingleLineComment(line)) {
-        printf("======SINGL==========================Comment line\n");
+        //printf("======SINGL==========================Comment line\n");
         return true;
     }
     return false;

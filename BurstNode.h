@@ -13,6 +13,7 @@
 #include "Dequeue.h"
 
 enum burstType {
+   BT_NONE = -1,
    BT_CPU,
    BT_IO,
 };

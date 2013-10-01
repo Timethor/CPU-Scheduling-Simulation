@@ -22,6 +22,7 @@ enum FormatStage {
 typedef struct InputState {
     bool in_comment;
     enum FormatStage stage;
+    BurstNode* bn;
     int seen_stage_req;
     bool error_thrown;
     PCB_dequeue notYetArrived;

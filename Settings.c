@@ -61,7 +61,6 @@ Settings* setup(int argc, char *argv[]) {
         }
 
     errno = 0;
-    printf("FILE TO BE READ FROM:: %s", argv[optind] );
     
     int fp = open(argv[optind], O_RDONLY);
 

@@ -24,10 +24,7 @@ int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
 
     begin = end = buf;
     //>>	Main loop for each line in file
-    while (true) {
-        if (istate->error_thrown) {
-            break;
-        }
+    while (!istate->error_thrown) {
         if (!(*end == '\r' || *end == '\n')) {
             if (++end < buf_end) continue;
         } else if (1 + end < buf_end) {
@@ -47,6 +44,7 @@ int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
 
     munmap(buf, fs.st_size);
     close(fd);
+    if (istate->error_thrown) return false;
     return true;
 }
 

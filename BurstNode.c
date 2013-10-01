@@ -3,20 +3,18 @@
 
 DEQUEUE(BurstNode);
 
-const int BURST_NULL = -1;
-
 bool BurstNode_fullyFormed(BurstNode* bn) {
-    return (bn->type != BURST_NULL) ?
+    return (bn->type != BT_NONE) ?
                 (bn->type == BT_CPU ?
-                    (bn->duration != BURST_NULL ? true : false) :
-                    ((bn->duration != BURST_NULL && bn->queue_id != BURST_NULL) ? true : false) 
+                    (bn->duration != BT_NONE ? true : false) :
+                    ((bn->duration != BT_NONE && bn->queue_id != BT_NONE) ? true : false) 
                 ) : false;
 }
 
 BurstNode* initBurstNode() {
     BurstNode* newBurst = malloc(sizeof(*newBurst));
-    newBurst->duration = BURST_NULL;
-    newBurst->queue_id = BURST_NULL;
-    newBurst->type = BURST_NULL;
+    newBurst->duration = BT_NONE;
+    newBurst->queue_id = BT_NONE;
+    newBurst->type = BT_NONE;
     return newBurst;
 }

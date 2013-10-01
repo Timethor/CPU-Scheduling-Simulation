@@ -22,11 +22,14 @@
  */
 int main(int argc, char** argv) {
    
+    printf("INIT SETTINGS!\n");
     Settings* set = setup(argc,argv);
     
+    printf("INIT INPUTSTATE!\n");
     InputState is;
     InputState_init(&is);
     
+    printf("INIT FILEREADER!\n");
     MyFileReader reader;
     MyFileReader_init(&reader, &is);
 
@@ -35,8 +38,14 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     
+    
+    printf("==============INIT VCPU!=============\n");
     VirtualCPU cpu;
-    VCPU_init(&cpu);
+    VCPU_init(&cpu, &is);
+    printf("==============VCPU TICKING!=============\n");
+    while (!PCB_dequeue_empty(&is.notYetArrived)){
+        VCPU_doClockCycle(&cpu, &is.notYetArrived);
+    }
     
     return EXIT_SUCCESS;
 }
