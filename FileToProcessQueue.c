@@ -6,13 +6,14 @@
  * Callback function for mmap file read, approprietely sets line_buffer to the value
  * of the memory location passed
  */
-void interpret_line(const char* begin, const char* end, interpreterState* state) {
+void interpret_line(const char* begin, const char* end, readLineState* state) {
     //>>	Copy values from memory at beginning -> end into line_buffer
     char line_buffer[end - begin + 1];
     int copyend = (end - begin + 1);
     strncpy(line_buffer, begin, copyend);
     line_buffer[copyend] = 0;
 
+    //>>	Determine what kind of line we have
     if (isEmptyLine(line_buffer)) {
         state->empty_lines++;
         printf("=====================================Empty line!\n");
@@ -39,7 +40,7 @@ void interpret_line(const char* begin, const char* end, interpreterState* state)
     }
 }
 
-int read_lines(const char* fname, void (*call_back)(const char*, const char*, interpreterState*)) {
+int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*)) {
     //>>	
     int fd = open(fname, O_RDONLY);
     struct stat fs;
@@ -67,7 +68,7 @@ int read_lines(const char* fname, void (*call_back)(const char*, const char*, in
 
     begin = end = buf;
     //>>	Keep track of what we have seen so far
-    interpreterState state;
+    readLineState state;
     state.empty_lines = 0;
     state.in_comment = false;
 

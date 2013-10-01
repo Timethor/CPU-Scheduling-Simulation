@@ -26,13 +26,13 @@
 typedef struct readLineState {
     int empty_lines;
     bool in_comment;
-} interpreterState;
+} readLineState;
 
 #include "ProcessControlBlock.h"
 
 
-void interpret_line(const char* begin, const char* end, interpreterState* state);
-int read_lines(const char* fname, void (*call_back)(const char*, const char*, interpreterState*));
+void interpret_line(const char* begin, const char* end, readLineState* state);
+int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*));
 
 // Functions to process the lines
 bool isEmptyLine(char* line);
