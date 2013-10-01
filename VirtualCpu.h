@@ -19,6 +19,6 @@ typedef struct VirtualCPU {
     PQ_dequeue queues;
 } VirtualCPU;
 
-void initCPU(VirtualCPU* cpu);
+void VCPU_init(VirtualCPU* cpu);
 #endif	/* VIRTUALCPU_H */
 

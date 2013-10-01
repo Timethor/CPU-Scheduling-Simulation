@@ -6,7 +6,7 @@
 #include "LineInterpreter.h"
 
 
-void initInputState(InputState* state) {
+void InputState_init(InputState* state) {
     state->in_comment = false;
     state->stage = FS_TQ;
     state->seen_stage_req = -1;
@@ -14,7 +14,7 @@ void initInputState(InputState* state) {
     DD_dequeue_init(&state->proto_devices, false, true);
     PQ_dequeue_init(&state->proto_queues, false, true);
     PCB_dequeue_init(&state->notYetArrived, false, true);
-    state->call_back = processInputLine;
+    state->call_back = IS_processInputLine;
 }
 
 
@@ -22,7 +22,7 @@ void initInputState(InputState* state) {
  * Callback function for mmap file read, appropriately sets line_buffer to the value
  * of the memory location passed
  */
-void processInputLine(InputState* this, const char* begin, const char* end) {
+void IS_processInputLine(InputState* this, const char* begin, const char* end) {
     //>>	Copy values from memory at beginning -> end into line_buffer
     char line[end - begin + 1];
     int copyend = (end - begin + 1);
@@ -30,26 +30,26 @@ void processInputLine(InputState* this, const char* begin, const char* end) {
     line[copyend] = 0;
 
     //>>	Determine what kind of line we have
-    if (hasNonProcessableLine(this, line)) {
+    if (IS_hasNonProcessableLine(this, line)) {
         return;
     }
-    if (this->stage == FS_TQ && processLineForTimeQuantum(this, line)) {
+    if (this->stage == FS_TQ && IS_processLineForTimeQuantum(this, line)) {
         return;
     }
-    if (this->stage == FS_PN_NEW && processLineForNewProcess(this, line)) {
+    if (this->stage == FS_PN_NEW && IS_processLineForNewProcess(this, line)) {
         return;
     }
-    if (this->stage == FS_PN_AT && processLineForProcessArrival(this, line)) {
+    if (this->stage == FS_PN_AT && IS_processLineForProcessArrival(this, line)) {
         return;
     }
-    if (this->stage == FS_PN_SCHEDULE && processLineForProcessSchedule(this, line)) {
+    if (this->stage == FS_PN_SCHEDULE && IS_processLineForProcessSchedule(this, line)) {
         return;
     }
     printf("File Format Violates Specification!\nPlease check for errors and try again.\nLine in Violation:\t`%s", line);
     this->error_thrown = true;
 }
 
-int hasSubString(char* line, char* needle) {
+int IS_hasSubString(char* line, char* needle) {
     char* locate = strcasestr(line, needle);
     if (locate != NULL) {
         return strlen(needle);
@@ -57,9 +57,9 @@ int hasSubString(char* line, char* needle) {
     return -1;
 }
 
-bool processLineForTimeQuantum(InputState* this, char* line) {
+bool IS_processLineForTimeQuantum(InputState* this, char* line) {
     char needle[] = "time quantum ";
-    int found = hasSubString(line, needle);
+    int found = IS_hasSubString(line, needle);
     if (found == -1)
         return false;
     this->seen_stage_req = true;
@@ -79,9 +79,9 @@ bool processLineForTimeQuantum(InputState* this, char* line) {
     return true;
 }
 
-bool processLineForNewProcess(InputState* this, char* line) {
+bool IS_processLineForNewProcess(InputState* this, char* line) {
     char needle[] = "process id: ";
-    int found = hasSubString(line, needle);
+    int found = IS_hasSubString(line, needle);
     if (found == -1)
         return false;
     this->seen_stage_req = -1;
@@ -94,9 +94,9 @@ bool processLineForNewProcess(InputState* this, char* line) {
     return true;
 }
 
-bool processLineForProcessArrival(InputState* this, char* line) {
+bool IS_processLineForProcessArrival(InputState* this, char* line) {
     char needle[] = "arrival time: ";
-    int found = hasSubString(line, needle);
+    int found = IS_hasSubString(line, needle);
     if (found == -1)
         return false;
     this->seen_stage_req = -1;
@@ -107,10 +107,10 @@ bool processLineForProcessArrival(InputState* this, char* line) {
     return true;
 }
 
-bool processLineForProcessSchedule(InputState* this, char* line) {
+bool IS_processLineForProcessSchedule(InputState* this, char* line) {
     BurstNode_dequeue* sched = &PCB_dequeue_peekL(&this->notYetArrived)->schedule;
     sched->trace = true;
-    int found = hasCpuBurst(line);
+    int found = IS_hasCpuBurst(line);
     if (BurstNode_dequeue_empty(sched) || BurstNode_fullyFormed(BurstNode_dequeue_peekL(sched))) {
         this->seen_stage_req = 0;
         BurstNode* newBurst = initBurstNode();
@@ -123,7 +123,7 @@ bool processLineForProcessSchedule(InputState* this, char* line) {
         BurstNode_dequeue_peekL(sched)->type = BT_CPU;
         BurstNode_dequeue_peekL(sched)->duration = cpuBurst;
     }
-    found = hasIOBurst(line);
+    found = IS_hasIOBurst(line);
     if (found != -1) {
         int ioBurst = strtol((line + found), NULL, 10);
         printf("IO Burst Found: `%d`\n", ioBurst);
@@ -131,7 +131,7 @@ bool processLineForProcessSchedule(InputState* this, char* line) {
         BurstNode_dequeue_peekL(sched)->type = BT_IO;
         BurstNode_dequeue_peekL(sched)->duration = ioBurst;
     }
-    found = hasIODevice(line);
+    found = IS_hasIODevice(line);
     if (found != -1) {
         int ioID = strtol((line + found), NULL, 10);
         printf("IO Device ID Found: `%d`\n", ioID);
@@ -151,23 +151,23 @@ bool processLineForProcessSchedule(InputState* this, char* line) {
     return false;
 }
 
-int hasCpuBurst(char* line) {
+int IS_hasCpuBurst(char* line) {
     char needle[] = "cpu burst: ";
-    return hasSubString(line, needle);
+    return IS_hasSubString(line, needle);
 }
 
-int hasIOBurst(char* line) {
+int IS_hasIOBurst(char* line) {
     char needle[] = "i/o burst: ";
-    return hasSubString(line, needle);
+    return IS_hasSubString(line, needle);
 }
 
-int hasIODevice(char* line) {
+int IS_hasIODevice(char* line) {
     char needle[] = "i/o device id: ";
-    return hasSubString(line, needle);
+    return IS_hasSubString(line, needle);
 }
 
-bool hasNonProcessableLine(InputState* this, char* line) {
-    if (isEmptyLine(line)) {
+bool IS_hasNonProcessableLine(InputState* this, char* line) {
+    if (IS_isEmptyLine(line)) {
         this->in_comment = false;
         printf("=====================================Empty line!\n");
         if (this->stage != FS_PN_SCHEDULE && this->seen_stage_req != -1) {
@@ -178,33 +178,33 @@ bool hasNonProcessableLine(InputState* this, char* line) {
         }
         return true;
     }
-    if (isStartMultiLineComment(line)) {
-        if (!isEndMultiLineComment(line)) {
+    if (IS_isStartMultiLineComment(line)) {
+        if (!IS_isEndMultiLineComment(line)) {
             this->in_comment = true;
             printf("======MLSRT==========================Comment line\n");
         } else {
             printf("======MLSLC==========================Comment line\n");
         }
         return true;
-    } else if (isEndMultiLineComment(line)) {
+    } else if (IS_isEndMultiLineComment(line)) {
         this->in_comment = false;
         printf("======MLEND==========================Comment line\n");
         return true;
     } else if (this->in_comment == true) {
         printf("======MLINC==========================Comment line\n");
         return true;
-    } else if (isSingleLineComment(line)) {
+    } else if (IS_isSingleLineComment(line)) {
         printf("======SINGL==========================Comment line\n");
         return true;
     }
     return false;
 }
 
-bool isEmptyLine(char* line) {
+bool IS_isEmptyLine(char* line) {
     return (line[0] == ' ' || line[0] == '\r' || line[0] == '\n');
 }
 
-bool isEndMultiLineComment(char* line) {
+bool IS_isEndMultiLineComment(char* line) {
     int len = strlen(line);
     int x = 0;
     while (x <= 5) {
@@ -218,7 +218,7 @@ bool isEndMultiLineComment(char* line) {
     return false;
 }
 
-bool isSingleLineComment(char* line) {
+bool IS_isSingleLineComment(char* line) {
     if (strlen(line) <= 1) {
         return false;
     }
@@ -228,7 +228,7 @@ bool isSingleLineComment(char* line) {
     return false;
 }
 
-bool isStartMultiLineComment(char* line) {
+bool IS_isStartMultiLineComment(char* line) {
     if (strlen(line) <= 1) {
         return false;
     }

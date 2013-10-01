@@ -1,7 +1,7 @@
 #include "MyFileReader.h"
 #include "Settings.h"
 
-int read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
+int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
     //>>	
     struct stat fs;
     char *buf, *buf_end;
@@ -50,7 +50,7 @@ int read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
     return true;
 }
 
-void initFileReader(MyFileReader* fr, InputState* istate) {
+void MyFileReader_init(MyFileReader* fr, InputState* istate) {
     fr->call_back = istate->call_back;
-    fr->readLines = read_lines;
+    fr->readLines = FR_read_lines;
 }

@@ -25,16 +25,19 @@ int main(int argc, char** argv) {
     Settings* set = setup(argc,argv);
     
     InputState is;
-    initInputState(&is);
+    InputState_init(&is);
     
     MyFileReader reader;
-    initFileReader(&reader, &is);
+    MyFileReader_init(&reader, &is);
 
-    
     printf("Reading File!\n");
     if (!reader.readLines(&reader, set, &is)){
         return EXIT_FAILURE;
     }
+    
+    VirtualCPU cpu;
+    VCPU_init(&cpu);
+    
     return EXIT_SUCCESS;
 }
 

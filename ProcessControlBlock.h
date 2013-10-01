@@ -21,7 +21,8 @@ enum PCBState {
 };
 
 // Structure of PCB (process control block)
-typedef struct PCB{
+
+typedef struct PCB {
     //>>	The ID of the process
     int process_id;
     //>>	The arrival time of the process
@@ -37,7 +38,7 @@ typedef struct PCB{
 } PCB;
 
 DEQUEUE_PROTOTYPE(PCB);
-int compare_PCB_Arrival(const PCB ** job1, const PCB** job2);
+int compare_PCB_Arrival(const PCB*job1, const PCB* job2);
 
 #endif	/* PROCESSCONTROLBLOCK_H */
 

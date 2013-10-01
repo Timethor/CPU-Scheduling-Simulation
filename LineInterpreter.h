@@ -30,25 +30,25 @@ typedef struct InputState {
     void (*call_back)(struct InputState*, const char*, const char*);
 } InputState;
 
-void processInputLine(InputState * this, const char* begin, const char* end);
-void initInputState(InputState* state);
+void IS_processInputLine(InputState * this, const char* begin, const char* end);
+void InputState_init(InputState* state);
 
-bool hasNonProcessableLine(InputState * this, char* line);
+bool IS_hasNonProcessableLine(InputState * this, char* line);
 
-int hasCpuBurst(char* line);
-int hasIOBurst(char* line);
-int hasIODevice(char* line);
+int IS_hasCpuBurst(char* line);
+int IS_hasIOBurst(char* line);
+int IS_hasIODevice(char* line);
 
-bool processLineForTimeQuantum(InputState * this, char* line);
-bool processLineForNewProcess(InputState * this, char* line);
-bool processLineForProcessArrival(InputState * this, char* line);
-bool processLineForProcessSchedule(InputState * this, char* line);
+bool IS_processLineForTimeQuantum(InputState * this, char* line);
+bool IS_processLineForNewProcess(InputState * this, char* line);
+bool IS_processLineForProcessArrival(InputState * this, char* line);
+bool IS_processLineForProcessSchedule(InputState * this, char* line);
 
-int hasSubString(char* line, char* needle);
-bool isEmptyLine(char* line);
-bool isEndMultiLineComment(char* line);
-bool isSingleLineComment(char* line);
-bool isStartMultiLineComment(char* line);
+int IS_hasSubString(char* line, char* needle);
+bool IS_isEmptyLine(char* line);
+bool IS_isEndMultiLineComment(char* line);
+bool IS_isSingleLineComment(char* line);
+bool IS_isStartMultiLineComment(char* line);
 
 #endif	/* LINEINTERPRETER_H */
 
