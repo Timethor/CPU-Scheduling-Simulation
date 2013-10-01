@@ -1,7 +1,7 @@
 #include "MyFileReader.h"
 #include "Settings.h"
 
-int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu) {
+int read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
     //>>	
     struct stat fs;
     char *buf, *buf_end;
@@ -25,7 +25,7 @@ int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu) {
     begin = end = buf;
     //>>	Main loop for each line in file
     while (true) {
-        if (cpu->state.error_thrown){
+        if (istate->error_thrown) {
             break;
         }
         if (!(*end == '\r' || *end == '\n')) {
@@ -39,7 +39,7 @@ int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu) {
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
         //memset(r, 32, sizeof (r) - 1);
-        this->call_back(cpu, begin, end);
+        this->call_back(istate, begin, end);
 
         if ((begin = ++end) >= buf_end)
             break;
@@ -50,7 +50,7 @@ int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu) {
     return true;
 }
 
-void initFileReader(MyFileReader* fr, VirtualCPU* cpu) {
-    fr->call_back = cpu->processInputLine;
+void initFileReader(MyFileReader* fr, InputState* istate) {
+    fr->call_back = istate->call_back;
     fr->readLines = read_lines;
 }

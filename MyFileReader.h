@@ -20,16 +20,16 @@
 #include <stdbool.h>
 #include <err.h>
 
-#include "VirtualCpu.h"
 #include "Settings.h"
+#include "LineInterpreter.h"
 
 typedef struct MyFileReader {
-    void (*call_back)(VirtualCPU*, const char*, const char*);
-    int (*readLines)(struct MyFileReader*, Settings*, VirtualCPU*);
+    void (*call_back)(InputState*, const char*, const char*);
+    int (*readLines)(struct MyFileReader*, Settings*, InputState*);
 } MyFileReader;
 
-void initFileReader(MyFileReader* fr, VirtualCPU* cpu);
-int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu);
+void initFileReader(MyFileReader* fr, InputState* cpu);
+int read_lines(MyFileReader* this, Settings* settings, InputState* cpu);
 
 #endif	/* FILEREADER_H */
 

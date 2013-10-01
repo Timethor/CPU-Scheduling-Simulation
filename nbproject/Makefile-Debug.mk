@@ -37,9 +37,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/BurstNode.o \
 	${OBJECTDIR}/DeviceDescriptor.o \
+	${OBJECTDIR}/LineInterpreter.o \
 	${OBJECTDIR}/MyFileReader.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
 	${OBJECTDIR}/ProcessQueue.o \
+	${OBJECTDIR}/RoundRobin.o \
 	${OBJECTDIR}/Settings.o \
 	${OBJECTDIR}/VirtualCpu.o \
 	${OBJECTDIR}/main.o
@@ -79,6 +81,11 @@ ${OBJECTDIR}/DeviceDescriptor.o: DeviceDescriptor.c
 	${RM} $@.d
 	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
 
+${OBJECTDIR}/LineInterpreter.o: LineInterpreter.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/LineInterpreter.o LineInterpreter.c
+
 ${OBJECTDIR}/MyFileReader.o: MyFileReader.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -93,6 +100,11 @@ ${OBJECTDIR}/ProcessQueue.o: ProcessQueue.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
+
+${OBJECTDIR}/RoundRobin.o: RoundRobin.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/RoundRobin.o RoundRobin.c
 
 ${OBJECTDIR}/Settings.o: Settings.c 
 	${MKDIR} -p ${OBJECTDIR}

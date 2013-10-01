@@ -14,6 +14,7 @@
 #include "Dequeue.h"
 #include "VirtualCpu.h"
 #include "MyFileReader.h"
+#include "LineInterpreter.h"
 #include "Settings.h"
 
 /*
@@ -23,14 +24,15 @@ int main(int argc, char** argv) {
    
     Settings* set = setup(argc,argv);
     
-    VirtualCPU cpu;
-    initCPU(&cpu);
+    InputState is;
+    initInputState(&is);
     
     MyFileReader reader;
-    initFileReader(&reader, &cpu);
+    initFileReader(&reader, &is);
 
+    
     printf("Reading File!\n");
-    if (!reader.readLines(&reader, set, &cpu)){
+    if (!reader.readLines(&reader, set, &is)){
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
