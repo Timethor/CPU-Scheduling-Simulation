@@ -14,27 +14,25 @@
 #include "Dequeue.h"
 #include "VirtualCpu.h"
 #include "MyFileReader.h"
+#include "Settings.h"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
    
+    Settings* set = setup(argc,argv);
+    
     VirtualCPU cpu;
     initCPU(&cpu);
+    
     MyFileReader reader;
     initFileReader(&reader, &cpu);
-    
-
-    char filename[30];
-    if (argc != 2) {
-        printf("Put Usage Detail here\n");
-        return 1;
-    }
-    strcpy(filename, argv[1]);
 
     printf("Reading File!\n");
-    return reader.readLines(&reader, filename, &cpu) ? 0 : 1;
-
+    if (!reader.readLines(&reader, set, &cpu)){
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
 
