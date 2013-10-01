@@ -1,4 +1,5 @@
 #include "FileToProcessQueue.h"
+#include "VirtualCpu.h"
 
 #include <regex.h>
 
@@ -6,7 +7,7 @@
  * Callback function for mmap file read, approprietely sets line_buffer to the value
  * of the memory location passed
  */
-void interpret_line(const char* begin, const char* end, readLineState* state) {
+void interpret_line(const char* begin, const char* end, readLineState* state, VirtualCPU* cpu) {
     //>>	Copy values from memory at beginning -> end into line_buffer
     char line_buffer[end - begin + 1];
     int copyend = (end - begin + 1);
@@ -35,12 +36,12 @@ void interpret_line(const char* begin, const char* end, readLineState* state) {
             printf("======SINGL==========================Comment line\n");
         } else {
             // This line is useful, pass to VPCU
-            printf("%s\n", line_buffer);
+            cpu->func->processInputLine(line_buffer);
         }
     }
 }
 
-int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*)) {
+int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*, VirtualCPU*), VirtualCPU* cpu) {
     //>>	
     int fd = open(fname, O_RDONLY);
     struct stat fs;
@@ -85,7 +86,7 @@ int read_lines(const char* fname, void (*call_back)(const char*, const char*, re
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
         //memset(r, 32, sizeof (r) - 1);
-        call_back(begin, end, &state);
+        call_back(begin, end, &state, cpu);
 
         if ((begin = ++end) >= buf_end)
             break;

@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     strcpy(filename, argv[1]);
 
     printf("Reading File!\n");
-    return read_lines(filename, interpret_line) ? 0 : 1;
+    return read_lines(filename, interpret_line, &cpu) ? 0 : 1;
 
 }
 

@@ -29,10 +29,11 @@ typedef struct readLineState {
 } readLineState;
 
 #include "ProcessControlBlock.h"
+#include "VirtualCpu.h"
 
 
-void interpret_line(const char* begin, const char* end, readLineState* state);
-int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*));
+void interpret_line(const char* begin, const char* end, readLineState* state, VirtualCPU* cpu);
+int read_lines(const char* fname, void (*call_back)(const char*, const char*, readLineState*, VirtualCPU*), VirtualCPU* cpu);
 
 // Functions to process the lines
 bool isEmptyLine(char* line);
