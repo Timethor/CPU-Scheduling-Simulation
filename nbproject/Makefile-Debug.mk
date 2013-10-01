@@ -38,6 +38,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/BurstNode.o \
 	${OBJECTDIR}/DeviceDescriptor.o \
 	${OBJECTDIR}/FileToProcessQueue.o \
+	${OBJECTDIR}/MyFileReader.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
 	${OBJECTDIR}/ProcessQueue.o \
 	${OBJECTDIR}/VirtualCpu.o \
@@ -82,6 +83,11 @@ ${OBJECTDIR}/FileToProcessQueue.o: FileToProcessQueue.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileToProcessQueue.o FileToProcessQueue.c
+
+${OBJECTDIR}/MyFileReader.o: MyFileReader.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/MyFileReader.o MyFileReader.c
 
 ${OBJECTDIR}/ProcessControlBlock.o: ProcessControlBlock.c 
 	${MKDIR} -p ${OBJECTDIR}

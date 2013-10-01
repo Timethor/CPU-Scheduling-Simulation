@@ -14,12 +14,15 @@
 #include "Dequeue.h"
 #include "FileToProcessQueue.h"
 #include "VirtualCpu.h"
+#include "MyFileReader.h"
 
 /*
  * 
  */
 int main(int argc, char** argv) {
    
+    MyFileReader reader;
+    initFileReader(&reader, interpret_line);
     VirtualCPU cpu;
     initCPU(&cpu);
 
@@ -31,7 +34,7 @@ int main(int argc, char** argv) {
     strcpy(filename, argv[1]);
 
     printf("Reading File!\n");
-    return read_lines(filename, interpret_line, &cpu) ? 0 : 1;
+    return reader.readLines(&reader, filename, &cpu) ? 0 : 1;
 
 }
 

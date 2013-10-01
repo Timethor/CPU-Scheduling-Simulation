@@ -13,6 +13,12 @@
 #include "ProcessQueue.h"
 // Structure of DD Device Descriptor
 
+typedef struct VCPUInputState {
+    int empty_lines;
+    bool in_comment;
+    bool in_process;
+} VCPUInputState;
+
 typedef struct VirtualCPU_FTable {
     void (*processInputLine)(char*);
 } VirtualCPU_FTable;
@@ -22,7 +28,6 @@ typedef struct VirtualCPU {
     DD_dequeue devices;
     PQ_dequeue queues;
     VirtualCPU_FTable* func;
-
 } VirtualCPU;
 
 void processInputLine(char* line);

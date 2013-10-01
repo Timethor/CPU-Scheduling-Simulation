@@ -23,5 +23,5 @@ VirtualCPU_FTable* initVCPU_FTable() {
 }
 
 void processInputLine(char* line) {
-    printf("Processing Line %s", line);
+    printf("%s", line);
 }
