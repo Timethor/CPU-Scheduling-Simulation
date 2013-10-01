@@ -9,15 +9,27 @@
 #define	DEVICEDESCRIPTOR_H
 
 #include "ProcessControlBlock.h"
+#include "Dequeue.h"
 
-// Structure of DD Device Descriptor
+enum DDState {
+    DD_NEW,
+    DD_READY,
+    DD_RUNNING,
+};
+
+// Structure of PCB (process control block)
 typedef struct DD{
-    int device_id;
-    enum PCBState device_state;
-    dequeue_PCB queue;
+    //>>	The ID of the device
+    int id;
+    //>>	The enum representation of the state of the process
+    enum DDState state;
+    //>>	Queue of PCB to be processed
+    PCB_dequeue queue;
 } DD;
 
 DEQUEUE_PROTOTYPE(DD);
+
+void DD_init(DD* queue);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 
