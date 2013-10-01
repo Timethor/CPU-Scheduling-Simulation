@@ -31,7 +31,7 @@ DEFAULTCONF=Debug
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug Release Debug_ProcA.list 
+ALLCONFS=Debug Release Debug_ProcA.list Debug_ProcB.list 
 
 
 # build

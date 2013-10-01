@@ -21,6 +21,8 @@
     typedef struct type##_dequeue { \
         type##_dequeueN* head; \
         type##_dequeueN* tail; \
+        bool debug; \
+        bool trace; \
     } type##_dequeue; \
     typedef struct type##_dequeueI { \
         type##_dequeueN* current; \
@@ -31,7 +33,7 @@
 #define DEQUEUE_PROTOTYPE(type) \
     DEFINE_DEQUEUE(type) \
     \
-    void type##_dequeue_init(type##_dequeue* container); \
+    void type##_dequeue_init(type##_dequeue* container, bool debug, bool trace); \
     void type##_dequeueN_init(type##_dequeueN* container); \
     \
     void type##_dequeue_pushF(type##_dequeue* container, type* data); \
@@ -65,9 +67,13 @@
     } \
     \
     void type##_dequeue_pushF(type##_dequeue * container, type* data) { \
-        if (container->head==NULL) \
+        if (container->head==NULL) { \
+            if (container->trace) \
+                printf("TRACE:: Pushing to First Place: %s_Deque Empty\n", #type); \
             type##_dequeue_first_insert(container, data); \
-        else { \
+        } else { \
+            if (container->trace) \
+                printf("TRACE:: Pushing to First Place: %s_Deque !Empty\n", #type); \
             type##_dequeue_pushA(container->head, data); \
             container->head=container->head->prev; \
         } \
@@ -82,9 +88,13 @@
     } \
     \
     void type##_dequeue_pushL(type##_dequeue * container, type* data) { \
-        if (container->tail==NULL)\
+        if (container->tail==NULL) { \
+            if (container->trace) \
+                printf("TRACE:: Pushing to Last Place: %s_Deque Empty\n", #type); \
             type##_dequeue_first_insert(container, data); \
-        else { \
+        } else { \
+            if (container->trace) \
+                printf("TRACE:: Pushing to Last Place: %s_Deque !Empty\n", #type); \
             type##_dequeue_pushB(container->tail, data); \
             container->tail=container->tail->next; \
         } \
@@ -182,17 +192,19 @@
 
 // Defines type specific removal functions (pollF, pollL)
 #define DEQUEUE_INIT(type) \
-    void type##_dequeue_init(type##_dequeue* container){ \
+    void type##_dequeue_init(type##_dequeue* container, bool debug, bool trace) { \
         container->head = NULL; \
         container->tail = NULL; \
+        container->debug = debug; \
+        container->trace = trace; \
     } \
     \
-    void type##_dequeueN_init(type##_dequeueN* container){ \
+    void type##_dequeueN_init(type##_dequeueN* container) { \
         container->next = NULL; \
         container->prev = NULL; \
         container->data = NULL; \
     }
-    
+
 
 // Runs all type specific function macros
 #define DEQUEUE(type) \

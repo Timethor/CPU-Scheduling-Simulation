@@ -12,7 +12,6 @@
 
 #include "main.h"
 #include "Dequeue.h"
-#include "FileToProcessQueue.h"
 #include "VirtualCpu.h"
 #include "MyFileReader.h"
 
@@ -21,10 +20,11 @@
  */
 int main(int argc, char** argv) {
    
-    MyFileReader reader;
-    initFileReader(&reader, interpret_line);
     VirtualCPU cpu;
     initCPU(&cpu);
+    MyFileReader reader;
+    initFileReader(&reader, &cpu);
+    
 
     char filename[30];
     if (argc != 2) {

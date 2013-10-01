@@ -30,5 +30,8 @@ typedef struct BurstNode{
 
 DEQUEUE_PROTOTYPE(BurstNode);
 
+bool BurstNode_fullyFormed(BurstNode* bn);
+BurstNode* initBurstNode();
+
 #endif	/* BURSTNODE_H */
 

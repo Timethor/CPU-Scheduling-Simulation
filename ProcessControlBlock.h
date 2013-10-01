@@ -32,8 +32,8 @@ typedef struct PCB{
     int waiting_time;
     //>>	The internal time that this process completed at
     int completion_time;
-    //>>	A linked list of 
-    BurstNode* schedule;
+    //>>	A linked list of burstNodes
+    BurstNode_dequeue schedule;
 } PCB;
 
 DEQUEUE_PROTOTYPE(PCB);

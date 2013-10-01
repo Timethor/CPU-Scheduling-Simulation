@@ -1,5 +1,4 @@
 #include "MyFileReader.h"
-#include "FileToProcessQueue.h"
 
 int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu) {
     //>>	
@@ -10,31 +9,29 @@ int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu) {
 
     if (fd == -1) {
         err(1, "open: %s", fname);
-        return 0;
+        return false;
     }
 
     if (fstat(fd, &fs) == -1) {
         err(1, "stat: %s", fname);
-        return 0;
+        return false;
     }
 
     buf = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if (buf == (void*) - 1) {
         err(1, "mmap: %s", fname);
         close(fd);
-        return 0;
+        return false;
     }
 
     buf_end = buf + fs.st_size;
 
     begin = end = buf;
-    //>>	Keep track of what we have seen so far
-    VCPUInputState state;
-    state.empty_lines = 0;
-    state.in_comment = false;
-
     //>>	Main loop for each line in file
-    while (1) {
+    while (true) {
+        if (cpu->state.error_thrown){
+            break;
+        }
         if (!(*end == '\r' || *end == '\n')) {
             if (++end < buf_end) continue;
         } else if (1 + end < buf_end) {
@@ -46,7 +43,7 @@ int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu) {
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
         //memset(r, 32, sizeof (r) - 1);
-        this->call_back(begin, end, &state, cpu);
+        this->call_back(cpu, begin, end);
 
         if ((begin = ++end) >= buf_end)
             break;
@@ -54,10 +51,10 @@ int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu) {
 
     munmap(buf, fs.st_size);
     close(fd);
-    return 1;
+    return true;
 }
 
-void initFileReader(MyFileReader* fr, void(*call_back)(const char* begin, const char* end, VCPUInputState* state, VirtualCPU*)) {
-    fr->call_back = call_back;
+void initFileReader(MyFileReader* fr, VirtualCPU* cpu) {
+    fr->call_back = cpu->processInputLine;
     fr->readLines = read_lines;
 }
