@@ -16,8 +16,8 @@ void initCPU(VirtualCPU* cpu) {
     //    PQ_dequeue_pushF(&cpu->queues, &RoundRobin1);
 }
 
-VCPU_FTable* initVCPU_FTable() {
-    VCPU_FTable *ptr = malloc(sizeof (VCPU_FTable));
+VirtualCPU_FTable* initVCPU_FTable() {
+    VirtualCPU_FTable *ptr = malloc(sizeof (VirtualCPU_FTable));
     ptr->processInputLine = processInputLine;
     return ptr;
 }
