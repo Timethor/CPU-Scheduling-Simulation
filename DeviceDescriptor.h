@@ -29,7 +29,8 @@ typedef struct DD{
 
 DEQUEUE_PROTOTYPE(DD);
 
-void DD_init(DD* queue);
+DD* DD_init(int id);
+bool SearchDeviceIds(DD_dequeue* container, int id);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 

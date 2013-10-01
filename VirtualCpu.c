@@ -143,6 +143,9 @@ bool processLineForProcessSchedule(VirtualCPU* this, char* line) {
         int ioID = strtol((line + found), NULL, 10);
         printf("IO Device ID Found: `%d`\n", ioID);
         this->state.seen_stage_req |= (1 << 2);
+        if ( DD_dequeue_empty(&this->devices) || !SearchDeviceIds(&this->devices, ioID) ){
+            DD_dequeue_pushL(&this->devices, DD_init(ioID));
+        }
         BurstNode_dequeue_peekL(sched)->type = BT_IO;
         BurstNode_dequeue_peekL(sched)->queue_id = ioID;
     }

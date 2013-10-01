@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/MyFileReader.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
 	${OBJECTDIR}/ProcessQueue.o \
+	${OBJECTDIR}/Settings.o \
 	${OBJECTDIR}/VirtualCpu.o \
 	${OBJECTDIR}/main.o
 
@@ -92,6 +93,11 @@ ${OBJECTDIR}/ProcessQueue.o: ProcessQueue.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
+
+${OBJECTDIR}/Settings.o: Settings.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/Settings.o Settings.c
 
 ${OBJECTDIR}/VirtualCpu.o: VirtualCpu.c 
 	${MKDIR} -p ${OBJECTDIR}

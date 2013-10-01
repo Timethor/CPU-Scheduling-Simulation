@@ -1,25 +1,21 @@
 #include "MyFileReader.h"
+#include "Settings.h"
 
-int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu) {
+int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu) {
     //>>	
-    int fd = open(fname, O_RDONLY);
     struct stat fs;
     char *buf, *buf_end;
     char *begin, *end, c;
-
-    if (fd == -1) {
-        err(1, "open: %s", fname);
-        return false;
-    }
+    int fd = settings->jobInput;
 
     if (fstat(fd, &fs) == -1) {
-        err(1, "stat: %s", fname);
+        err(1, "stat: %s", settings->jobInputName);
         return false;
     }
 
     buf = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if (buf == (void*) - 1) {
-        err(1, "mmap: %s", fname);
+        err(1, "mmap: %s", settings->jobInputName);
         close(fd);
         return false;
     }

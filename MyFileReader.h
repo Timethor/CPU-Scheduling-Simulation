@@ -21,14 +21,15 @@
 #include <err.h>
 
 #include "VirtualCpu.h"
+#include "Settings.h"
 
 typedef struct MyFileReader {
     void (*call_back)(VirtualCPU*, const char*, const char*);
-    int (*readLines)(struct MyFileReader*, const char*, VirtualCPU*);
+    int (*readLines)(struct MyFileReader*, Settings*, VirtualCPU*);
 } MyFileReader;
 
 void initFileReader(MyFileReader* fr, VirtualCPU* cpu);
-int read_lines(MyFileReader* this, const char* fname, VirtualCPU* cpu);
+int read_lines(MyFileReader* this, Settings* settings, VirtualCPU* cpu);
 
 #endif	/* FILEREADER_H */
 
