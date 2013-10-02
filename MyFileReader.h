@@ -28,7 +28,7 @@ typedef struct MyFileReader {
     int (*readLines)(struct MyFileReader*, Settings*, InputState*);
 } MyFileReader;
 
-void MyFileReader_init(MyFileReader* fr, InputState* cpu);
+MyFileReader* MyFileReader_init(InputState* istate);
 int FR_read_lines(MyFileReader* this, Settings* settings, InputState* cpu);
 
 #endif	/* FILEREADER_H */

@@ -17,12 +17,13 @@ typedef struct VirtualCPU {
     int clockTime;
     DD_dequeue devices;
     PQ_dequeue queues;
+    //Logger* log;
 } VirtualCPU;
 
-void VCPU_init(VirtualCPU* cpu, InputState* istate);
+VirtualCPU* VCPU_init(InputState* istate);
 void VCPU_MergeWithInputState(VirtualCPU* this, InputState* istate);
-
 void VCPU_doClockCycle(VirtualCPU* this, PCB_dequeue* notYetArrived);
+void VCPU_ProcessArrivingProcesses(VirtualCPU* this, PCB_dequeue* notYetArrived);
 
 #endif	/* VIRTUALCPU_H */
 

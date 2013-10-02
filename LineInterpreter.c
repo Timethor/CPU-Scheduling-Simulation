@@ -5,19 +5,19 @@
 
 #include "LineInterpreter.h"
 
-
-void InputState_init(InputState* state) {
-    state->in_comment = false;
-    state->stage = FS_TQ;
-    state->seen_stage_req = -1;
-    state->error_thrown = false;
-    DD_dequeue_init(&state->proto_devices, false, true);
-    PQ_dequeue_init(&state->proto_queues, false, true);
-    PCB_dequeue_init(&state->notYetArrived, false, true);
-    state->call_back = IS_processInputLine;
-    state->bn = NULL;
+InputState* InputState_init() {
+    InputState* this = malloc(sizeof(*this));
+    this->in_comment = false;
+    this->stage = FS_TQ;
+    this->seen_stage_req = -1;
+    this->error_thrown = false;
+    DD_dequeue_init(&this->proto_devices, false, false);
+    PQ_dequeue_init(&this->proto_queues, false, false);
+    PCB_dequeue_init(&this->notYetArrived, false, false);
+    this->call_back = IS_processInputLine;
+    this->bn = NULL;
+    return this;
 }
-
 
 /*
  * Callback function for mmap file read, appropriately sets line_buffer to the value
@@ -31,7 +31,7 @@ void IS_processInputLine(InputState* this, const char* begin, const char* end) {
     line[copyend] = 0;
 
     //>>	Determine what kind of line we have
-    printf("============================================================\n|\tSTAGE ::: %d\n============================================================\n", this->stage);
+//    printf("============================================================\n|\tSTAGE ::: %d\n============================================================\n", this->stage);
     if (IS_hasNonProcessableLine(this, line)) {
         return;
     }
@@ -47,7 +47,7 @@ void IS_processInputLine(InputState* this, const char* begin, const char* end) {
     if (this->stage == FS_PN_SCHEDULE && IS_processLineForProcessSchedule(this, line)) {
         return;
     }
-    printf("File Format Violates Specification!\nPlease check for errors and try again.\nLine in Violation:\t`%s", line);
+//    printf("File Format Violates Specification!\nPlease check for errors and try again.\nLine in Violation:\t`%s", line);
     this->error_thrown = true;
 }
 
@@ -65,18 +65,18 @@ bool IS_processLineForTimeQuantum(InputState* this, char* line) {
     if (found == -1)
         return false;
     this->seen_stage_req = true;
-    printf("Time Quantum Found::\n");
+//    printf("Time Quantum Found::\n");
     int id = strtol((line + found), NULL, 10);
-    printf("\tID Found: `%d`\n", id);
+//    printf("\tID Found: `%d`\n", id);
     int quantum = strtol((line + found + 2), NULL, 10);
-    printf("\tAmount Found: `%d`\n", quantum);
-    PQ RoundRobin1;
-    PQ_init_RoundRobin(&RoundRobin1, id, quantum);
-    PQ_dequeue_pushL(&this->proto_queues, &RoundRobin1);
-    if (id == 2) {
-        PQ FCFS1;
-        PQ_init_FCFS(&FCFS1, id + 1);
-        PQ_dequeue_pushL(&this->proto_queues, &FCFS1);
+//    printf("\tAmount Found: `%d`\n", quantum);
+    PQ* RoundRobin1 = PQ_init_RoundRobin(id, quantum);
+    PQ_dequeue_pushL(&this->proto_queues, RoundRobin1);
+    PQ_printQueue(PQ_dequeue_peekF(&this->proto_queues));
+    if (id++ == 2) {
+        PQ* FCFS = PQ_init_FCFS(id);
+        PQ_dequeue_pushL(&this->proto_queues, FCFS);
+        PQ_printQueue(PQ_dequeue_peekF(&this->proto_queues));
     }
     return true;
 }
@@ -89,9 +89,8 @@ bool IS_processLineForNewProcess(InputState* this, char* line) {
     this->seen_stage_req = -1;
     this->stage++;
     int id = strtol((line + found), NULL, 10);
-    printf("Process ID Found:: %d\n", id);
-    PCB* process = malloc(sizeof (*process));
-    process->process_id = id;
+//    printf("Process ID Found:: %d\n", id);
+    PCB* process = PCB_init(id);
     PCB_dequeue_pushL(&this->notYetArrived, process);
     return true;
 }
@@ -104,26 +103,26 @@ bool IS_processLineForProcessArrival(InputState* this, char* line) {
     this->seen_stage_req = -1;
     this->stage++;
     int time = strtol((line + found), NULL, 10);
-    printf("Arrival Time Found:: %d\n", time);
+//    printf("Arrival Time Found:: %d\n", time);
     PCB_dequeue_peekL(&this->notYetArrived)->arrival_time = time;
     return true;
 }
 
 bool IS_processLineForProcessSchedule(InputState* this, char* line) {
-    printf("ENTER PROCESS SCHEDULE\n");
+//    printf("ENTER PROCESS SCHEDULE\n");
     BurstNode_dequeue* sched = &PCB_dequeue_peekL(&this->notYetArrived)->schedule;
     sched->trace = true;
     int found = IS_hasCpuBurst(line);
     if (this->bn == NULL) {
         this->seen_stage_req = 0;
-        printf("REINIT BURSTNODE\n");
+//        printf("REINIT BURSTNODE\n");
         this->bn = initBurstNode();
     }
     BurstNode* peek = this->bn;
-    printf("State Found BEFORE: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
+//    printf("State Found BEFORE: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
     if (found != -1) {
         int cpuBurst = strtol((line + found), NULL, 10);
-        printf("CPU Burst Found: `%d`\n", cpuBurst);
+//        printf("CPU Burst Found: `%d`\n", cpuBurst);
         this->seen_stage_req |= (1 << 0);
         peek->type = BT_CPU;
         peek->duration = cpuBurst;
@@ -131,14 +130,14 @@ bool IS_processLineForProcessSchedule(InputState* this, char* line) {
     found = IS_hasIOBurst(line);
     if (found != -1) {
         int ioBurst = strtol((line + found), NULL, 10);
-        printf("IO Burst Found: `%d`\n", ioBurst);
+//        printf("IO Burst Found: `%d`\n", ioBurst);
         this->seen_stage_req |= (1 << 1);
         peek->duration = ioBurst;
     }
     found = IS_hasIODevice(line);
     if (found != -1) {
         int ioID = strtol((line + found), NULL, 10);
-        printf("IO Device ID Found: `%d`\n", ioID);
+//        printf("IO Device ID Found: `%d`\n", ioID);
         this->seen_stage_req |= (1 << 2);
         if (DD_dequeue_empty(&this->proto_devices) || !SearchDeviceIds(&this->proto_devices, ioID)) {
             DD_dequeue_pushL(&this->proto_devices, DD_init(ioID));
@@ -146,14 +145,14 @@ bool IS_processLineForProcessSchedule(InputState* this, char* line) {
         peek->type = BT_IO;
         peek->queue_id = ioID;
     }
-    printf("STATE Found AFTER: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
+//    printf("STATE Found AFTER: `%d:%d:%d`\n", peek->queue_id, peek->duration, peek->type);
     if (this->seen_stage_req > 0) {
-        printf("REQUIREMENT MET\n");
+//        printf("REQUIREMENT MET\n");
         if (BurstNode_fullyFormed(peek)) {
-            printf("BURSTNODE FULLY FORMED\n");
+//            printf("BURSTNODE FULLY FORMED\n");
             this->seen_stage_req = -1;
             BurstNode_dequeue_pushL(sched, peek);
-            printf("\tLENGTH: %d\n", BurstNode_dequeue_length(sched));
+//            printf("\tLENGTH: %d\n", BurstNode_dequeue_length(sched));
             this->bn = NULL;
         }
         return true;
@@ -246,4 +245,10 @@ bool IS_isStartMultiLineComment(char* line) {
         return true;
     }
     return false;
+}
+
+void printInputState(InputState* this) {
+    PCB_dequeueI it;
+    PCB_dequeueI_init(&it, &this->notYetArrived);
+
 }

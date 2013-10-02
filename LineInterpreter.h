@@ -32,7 +32,7 @@ typedef struct InputState {
 } InputState;
 
 void IS_processInputLine(InputState * this, const char* begin, const char* end);
-void InputState_init(InputState* state);
+InputState* InputState_init();
 
 bool IS_hasNonProcessableLine(InputState * this, char* line);
 

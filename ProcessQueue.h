@@ -10,23 +10,27 @@
 
 #include "ProcessControlBlock.h"
 
-enum PQState {
-    PQ_EMPTY,
-};
-
 // Structure of PQ (Process Queue)
 
 typedef struct PQ {
     int id;
     int quantum;
-    enum PQState state;
+    int quantumCheck;
     PCB_dequeue queue;
 } PQ;
 
 DEQUEUE_PROTOTYPE(PQ);
 
-void PQ_init_RoundRobin(PQ* queue, int id, int quantum);
-void PQ_init_FCFS(PQ* queue, int id);
+PQ* PQ_init_RoundRobin(int id, int quantum);
+PQ* PQ_init_FCFS(int id);
+PQ* PQ_init_base(int id);
+
+void PQ_SystemWideTick(PQ* this);
+void PQ_printQueue(PQ* this);
+
+void PQ_dequeue_SystemWideTick(PQ_dequeue* this);
+void PQ_dequeue_ProcArrival(PQ_dequeue* this, PCB* process);
+void PQ_dequeue_print(PQ_dequeue* this);
 
 #endif	/* PROCESSQUEUE_H */
 

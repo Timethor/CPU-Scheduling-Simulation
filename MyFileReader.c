@@ -48,7 +48,9 @@ int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
     return true;
 }
 
-void MyFileReader_init(MyFileReader* fr, InputState* istate) {
+MyFileReader* MyFileReader_init(InputState* istate) {
+    MyFileReader* fr = malloc(sizeof (*fr));
     fr->call_back = istate->call_back;
     fr->readLines = FR_read_lines;
+    return fr;
 }

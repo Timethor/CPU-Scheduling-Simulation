@@ -14,9 +14,9 @@
 
 enum PCBState {
     PCB_NEW,
-    PCB_READY,
     PCB_RUNNING,
     PCB_WAITING,
+    PCB_BURST_FINISHED,
     PCB_TERMINATED
 };
 
@@ -24,7 +24,7 @@ enum PCBState {
 
 typedef struct PCB {
     //>>	The ID of the process
-    int process_id;
+    int id;
     //>>	The arrival time of the process
     int arrival_time;
     //>>	The enum representation of the state of the process
@@ -32,13 +32,16 @@ typedef struct PCB {
     //>>	The amount of time this process spends waiting until completion
     int waiting_time;
     //>>	The internal time that this process completed at
-    int completion_time;
+    int running_time;
     //>>	A linked list of burstNodes
     BurstNode_dequeue schedule;
 } PCB;
 
 DEQUEUE_PROTOTYPE(PCB);
-int compare_PCB_Arrival(const PCB*job1, const PCB* job2);
+
+PCB* PCB_init(int id);
+void PCB_toString(PCB* pcb);
+void PCB_SystemWideTick(PCB* this);
 
 #endif	/* PROCESSCONTROLBLOCK_H */
 
