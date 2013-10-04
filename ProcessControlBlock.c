@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <unistd.h>
-#include "ProcessControlBlock.h"
+#include "ProcessControlBlockList.h"
 
 //#define DEBUG
 #include "debug.h"
-
-DEQUEUE(PCB);
+#include "ProcessQueueList.h"
 
 PCB* PCB_init(int id) {
     PCB* process = malloc(sizeof (*process));
@@ -15,7 +14,7 @@ PCB* PCB_init(int id) {
     process->running_time = 0;
     process->waiting_time = 0;
     process->state = PCB_NEW;
-    BurstNode_dequeue_init(&process->schedule, false, false);
+    BurstNode_deque_init(&process->schedule, false, false);
     return process;
 }
 
@@ -24,23 +23,29 @@ void PCB_toString(PCB* this) {
 }
 
 void PCB_SystemWideTick(PCB* this) {
+    //    printf("Doing PCB TICK\n");
     switch (this->state) {
         case PCB_WAITING:
             this->waiting_time++;
-            printf ("Incr Wait time");
             break;
         case PCB_RUNNING:
             this->running_time++;
-            printf ("Incr run time");
-            BurstNode* bn = BurstNode_dequeue_peekF(&this->schedule);
+            BurstNode* bn = BurstNode_deque_peekF(&this->schedule);
             bn->duration--;
-            if (bn->duration == 0){
-                printf("BURST FINISHED");
+            if (bn->duration == 0) {
+                BurstNode_deque_pollF(&this->schedule);
                 this->state = PCB_BURST_FINISHED;
             }
             break;
         default:
+            //            printf("==============NO TICK!=================\n");
             break;
     };
     usleep(275);
+}
+
+void PCB_checkProcessTermination(PCB* this) {
+    if (BurstNode_deque_empty(&this->schedule)) {
+        this->state = PCB_TERMINATED;
+    }
 }

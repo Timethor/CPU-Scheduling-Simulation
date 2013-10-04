@@ -10,8 +10,8 @@ Super Round Robin Policy Comment */
 
 // Single Line Comment
 
-Time Quantum 1: 100
-Time Quantum 2: 250
+Time Quantum 1: 50
+Time Quantum 2: 70
 
 Process ID: 1
 Arrival time: 0 

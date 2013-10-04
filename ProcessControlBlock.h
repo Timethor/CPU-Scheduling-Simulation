@@ -9,8 +9,7 @@
 #define	PROCESSCONTROLBLOCK_H
 
 #include <stdio.h>
-#include "Dequeue.h"
-#include "BurstNode.h"
+#include "BurstNodeList.h"
 
 enum PCBState {
     PCB_NEW,
@@ -34,14 +33,13 @@ typedef struct PCB {
     //>>	The internal time that this process completed at
     int running_time;
     //>>	A linked list of burstNodes
-    BurstNode_dequeue schedule;
+    BurstNode_deque schedule;
 } PCB;
-
-DEQUEUE_PROTOTYPE(PCB);
 
 PCB* PCB_init(int id);
 void PCB_toString(PCB* pcb);
-void PCB_SystemWideTick(PCB* this);
+void PCB_SystemWideTick(PCB * this);
+void PCB_checkProcessTermination(PCB * this);
 
 #endif	/* PROCESSCONTROLBLOCK_H */
 

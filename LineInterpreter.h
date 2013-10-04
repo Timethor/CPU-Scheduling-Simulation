@@ -8,9 +8,9 @@
 #ifndef LINEINTERPRETER_H
 #define	LINEINTERPRETER_H
 
-#include "ProcessControlBlock.h"
-#include "ProcessQueue.h"
-#include "DeviceDescriptor.h"
+#include "ProcessControlBlockList.h"
+#include "ProcessQueueList.h"
+#include "DeviceDescriptorList.h"
 
 enum FormatStage {
     FS_TQ,
@@ -25,20 +25,21 @@ typedef struct InputState {
     BurstNode* bn;
     int seen_stage_req;
     bool error_thrown;
-    PCB_dequeue notYetArrived;
-    DD_dequeue proto_devices;
-    PQ_dequeue proto_queues;
+    PCB_deque notYetArrived;
+    DD_deque proto_devices;
+    PQ_deque proto_queues;
     void (*call_back)(struct InputState*, const char*, const char*);
 } InputState;
 
 void IS_processInputLine(InputState * this, const char* begin, const char* end);
-InputState* InputState_init();
 
-bool IS_hasNonProcessableLine(InputState * this, char* line);
+InputState* InputState_init();
 
 int IS_hasCpuBurst(char* line);
 int IS_hasIOBurst(char* line);
 int IS_hasIODevice(char* line);
+
+bool IS_hasNonProcessableLine(InputState * this, char* line);
 
 bool IS_processLineForTimeQuantum(InputState * this, char* line);
 bool IS_processLineForNewProcess(InputState * this, char* line);

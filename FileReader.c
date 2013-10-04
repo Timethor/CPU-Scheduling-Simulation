@@ -1,7 +1,6 @@
-#include "MyFileReader.h"
-#include "Settings.h"
+#include "FileReader.h"
 
-int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
+int FR_read_lines(FileReader* this, Settings* settings, InputState* istate) {
     //>>	
     struct stat fs;
     char *buf, *buf_end;
@@ -48,8 +47,8 @@ int FR_read_lines(MyFileReader* this, Settings* settings, InputState* istate) {
     return true;
 }
 
-MyFileReader* MyFileReader_init(InputState* istate) {
-    MyFileReader* fr = malloc(sizeof (*fr));
+FileReader* FileReader_init(InputState* istate) {
+    FileReader* fr = malloc(sizeof (*fr));
     fr->call_back = istate->call_back;
     fr->readLines = FR_read_lines;
     return fr;

@@ -8,36 +8,34 @@
 #ifndef DEVICEDESCRIPTOR_H
 #define	DEVICEDESCRIPTOR_H
 
-#include "ProcessControlBlock.h"
-#include "Dequeue.h"
+#include "ProcessControlBlockList.h"
 
 enum DDState {
-    DD_NEW,
-    DD_READY,
-    DD_RUNNING,
+    DD_IDLE,
+    DD_BUSY,
 };
 
 // Structure of PCB (process control block)
-typedef struct DD{
+
+typedef struct DeviceDescriptor {
     //>>	The ID of the device
     int id;
     //>>	The enum representation of the state of the process
     enum DDState state;
     //>>	Queue of PCB to be processed
-    PCB_dequeue queue;
-} DD;
+    PCB_deque queue;
+} DeviceDescriptor;
 
-DEQUEUE_PROTOTYPE(DD);
 
-bool SearchDeviceIds(DD_dequeue* container, int id);
+DeviceDescriptor* DeviceDescriptor_init(int id);
+void DeviceDescriptor_destruct(DeviceDescriptor* this);
 
-DD* DD_init(int id);
+PCB* DD_hasBurstEndedProcess(DeviceDescriptor * this);
 
-void DD_SystemWideTick(DD* this);
-void DD_printQueue(DD* this);
-
-void DD_dequeue_SystemWideTick(DD_dequeue* this);
-void DD_dequeue_print(DD_dequeue* this);
+void DD_enqueueProcess(DeviceDescriptor * this, PCB* process);
+void DD_tryActivateDevice(DeviceDescriptor * this);
+void DD_SystemWideTick(DeviceDescriptor * this);
+void DD_printQueue(DeviceDescriptor * this);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 

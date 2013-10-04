@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>CPU Scheduler Simulator</name>
+            <name>CPU Scheduler Simulation</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
@@ -17,14 +17,6 @@
                 </confElem>
                 <confElem>
                     <name>Release</name>
-                    <type>1</type>
-                </confElem>
-                <confElem>
-                    <name>Debug_ProcA.list</name>
-                    <type>1</type>
-                </confElem>
-                <confElem>
-                    <name>Debug_ProcB.list</name>
                     <type>1</type>
                 </confElem>
             </confList>

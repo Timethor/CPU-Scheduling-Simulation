@@ -10,12 +10,10 @@
 #include <string.h>
 #include <fcntl.h>
 
-#include "main.h"
-#include "Dequeue.h"
-#include "VirtualCpu.h"
-#include "MyFileReader.h"
-#include "LineInterpreter.h"
 #include "Settings.h"
+#include "LineInterpreter.h"
+#include "FileReader.h"
+#include "VirtualCpu.h"
 
 /*
  * 
@@ -29,7 +27,7 @@ int main(int argc, char** argv) {
     InputState* is = InputState_init();
 
     printf("INIT FILEREADER!\n");
-    MyFileReader* reader = MyFileReader_init(is);
+    FileReader* reader = FileReader_init(is);
 
     printf("Reading File!\n");
     if (!reader->readLines(reader, set, is)) {
@@ -37,12 +35,16 @@ int main(int argc, char** argv) {
     }
 
     printf("==============INIT VCPU!=============\n");
-    VirtualCPU* cpu = VCPU_init(is);
+    VirtualCPU* cpu = VCPU_init(is, set);
     printf("\n==============VCPU TICKING!=============\n========================================\n========================================\n\n");
-    while (!PCB_dequeue_empty(&is->notYetArrived)) {
-        VCPU_doClockCycle(cpu, &is->notYetArrived);
+    bool haveWorkToDo = true;
+    while (!PCB_deque_empty(&is->notYetArrived) || haveWorkToDo) {
+        haveWorkToDo = VCPU_doClockCycle(cpu, &is->notYetArrived);
+        if (!haveWorkToDo) {
+            haveWorkToDo = VCPU_doClockCycle(cpu, &is->notYetArrived);
+        }
     }
+    printf("Simulation Ends\n");
 
     return EXIT_SUCCESS;
 }
-

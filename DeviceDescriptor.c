@@ -1,82 +1,79 @@
+
 #include <stdlib.h>
+
 #include "DeviceDescriptor.h"
-#include "ProcessControlBlock.h"
 
-DEQUEUE(DD);
-
-bool SearchDeviceIds(DD_dequeue* container, int id) {
-    DD_dequeueI iter;
-    DD_dequeueI_init(&iter, container);
-    while (DD_dequeueI_next(&iter) != NULL) {
-        if (DD_dequeueI_examine(&iter)->id == id) return true;
-    }
-    return false;
-}
-
-DD* DD_init(int id) {
-    DD* newDevice = malloc(sizeof (*newDevice));
+DeviceDescriptor* DeviceDescriptor_init(int id) {
+    DeviceDescriptor* newDevice = malloc(sizeof (*newDevice));
     newDevice->id = id;
-    newDevice->state = DD_NEW;
-    PCB_dequeue_init(&newDevice->queue, false, true);
+    newDevice->state = DD_IDLE;
+    PCB_deque_init(&newDevice->queue, false, false);
     return newDevice;
 }
 
-void DD_SystemWideTick(DD* this) {
-    PCB_dequeueI it;
-    PCB_dequeueI_init(&it, &this->queue);
-    switch (this->state) {
-        case DD_RUNNING:
-            while (true) {
-                PCB* pcb = PCB_dequeueI_examine(&it);
-                if (pcb == NULL)
-                    break;
-                PCB_SystemWideTick(pcb);
-                if (PCB_dequeueI_next(&it) == NULL)
-                    break;
-            }
+void DeviceDescriptor_destruct(DeviceDescriptor* this){
+    while (PCB_deque_empty(&this->queue)){
+        PCB* tbd = PCB_deque_
+    }
+}
+
+PCB* DD_hasBurstEndedProcess(DeviceDescriptor* this) {
+    PCB* firstInQueue = PCB_deque_peekF(&this->queue);
+    if (firstInQueue != NULL && firstInQueue->state == PCB_BURST_FINISHED) {
+        this->state = DD_IDLE;
+        PCB_checkProcessTermination(firstInQueue);
+        return PCB_deque_pollF(&this->queue);
+    }
+    return NULL;
+}
+
+void DD_enqueueProcess(DeviceDescriptor* this, PCB* process) {
+    if (process != NULL) {
+        PCB_deque_pushL(&this->queue, process);
+    }
+}
+
+void DD_tryActivateDevice(DeviceDescriptor* this) {
+    if (this->state == DD_IDLE && !PCB_deque_empty(&this->queue)) {
+        PCB* firstInQueue = PCB_deque_peekF(&this->queue);
+        firstInQueue->state = PCB_RUNNING;
+        this->state = DD_BUSY;
+        printf("I/O Device %2d now in use by ", this->id);
+        PCB_toString(firstInQueue);
+        printf("\n");
+    }
+}
+
+void DD_SystemWideTick(DeviceDescriptor* this) {
+    //    printf("Doing DD TICK\n");
+    PCB_dequeI it;
+    PCB_dequeI_init(&it, &this->queue);
+    while (true) {
+        PCB* pcb = PCB_dequeI_examine(&it);
+        if (pcb == NULL)
             break;
-        default:
+        PCB_SystemWideTick(pcb);
+        if (PCB_dequeI_next(&it) == NULL)
             break;
     }
 }
 
-void DD_dequeue_SystemWideTick(DD_dequeue* this) {
-    DD_dequeueI iter;
-    DD_dequeueI_init(&iter, this);
-    while (DD_dequeueI_next(&iter) != NULL) {
-        DD_SystemWideTick(DD_dequeueI_examine(&iter));
-    }
-}
-
-void DD_printQueue(DD* this) {
+void DD_printQueue(DeviceDescriptor* this) {
     if (this == NULL) {
-        printf("Cant print null queue\n");
+        printf("Can't print null queue\n");
         return;
     }
-    PCB_dequeueI it;
-    PCB_dequeueI_init(&it, &this->queue);
-    printf("I/O Device %d Queue = [", this->id);
+    PCB_dequeI it;
+    PCB_dequeI_init(&it, &this->queue);
+    printf("%-11s %-3d %-10s = [", "I/O Device", this->id, "Queue");
     while (true) {
-        PCB* pcb = PCB_dequeueI_examine(&it);
+        PCB* pcb = PCB_dequeI_examine(&it);
         if (pcb == NULL)
             break;
         PCB_toString(pcb);
-        if (PCB_dequeueI_next(&it) != NULL)
+        if (PCB_dequeI_next(&it) != NULL)
             printf(", ");
         else break;
     }
     printf("]\n");
-}
-
-void DD_dequeue_print(DD_dequeue* this) {
-    DD_dequeueI it;
-    DD_dequeueI_init(&it, this);
-    while (true) {
-        DD* dd = DD_dequeueI_examine(&it);
-        if (dd == NULL)
-            break;
-        DD_printQueue(dd);
-        if (DD_dequeueI_next(&it) == NULL)
-            break;
-    }
 }

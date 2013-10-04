@@ -5,28 +5,44 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>BurstNode.h</itemPath>
-      <itemPath>Dequeue.h</itemPath>
+      <itemPath>BurstNodeList.h</itemPath>
+      <itemPath>Deque.h</itemPath>
       <itemPath>DeviceDescriptor.h</itemPath>
-      <itemPath>MyFileReader.h</itemPath>
+      <itemPath>DeviceDescriptorList.h</itemPath>
+      <itemPath>FileReader.h</itemPath>
+      <itemPath>LineInterpreter.h</itemPath>
+      <itemPath>LogEntry.h</itemPath>
+      <itemPath>Logger.h</itemPath>
       <itemPath>ProcessControlBlock.h</itemPath>
+      <itemPath>ProcessControlBlockList.h</itemPath>
       <itemPath>ProcessQueue.h</itemPath>
+      <itemPath>ProcessQueueList.h</itemPath>
+      <itemPath>Settings.h</itemPath>
       <itemPath>VirtualCpu.h</itemPath>
       <itemPath>debug.h</itemPath>
-      <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>.gitignore</itemPath>
       <itemPath>procA.list</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>BurstNode.c</itemPath>
+      <itemPath>BurstNodeList.c</itemPath>
       <itemPath>DeviceDescriptor.c</itemPath>
-      <itemPath>MyFileReader.c</itemPath>
+      <itemPath>DeviceDescriptorList.c</itemPath>
+      <itemPath>FileReader.c</itemPath>
+      <itemPath>LineInterpreter.c</itemPath>
+      <itemPath>LogEntry.c</itemPath>
+      <itemPath>Logger.c</itemPath>
       <itemPath>ProcessControlBlock.c</itemPath>
+      <itemPath>ProcessControlBlockList.c</itemPath>
       <itemPath>ProcessQueue.c</itemPath>
+      <itemPath>ProcessQueueList.c</itemPath>
+      <itemPath>Settings.c</itemPath>
       <itemPath>VirtualCpu.c</itemPath>
       <itemPath>main.c</itemPath>
     </logicalFolder>
@@ -47,44 +63,63 @@
     <conf name="Debug" type="1">
       <toolsSet>
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>GNU|GNU</compilerSet>
+        <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
-        <cTool>
-          <warningLevel>2</warningLevel>
-        </cTool>
       </compileType>
+      <item path=".gitignore" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
+      <item path="BurstNodeList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="BurstNodeList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Deque.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="DeviceDescriptorList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DeviceDescriptorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FileReader.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FileReader.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="MyFileReader.c" ex="false" tool="0" flavor2="0">
+      <item path="LogEntry.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="MyFileReader.h" ex="false" tool="3" flavor2="0">
+      <item path="LogEntry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Logger.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="Logger.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="ProcessControlBlockList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessControlBlockList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="RoundRobin.c" ex="false" tool="0" flavor2="0">
+      <item path="ProcessQueueList.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="RoundRobin.h" ex="false" tool="3" flavor2="0">
+      <item path="ProcessQueueList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Settings.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -98,19 +133,13 @@
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="make.sh" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="run.sh" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>GNU|GNU</compilerSet>
+        <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
@@ -128,35 +157,57 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path=".gitignore" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
+      <item path="BurstNodeList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="BurstNodeList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Deque.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="DeviceDescriptorList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DeviceDescriptorList.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="FileReader.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="FileReader.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="MyFileReader.c" ex="false" tool="0" flavor2="0">
+      <item path="LogEntry.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="MyFileReader.h" ex="false" tool="3" flavor2="0">
+      <item path="LogEntry.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Logger.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="Logger.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="ProcessControlBlockList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="ProcessControlBlockList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="RoundRobin.c" ex="false" tool="0" flavor2="0">
+      <item path="ProcessQueueList.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="RoundRobin.h" ex="false" tool="3" flavor2="0">
+      <item path="ProcessQueueList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Settings.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -170,139 +221,7 @@
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="make.sh" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="run.sh" ex="false" tool="3" flavor2="0">
-      </item>
-    </conf>
-    <conf name="Debug_ProcA.list" type="1">
-      <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>GNU|GNU</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
-      </toolsSet>
-      <compileType>
-        <cTool>
-          <warningLevel>2</warningLevel>
-        </cTool>
-      </compileType>
-      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="MyFileReader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="MyFileReader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="RoundRobin.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="RoundRobin.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Settings.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Settings.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="debug.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="make.sh" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="run.sh" ex="false" tool="3" flavor2="0">
-      </item>
-    </conf>
-    <conf name="Debug_ProcB.list" type="1">
-      <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>GNU|GNU</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
-      </toolsSet>
-      <compileType>
-        <cTool>
-          <warningLevel>2</warningLevel>
-        </cTool>
-      </compileType>
-      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Dequeue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="MyFileReader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="MyFileReader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="RoundRobin.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="RoundRobin.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Settings.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Settings.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="debug.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="make.sh" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="run.sh" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

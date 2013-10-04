@@ -23,13 +23,13 @@
 #include "Settings.h"
 #include "LineInterpreter.h"
 
-typedef struct MyFileReader {
+typedef struct FileReader {
     void (*call_back)(InputState*, const char*, const char*);
-    int (*readLines)(struct MyFileReader*, Settings*, InputState*);
-} MyFileReader;
+    int (*readLines)(struct FileReader*, Settings*, InputState*);
+} FileReader;
 
-MyFileReader* MyFileReader_init(InputState* istate);
-int FR_read_lines(MyFileReader* this, Settings* settings, InputState* cpu);
+FileReader* FileReader_init(InputState* istate);
+int FR_read_lines(FileReader* this, Settings* settings, InputState* cpu);
 
 #endif	/* FILEREADER_H */
 

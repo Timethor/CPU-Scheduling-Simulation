@@ -36,12 +36,17 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/BurstNode.o \
+	${OBJECTDIR}/BurstNodeList.o \
 	${OBJECTDIR}/DeviceDescriptor.o \
+	${OBJECTDIR}/DeviceDescriptorList.o \
+	${OBJECTDIR}/FileReader.o \
 	${OBJECTDIR}/LineInterpreter.o \
-	${OBJECTDIR}/MyFileReader.o \
+	${OBJECTDIR}/LogEntry.o \
+	${OBJECTDIR}/Logger.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
+	${OBJECTDIR}/ProcessControlBlockList.o \
 	${OBJECTDIR}/ProcessQueue.o \
-	${OBJECTDIR}/RoundRobin.o \
+	${OBJECTDIR}/ProcessQueueList.o \
 	${OBJECTDIR}/Settings.o \
 	${OBJECTDIR}/VirtualCpu.o \
 	${OBJECTDIR}/main.o
@@ -65,61 +70,86 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulation
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulation: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator ${OBJECTFILES} ${LDLIBSOPTIONS}
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulation ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/BurstNode.o: BurstNode.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
+
+${OBJECTDIR}/BurstNodeList.o: BurstNodeList.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNodeList.o BurstNodeList.c
 
 ${OBJECTDIR}/DeviceDescriptor.o: DeviceDescriptor.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
+
+${OBJECTDIR}/DeviceDescriptorList.o: DeviceDescriptorList.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptorList.o DeviceDescriptorList.c
+
+${OBJECTDIR}/FileReader.o: FileReader.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileReader.o FileReader.c
 
 ${OBJECTDIR}/LineInterpreter.o: LineInterpreter.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/LineInterpreter.o LineInterpreter.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/LineInterpreter.o LineInterpreter.c
 
-${OBJECTDIR}/MyFileReader.o: MyFileReader.c 
+${OBJECTDIR}/LogEntry.o: LogEntry.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/MyFileReader.o MyFileReader.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/LogEntry.o LogEntry.c
+
+${OBJECTDIR}/Logger.o: Logger.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Logger.o Logger.c
 
 ${OBJECTDIR}/ProcessControlBlock.o: ProcessControlBlock.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
+
+${OBJECTDIR}/ProcessControlBlockList.o: ProcessControlBlockList.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlockList.o ProcessControlBlockList.c
 
 ${OBJECTDIR}/ProcessQueue.o: ProcessQueue.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
 
-${OBJECTDIR}/RoundRobin.o: RoundRobin.c 
+${OBJECTDIR}/ProcessQueueList.o: ProcessQueueList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/RoundRobin.o RoundRobin.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueueList.o ProcessQueueList.c
 
 ${OBJECTDIR}/Settings.o: Settings.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/Settings.o Settings.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Settings.o Settings.c
 
 ${OBJECTDIR}/VirtualCpu.o: VirtualCpu.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -Wall -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
 
 # Subprojects
 .build-subprojects:
@@ -127,7 +157,7 @@ ${OBJECTDIR}/main.o: main.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulation
 
 # Subprojects
 .clean-subprojects:

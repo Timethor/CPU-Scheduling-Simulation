@@ -24,14 +24,14 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=CPU Scheduler Simulator
+PROJECTNAME=CPU Scheduler Simulation
 
 # Active Configuration
 DEFAULTCONF=Debug
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Debug Release Debug_ProcA.list Debug_ProcB.list 
+ALLCONFS=Debug Release 
 
 
 # build

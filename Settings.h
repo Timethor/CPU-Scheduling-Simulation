@@ -9,6 +9,9 @@
 #define	SETTINGS_H
 
 #include <stdlib.h>
+#include <stdbool.h>
+
+#include "Logger.h"
 
 // Structure for the settings for the operation of the Program
 typedef struct Settings {
@@ -16,15 +19,14 @@ typedef struct Settings {
     char* jobInputName;
     FILE* jobOutput;
     char* jobOutputName;
-
     bool debug;
-    bool trace;
-
+    int trace;
+    bool (*canLog)(struct Settings*, int);
+    CPULogger* log;
 } Settings;
 
-
-
 Settings* setup(int argc, char *argv[]);
+bool canLog(Settings * this, int trace);
 
 #endif	/* SETTINGS_H */
 

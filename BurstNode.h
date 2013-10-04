@@ -10,16 +10,16 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include "Dequeue.h"
 
 enum burstType {
-   BT_NONE = -1,
-   BT_CPU,
-   BT_IO,
+    BT_NONE = -1,
+    BT_CPU,
+    BT_IO,
 };
 
 // Structure of PCB (process control block)
-typedef struct BurstNode{
+
+typedef struct BurstNode {
     //>>	The type of Burst this Node is representing
     enum burstType type;
     //>>	The duration of the burst
@@ -29,10 +29,13 @@ typedef struct BurstNode{
     int queue_id;
 } BurstNode;
 
-DEQUEUE_PROTOTYPE(BurstNode);
+//>>	Construct / Destruct
+BurstNode* BurstNode_init();
+void BurstNode_destruct(BurstNode* this);
 
+//>>	Checks
 bool BurstNode_fullyFormed(BurstNode* bn);
-BurstNode* initBurstNode();
+
 
 #endif	/* BURSTNODE_H */
 
