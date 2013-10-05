@@ -24,12 +24,12 @@
 #include "LineInterpreter.h"
 
 typedef struct FileReader {
-    void (*call_back)(InputState*, const char*, const char*);
-    int (*readLines)(struct FileReader*, Settings*, InputState*);
+    void (*call_back)(SimulationState*, const char*, const char*);
+    int (*readLines)(struct FileReader*, Settings*, SimulationState*);
 } FileReader;
 
-FileReader* FileReader_init(InputState* istate);
-int FR_read_lines(FileReader* this, Settings* settings, InputState* cpu);
+FileReader* FileReader_init(SimulationState* istate);
+int FR_read_lines(FileReader* this, Settings* settings, SimulationState* cpu);
 
 #endif	/* FILEREADER_H */
 

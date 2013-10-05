@@ -12,9 +12,8 @@ DeviceDescriptor* DeviceDescriptor_init(int id) {
 }
 
 void DeviceDescriptor_destruct(DeviceDescriptor* this){
-    while (PCB_deque_empty(&this->queue)){
-        PCB* tbd = PCB_deque_
-    }
+    PCB_deque_freeElements(&this->queue);
+    free(this);
 }
 
 PCB* DD_hasBurstEndedProcess(DeviceDescriptor* this) {

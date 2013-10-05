@@ -21,30 +21,38 @@
 int main(int argc, char** argv) {
 
     printf("INIT SETTINGS!\n");
-    Settings* set = setup(argc, argv);
+    Settings* set = Settings_init(argc, argv);
 
     printf("INIT INPUTSTATE!\n");
-    InputState* is = InputState_init();
+    SimulationState* ss = SimulationState_init();
 
     printf("INIT FILEREADER!\n");
-    FileReader* reader = FileReader_init(is);
+    FileReader* reader = FileReader_init(ss);
 
     printf("Reading File!\n");
-    if (!reader->readLines(reader, set, is)) {
+    if (!reader->readLines(reader, set, ss)) {
         return EXIT_FAILURE;
     }
 
     printf("==============INIT VCPU!=============\n");
-    VirtualCPU* cpu = VCPU_init(is, set);
+    VirtualCPU* cpu = VirtualCPU_init(ss, set);
     printf("\n==============VCPU TICKING!=============\n========================================\n========================================\n\n");
     bool haveWorkToDo = true;
-    while (!PCB_deque_empty(&is->notYetArrived) || haveWorkToDo) {
-        haveWorkToDo = VCPU_doClockCycle(cpu, &is->notYetArrived);
+    while (!PCB_deque_empty(&ss->notYetArrived) || haveWorkToDo) {
+        haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         if (!haveWorkToDo) {
-            haveWorkToDo = VCPU_doClockCycle(cpu, &is->notYetArrived);
+            haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         }
     }
     printf("Simulation Ends\n");
+    
+    //>>	Wait time, turnover time cooker here
+    
+    Settings_destruct(set);
+    SimulationState_destruct(ss);
+//    FileReader_destruct(reader);
+    
+    VirtualCPU_destruct(cpu);
 
     return EXIT_SUCCESS;
 }

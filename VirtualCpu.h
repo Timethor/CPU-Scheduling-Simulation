@@ -17,28 +17,18 @@
 
 typedef struct VirtualCPU {
     int clockTime;
-    DD_deque devices;
-    PQ_deque queues;
+    DeviceDescriptor_deque devices;
+    ProcessQueue_deque queues;
     PCB_deque terminated;
     Settings* settings;
+    bool (*doClockCycle)(struct VirtualCPU *, PCB_deque*);
 } VirtualCPU;
 
-VirtualCPU* VCPU_init(InputState* istate, Settings* settings);
-void VCPU_MergeWithInputState(VirtualCPU * this, InputState* istate);
-bool VCPU_canEnd(VirtualCPU * this);
-bool VCPU_checkDeviceQueuesClear(VirtualCPU * this);
-bool VCPU_doClockCycle(VirtualCPU * this, PCB_deque* notYetArrived);
+//>>	== PUBLIC FUNCTION PROTO ==    <<//
 
-PQ* VCPU_getHighestWaitingProcessQueue(VirtualCPU * this);
-PQ* VCPU_getHighestRunningProcessQueue(VirtualCPU * this);
-
-void VCPU_doPreemptProcess(VirtualCPU * this);
-void VCPU_doCheckProcessStateChange(VirtualCPU * this);
-void VCPU_doProcessArrivingProcesses(VirtualCPU * this, PCB_deque* notYetArrived);
-void VCPU_doDispatcherProcessing(VirtualCPU * this);
-void VCPU_doSystemWideTick(VirtualCPU * this);
-
-void VCPU_doPrintQueues(VirtualCPU * this);
+//>>	Construct & Destruct
+VirtualCPU* VirtualCPU_init(SimulationState* istate, Settings* settings);
+void VirtualCPU_destruct(VirtualCPU * this);
 
 #endif	/* VIRTUALCPU_H */
 

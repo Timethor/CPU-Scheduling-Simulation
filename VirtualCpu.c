@@ -5,49 +5,75 @@
 
 #include "VirtualCpu.h"
 
-VirtualCPU* VCPU_init(InputState* istate, Settings* settings) {
+//>>	== PRIVATE FUNCTION PROTO ==    <<//
+void VCPU_MergeWithInputState(VirtualCPU * this, SimulationState* istate);
+bool VCPU_canEnd(VirtualCPU * this);
+bool VCPU_checkDeviceQueuesClear(VirtualCPU * this);
+bool VCPU_doClockCycle(VirtualCPU * this, PCB_deque* notYetArrived);
+
+ProcessQueue* VCPU_getHighestWaitingProcessQueue(VirtualCPU * this);
+ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU * this);
+
+void VCPU_doPreemptProcess(VirtualCPU * this);
+void VCPU_doCheckProcessStateChange(VirtualCPU * this);
+void VCPU_doProcessArrivingProcesses(VirtualCPU * this, PCB_deque* notYetArrived);
+void VCPU_doDispatcherProcessing(VirtualCPU * this);
+void VCPU_doSystemWideTick(VirtualCPU * this);
+
+void VCPU_doPrintQueues(VirtualCPU * this);
+
+
+
+VirtualCPU* VirtualCPU_init(SimulationState* istate, Settings* settings) {
     VirtualCPU* this = malloc(sizeof (*this));
     this->clockTime = 0;
     this->settings = settings;
-    this->
-    DD_deque_init(&this->devices, false, false);
-    PQ_deque_init(&this->queues, false, false);
+    this->doClockCycle = VCPU_doClockCycle;
+    DeviceDescriptor_deque_init(&this->devices, false, false);
+    ProcessQueue_deque_init(&this->queues, false, false);
     printf("STARTING SYNC-MERGE\n");
     VCPU_MergeWithInputState(this, istate);
     return this;
 }
 
-void VCPU_MergeWithInputState(VirtualCPU* this, InputState* istate) {
-    bool(*LoggerTest) (Settings*, int) = this->settings->canLog;
+void VirtualCPU_destruct(VirtualCPU* this){
+    DeviceDescriptor_deque_freeElements(&this->devices);
+    ProcessQueue_deque_freeElements(&this->queues);
+    PCB_deque_freeElements(&this->terminated);
+    free(this);
+}
+
+void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
+    bool(*LoggerTest) (Logger*, int) = this->settings->logger->canLog;
     int i;
-    for (i = DD_deque_length(&istate->proto_devices); i > 0; i--) {
-        DD_deque_pushL(&this->devices, DD_deque_pollF(&istate->proto_devices));
+    for (i = DeviceDescriptor_deque_length(&istate->proto_devices); i > 0; i--) {
+        DeviceDescriptor_deque_pushL(&this->devices, DeviceDescriptor_deque_pollF(&istate->proto_devices));
     }
-    for (i = PQ_deque_length(&istate->proto_queues); i > 0; i--) {
-        PQ_deque_pushL(&this->queues, PQ_deque_pollF(&istate->proto_queues));
+    for (i = ProcessQueue_deque_length(&istate->proto_queues); i > 0; i--) {
+        ProcessQueue_deque_pushL(&this->queues, ProcessQueue_deque_pollF(&istate->proto_queues));
     }
-    LoggerTest(this->settings, 0) && printf("After Print");
-    LoggerTest(this->settings, 0) && printf("SIZEOF:: THIS_>PROCESQUEUE:: %d\n\n", PQ_deque_length(&this->queues));
-    LoggerTest(this->settings, 0) && printf("QUEUE HEAD ID: %d\n", this->queues.head->data->id);
-    PQ_deque_print(&this->queues);
+    LoggerTest(this->settings->logger, 0) && printf("After Print");
+    LoggerTest(this->settings->logger, LogLevel_WARNING) && printf("SIZEOF:: THIS_>PROCESQUEUE:: %d\n\n", ProcessQueue_deque_length(&this->queues));
+    LoggerTest(this->settings->logger, 0) && printf("QUEUE HEAD ID: %d\n", this->queues.head->data->id);
+    ProcessQueue_deque_print(&this->queues);
 }
 
 bool VCPU_checkDeviceQueuesClear(VirtualCPU* this) {
-    DD_dequeI ddI;
-    DD_dequeI_init(&ddI, &this->devices);
-    DeviceDescriptor* current = DD_dequeI_examine(&ddI);
+    DeviceDescriptor_dequeI ddI;
+    DeviceDescriptor_dequeI_init(&ddI, &this->devices);
+    DeviceDescriptor* current = DeviceDescriptor_dequeI_examine(&ddI);
     bool clear = true;
     while (current != NULL && clear == true) {
         if (!PCB_deque_empty(&current->queue))
             clear = false;
-        current = DD_dequeI_next(&ddI);
+        current = DeviceDescriptor_dequeI_next(&ddI);
     }
     return clear;
 }
 
 bool VCPU_canEnd(VirtualCPU* this) {
-    PQ* running = VCPU_getHighestRunningProcessQueue(this);
-    PQ* waiting = VCPU_getHighestWaitingProcessQueue(this);
+    ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
+    ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
     if (running != NULL || waiting != NULL) {
         return false;
     }
@@ -71,28 +97,28 @@ bool VCPU_doClockCycle(VirtualCPU* this, PCB_deque* notYetArrived) {
     return !VCPU_canEnd(this);
 }
 
-PQ* VCPU_getHighestWaitingProcessQueue(VirtualCPU* this) {
-    PQ_dequeI pqI;
-    PQ_dequeI_init(&pqI, &this->queues);
-    PQ* current = PQ_dequeI_examine(&pqI);
+ProcessQueue* VCPU_getHighestWaitingProcessQueue(VirtualCPU* this) {
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
     while (current != NULL) {
         if (PQ_hasWaitingProcess(current))
 
             return current;
-        current = PQ_dequeI_next(&pqI);
+        current = ProcessQueue_dequeI_next(&pqI);
     }
     return NULL;
 }
 
-PQ* VCPU_getHighestRunningProcessQueue(VirtualCPU* this) {
-    PQ_dequeI pqI;
-    PQ_dequeI_init(&pqI, &this->queues);
-    PQ* current = PQ_dequeI_examine(&pqI);
+ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU* this) {
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
     while (current != NULL) {
         if (PQ_hasRunningProcess(current))
 
             return current;
-        current = PQ_dequeI_next(&pqI);
+        current = ProcessQueue_dequeI_next(&pqI);
     }
     return NULL;
 }
@@ -107,18 +133,18 @@ PQ* VCPU_getHighestRunningProcessQueue(VirtualCPU* this) {
  *                  no: continue
  */
 void VCPU_doPreemptProcess(VirtualCPU* this) {
-    PQ* running = VCPU_getHighestRunningProcessQueue(this);
-    PQ* waiting = VCPU_getHighestWaitingProcessQueue(this);
+    ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
+    ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
     if (running != NULL && waiting != NULL && waiting->id < running->id) {
         PQ_stopRunningProcess(running);
     }
-    PQ_dequeI pqI;
-    PQ_dequeI_init(&pqI, &this->queues);
-    running = PQ_dequeI_examine(&pqI);
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    running = ProcessQueue_dequeI_examine(&pqI);
     while (running != NULL) {
         PCB* movingProcess = PQ_getQuantumViolator(running);
-        PQ* prev = running;
-        running = PQ_dequeI_next(&pqI);
+        ProcessQueue* prev = running;
+        running = ProcessQueue_dequeI_next(&pqI);
         if (movingProcess != NULL) {
             PCB_toString(movingProcess);
             printf(" is preempted\n");
@@ -138,23 +164,23 @@ void VCPU_doPreemptProcess(VirtualCPU* this) {
 }
 
 void VCPU_doPrintQueues(VirtualCPU* this) {
-    PQ_deque_print(&this->queues);
-    DD_deque_print(&this->devices);
+    ProcessQueue_deque_print(&this->queues);
+    DeviceDescriptor_deque_print(&this->devices);
 }
 
 /*
  *  For each processQueue
  *      check for PCB with state == PCB_BURST_FINISHED
- *          do DD_deque_ProcArrival()
+ *          do DeviceDescriptor_deque_ProcArrival()
  * 
  *  For each deviceQueue
  *      check for PCB with state == PCB_BURST_FINISHED
- *          do PQ_deque_ProcArrival()
+ *          do ProcessQueue_deque_ProcArrival()
  */
 void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
-    PQ_dequeI pqI;
-    PQ_dequeI_init(&pqI, &this->queues);
-    PQ* currentPQ = PQ_dequeI_examine(&pqI);
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    ProcessQueue* currentPQ = ProcessQueue_dequeI_examine(&pqI);
     while (currentPQ != NULL) {
         PCB* requester = PQ_hasBurstEndedProcess(currentPQ);
         if (requester != NULL) {
@@ -164,7 +190,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
             VCPU_doPrintQueues(this);
             if (requester->state != PCB_TERMINATED) {
                 requester->state = PCB_WAITING;
-                DD_deque_ProcArrival(&this->devices, requester);
+                DeviceDescriptor_deque_ProcArrival(&this->devices, requester);
                 VCPU_doPrintQueues(this);
             } else {
                 PCB_toString(requester);
@@ -173,12 +199,12 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doPrintQueues(this);
             }
         }
-        currentPQ = PQ_dequeI_next(&pqI);
+        currentPQ = ProcessQueue_dequeI_next(&pqI);
     }
 
-    DD_dequeI ddI;
-    DD_dequeI_init(&ddI, &this->devices);
-    DeviceDescriptor* currentDD = DD_dequeI_examine(&ddI);
+    DeviceDescriptor_dequeI ddI;
+    DeviceDescriptor_dequeI_init(&ddI, &this->devices);
+    DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
     while (currentDD != NULL) {
         PCB* requester = DD_hasBurstEndedProcess(currentDD);
         if (requester != NULL) {
@@ -189,7 +215,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
             if (requester->state != PCB_TERMINATED) {
                 currentDD->state = DD_IDLE;
                 requester->state = PCB_WAITING;
-                PQ_deque_ProcArrival(&this->queues, requester);
+                ProcessQueue_deque_ProcArrival(&this->queues, requester);
                 VCPU_doPrintQueues(this);
             } else {
                 PCB_toString(requester);
@@ -198,7 +224,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doPrintQueues(this);
             }
         }
-        currentDD = DD_dequeI_next(&ddI);
+        currentDD = DeviceDescriptor_dequeI_next(&ddI);
     }
 }
 
@@ -208,17 +234,17 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
         PCB* requester = PCB_deque_pollF(notYetArrived);
 
         if (BurstNode_deque_peekF(&requester->schedule)->type == BT_CPU) {
-            PQ_deque_ProcArrival(&this->queues, requester);
+            ProcessQueue_deque_ProcArrival(&this->queues, requester);
             VCPU_doPrintQueues(this);
             //>>	Preempt any running process in lower queues
-            PQ* running = VCPU_getHighestRunningProcessQueue(this);
-            PQ* front = PQ_deque_peekF(&this->queues);
+            ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
+            ProcessQueue* front = ProcessQueue_deque_peekF(&this->queues);
             if (front != NULL && running != NULL && front->id < running->id) {
                 PQ_stopRunningProcess(running);
             }
         } else if (BurstNode_deque_peekF(&requester->schedule)->type == BT_IO) {
 
-            DD_deque_ProcArrival(&this->devices, requester);
+            DeviceDescriptor_deque_ProcArrival(&this->devices, requester);
         }
     }
 }
@@ -241,9 +267,9 @@ void VCPU_doDispatcherProcessing(VirtualCPU * this) {
     //>>	If no queues are running processes, get the highest priority queue 
     //>>	and start its first process
     if (VCPU_getHighestRunningProcessQueue(this) == NULL) {
-        PQ_dequeI pqI;
-        PQ_dequeI_init(&pqI, &this->queues);
-        PQ* waiting = VCPU_getHighestWaitingProcessQueue(this);
+        ProcessQueue_dequeI pqI;
+        ProcessQueue_dequeI_init(&pqI, &this->queues);
+        ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
         if (waiting != NULL) {
             PQ_startWaitingProcess(waiting);
             VCPU_doPrintQueues(this);
@@ -253,18 +279,18 @@ void VCPU_doDispatcherProcessing(VirtualCPU * this) {
     }
 
     //>>	For each Device, if !busy, get it working
-    DD_dequeI ddI;
-    DD_dequeI_init(&ddI, &this->devices);
-    DeviceDescriptor* current = DD_dequeI_examine(&ddI);
+    DeviceDescriptor_dequeI ddI;
+    DeviceDescriptor_dequeI_init(&ddI, &this->devices);
+    DeviceDescriptor* current = DeviceDescriptor_dequeI_examine(&ddI);
     while (current != NULL) {
 
         DD_tryActivateDevice(current);
-        current = DD_dequeI_next(&ddI);
+        current = DeviceDescriptor_dequeI_next(&ddI);
     }
 }
 
 void VCPU_doSystemWideTick(VirtualCPU * this) {
     this->clockTime++;
-    PQ_deque_SystemWideTick(&this->queues);
-    DD_deque_SystemWideTick(&this->devices);
+    ProcessQueue_deque_SystemWideTick(&this->queues);
+    DeviceDescriptor_deque_SystemWideTick(&this->devices);
 }

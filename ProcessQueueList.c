@@ -1,19 +1,19 @@
 #include "ProcessQueueList.h"
 
-DEQUE(PQ);
+DEQUE(ProcessQueue);
 
-void PQ_deque_SystemWideTick(PQ_deque* this) {
+void ProcessQueue_deque_SystemWideTick(ProcessQueue_deque* this) {
 //    printf("Doing PQ_D TICK\n");
-    PQ_dequeI iter;
-    PQ_dequeI_init(&iter, this);
-    PQ* pq = PQ_dequeI_examine(&iter);
+    ProcessQueue_dequeI iter;
+    ProcessQueue_dequeI_init(&iter, this);
+    ProcessQueue* pq = ProcessQueue_dequeI_examine(&iter);
     while (pq != NULL) {
         PQ_systemWideTick(pq);
-        pq = PQ_dequeI_next(&iter);
+        pq = ProcessQueue_dequeI_next(&iter);
     }
 }
 
-void PQ_deque_ProcArrival(PQ_deque* this, PCB* process) {
+void ProcessQueue_deque_ProcArrival(ProcessQueue_deque* this, PCB* process) {
     if (process->state == PCB_NEW) {
         PCB_toString(process);
         printf(" arrives\n");
@@ -21,18 +21,18 @@ void PQ_deque_ProcArrival(PQ_deque* this, PCB* process) {
     }
     PCB_toString(process);
     printf(" requests CPU\n");
-    PQ_enqueueProcess(PQ_deque_peekF(this), process);
+    PQ_enqueueProcess(ProcessQueue_deque_peekF(this), process);
 }
 
-void PQ_deque_print(PQ_deque* this) {
-    PQ_dequeI it;
-    PQ_dequeI_init(&it, this);
+void ProcessQueue_deque_print(ProcessQueue_deque* this) {
+    ProcessQueue_dequeI it;
+    ProcessQueue_dequeI_init(&it, this);
     while (true) {
-        PQ* pq = PQ_dequeI_examine(&it);
+        ProcessQueue* pq = ProcessQueue_dequeI_examine(&it);
         if (pq == NULL)
             break;
         PQ_printQueue(pq);
-        if (PQ_dequeI_next(&it) == NULL)
+        if (ProcessQueue_dequeI_next(&it) == NULL)
             break;
     }
 }

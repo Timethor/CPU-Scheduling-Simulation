@@ -37,6 +37,8 @@ typedef struct PCB {
 } PCB;
 
 PCB* PCB_init(int id);
+void PCB_destruct(PCB* this);
+
 void PCB_toString(PCB* pcb);
 void PCB_SystemWideTick(PCB * this);
 void PCB_checkProcessTermination(PCB * this);

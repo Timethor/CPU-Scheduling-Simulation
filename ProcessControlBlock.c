@@ -1,6 +1,8 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdarg.h>
-#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 #include "ProcessControlBlockList.h"
 
 //#define DEBUG
@@ -16,6 +18,10 @@ PCB* PCB_init(int id) {
     process->state = PCB_NEW;
     BurstNode_deque_init(&process->schedule, false, false);
     return process;
+}
+
+void PCB_destruct(PCB* this){
+    free(this);
 }
 
 void PCB_toString(PCB* this) {
@@ -41,7 +47,7 @@ void PCB_SystemWideTick(PCB* this) {
             //            printf("==============NO TICK!=================\n");
             break;
     };
-    usleep(275);
+//    nanosleep((struct timespec[]){{0, 62500000}}, NULL);
 }
 
 void PCB_checkProcessTermination(PCB* this) {

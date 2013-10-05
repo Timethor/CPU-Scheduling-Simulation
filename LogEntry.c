@@ -1,9 +1,9 @@
 
+#include <stdlib.h>
+
 #include "LogEntry.h"
 
-DEQUE(LogEntry);
-
-LogEntry* LogEntry_init(char* entry, LogEntry level, bool logtoConsole, bool logtoFile) {
+LogEntry* LogEntry_init(char* entry, enum LogLevel level, bool logtoConsole, bool logtoFile) {
     LogEntry* this = malloc(sizeof (*this));
     this->entry = entry;
     this->level = level;

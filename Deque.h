@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // Contains the deque, deque nodes and iterator
 #define DEFINE_DEQUE(type) \

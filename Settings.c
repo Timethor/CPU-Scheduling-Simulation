@@ -1,29 +1,26 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <stdbool.h>
-#include <fcntl.h>
 
 #include "Settings.h"
 // Printout of how to use the program properly
 
 void printUsage(int argc, char*argv[]) {
-    printf("usage:\n %s [df] Input File \n"
+    printf("usage:\n %s [df] Input_File\n"
             " [-v] number [-o] outputfile", argv[0]);
     printf("\n \t -d : Run in Debug Mode\n");
     printf("\t -f : Run in FileOnly Mode, will not print to console. Works with [-o] \n");
-    printf("\tInput File : The file to load jobs from\n");
+    printf("\tInput_File : The file to load jobs from\n");
     printf("\t -v number: Run in Verbose Mode from 1-4, number may be omitted, 1 will be assumed\n \n");
     printf("\t -o filename : The output file, if desired. Output will be printed to console. \n");
     printf("\n");
 }
 
-Settings* setup(int argc, char *argv[]) {
+Settings* Settings_init(int argc, char *argv[]) {
 
     if (argc < 2) {
         printUsage(argc, argv);
@@ -71,35 +68,14 @@ Settings* setup(int argc, char *argv[]) {
                 abort();
         }
 
-    errno = 0;
-
-    int fp = open(argv[optind], O_RDONLY);
-
-    if (fp == -1) {
-        perror(NULL);
-        exit(EXIT_FAILURE);
-    }
-    errno = 0;
-    FILE* fpo;
-    if (outputFile != NULL) {
-        fpo = fopen(outputFile, "w+");
-
-        if (fpo == NULL) {
-            perror(NULL);
-        }
-    }
-    Settings* returnpair = malloc(sizeof (*returnpair));
-    returnpair->jobInput = fp;
-    returnpair->jobInputName = argv[optind];
-    returnpair->jobOutput = fpo;
-    returnpair->jobOutputName = outputFile;
-    returnpair->debug = debug;
-    returnpair->canLog = canLog;
-    returnpair->trace = trace;
-    returnpair->log = CPUL_init();
-    return returnpair;
+    Settings* this = malloc(sizeof (*this));
+    this->jobInputName = argv[optind];
+    this->jobOutputName = outputFile;
+    this->logger = Logger_init(this->jobInputName, this->jobOutputName, debug, trace);
+    return this;
 }
 
-bool canLog(Settings* this, int trace) {
-    return (this->debug) ? (this->trace >= trace ? true : false) : false;
+void Settings_destruct(Settings* this){
+    Logger_destruct(this->logger);
+    free(this);
 }

@@ -14,19 +14,15 @@
 #include "Logger.h"
 
 // Structure for the settings for the operation of the Program
-typedef struct Settings {
-    int jobInput;
+typedef struct Settings{
     char* jobInputName;
-    FILE* jobOutput;
     char* jobOutputName;
-    bool debug;
-    int trace;
-    bool (*canLog)(struct Settings*, int);
-    CPULogger* log;
+    Logger* logger;
 } Settings;
 
-Settings* setup(int argc, char *argv[]);
-bool canLog(Settings * this, int trace);
+Settings* Settings_init(int argc, char *argv[]);
+void Settings_destruct(Settings* this);
+
 
 #endif	/* SETTINGS_H */
 

@@ -2,35 +2,39 @@
 #include <stdbool.h>
 #include "ProcessQueue.h"
 
-PQ* PQ_init_RoundRobin(int id, int quantum) {
-    PQ* this = PQ_init_base(id);
+ProcessQueue* PQ_init_RoundRobin(int id, int quantum) {
+    ProcessQueue* this = PQ_init(id);
     this->quantum = quantum;
     return this;
 }
 
-bool PQ_isRoundRobin(PQ* this) {
+bool PQ_isRoundRobin(ProcessQueue* this) {
     return (this->quantum == -1 ? false : true);
 }
 
-PQ* PQ_init_FCFS(int id) {
-    PQ* this = PQ_init_base(id);
+ProcessQueue* PQ_init_FCFS(int id) {
+    ProcessQueue* this = PQ_init(id);
     this->quantum = -1;
     return this;
 }
 
-bool PQ_isFCFS(PQ* this) {
+bool PQ_isFCFS(ProcessQueue* this) {
     return (this->quantum == -1 ? true : false);
 }
 
-PQ* PQ_init_base(int id) {
-    PQ* this = malloc(sizeof (*this));
+ProcessQueue* PQ_init(int id) {
+    ProcessQueue* this = malloc(sizeof (*this));
     this->id = id;
     this->quantumCheck = 0;
     PCB_deque_init(&this->queue, false, false);
     return this;
 }
 
-bool PQ_hasWaitingProcess(PQ* this) {
+void ProcessQueue_destruct(ProcessQueue* this){
+    free(this);
+}
+
+bool PQ_hasWaitingProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL) {
         return (firstInQueue->state == PCB_WAITING ? true : false);
@@ -38,7 +42,7 @@ bool PQ_hasWaitingProcess(PQ* this) {
     return false;
 }
 
-bool PQ_hasRunningProcess(PQ* this) {
+bool PQ_hasRunningProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL) {
         return (firstInQueue->state == PCB_RUNNING ? true : false);
@@ -46,7 +50,7 @@ bool PQ_hasRunningProcess(PQ* this) {
     return false;
 }
 
-PCB* PQ_hasBurstEndedProcess(PQ* this) {
+PCB* PQ_hasBurstEndedProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL && firstInQueue->state == PCB_BURST_FINISHED) {
         PCB_checkProcessTermination(firstInQueue);
@@ -55,7 +59,7 @@ PCB* PQ_hasBurstEndedProcess(PQ* this) {
     return NULL;
 }
 
-void PQ_systemWideTick(PQ* this) {
+void PQ_systemWideTick(ProcessQueue* this) {
     //    printf("Doing PQ TICK - Queue %d\n", this->id);
     PCB_dequeI it;
     PCB_dequeI_init(&it, &this->queue);
@@ -79,7 +83,7 @@ void PQ_systemWideTick(PQ* this) {
     }
 }
 
-void PQ_stopRunningProcess(PQ* this) {
+void PQ_stopRunningProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     PCB_toString(firstInQueue);
     printf(" is preempted\n");
@@ -87,7 +91,7 @@ void PQ_stopRunningProcess(PQ* this) {
         firstInQueue->state = PCB_WAITING;
 }
 
-void PQ_startWaitingProcess(PQ* this) {
+void PQ_startWaitingProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL) {
         printf("Dispatcher moves ");
@@ -97,12 +101,12 @@ void PQ_startWaitingProcess(PQ* this) {
     }
 }
 
-void PQ_enqueueProcess(PQ* this, PCB* process) {
+void PQ_enqueueProcess(ProcessQueue* this, PCB* process) {
     if (process != NULL)
         PCB_deque_pushL(&this->queue, process);
 }
 
-void PQ_printQueue(PQ* this) {
+void PQ_printQueue(ProcessQueue* this) {
     if (this == NULL) {
         printf("Cant print null queue\n");
         return;
@@ -124,7 +128,7 @@ void PQ_printQueue(PQ* this) {
     printf("]\n");
 }
 
-PCB* PQ_getQuantumViolator(PQ* this) {
+PCB* PQ_getQuantumViolator(ProcessQueue* this) {
     if (PQ_isRoundRobin(this) && this->quantum == this->quantumCheck) {
         this->quantumCheck = 0;
         PCB* violator = PCB_deque_pollF(&this->queue);

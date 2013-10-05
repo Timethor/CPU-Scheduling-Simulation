@@ -1,11 +1,11 @@
-#include "FileReader.h"
+#include "FileWriter.h"
 
-int FR_read_lines(FileReader* this, Settings* settings, SimulationState* istate) {
+int FW_write_lines(FileWriter* this, Settings* settings, SimulationState* istate) {
     //>>	
     struct stat fs;
     char *buf, *buf_end;
     char *begin, *end, c;
-    int fd = settings->logger->inputHandle;
+    int fd = settings->logger->outputHandle;
 
     if (fstat(fd, &fs) == -1) {
         err(1, "stat: %s", settings->jobInputName);
@@ -47,9 +47,9 @@ int FR_read_lines(FileReader* this, Settings* settings, SimulationState* istate)
     return true;
 }
 
-FileReader* FileReader_init(SimulationState* istate) {
-    FileReader* fr = malloc(sizeof (*fr));
-    fr->call_back = istate->call_back_read;
-    fr->readLines = FR_read_lines;
-    return fr;
+FileWriter* FileWriter_init(SimulationState* istate) {
+    FileWriter* fw = malloc(sizeof (*fw));
+    fw->call_back = istate->call_back_write;
+    fw->writeLines = FW_write_lines;
+    return fw;
 }

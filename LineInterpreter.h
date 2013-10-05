@@ -19,38 +19,41 @@ enum FormatStage {
     FS_PN_SCHEDULE
 };
 
-typedef struct InputState {
+typedef struct SimulationState {
     bool in_comment;
     enum FormatStage stage;
     BurstNode* bn;
     int seen_stage_req;
     bool error_thrown;
     PCB_deque notYetArrived;
-    DD_deque proto_devices;
-    PQ_deque proto_queues;
-    void (*call_back)(struct InputState*, const char*, const char*);
-} InputState;
+    DeviceDescriptor_deque proto_devices;
+    ProcessQueue_deque proto_queues;
+    void (*call_back_read)(struct SimulationState*, const char*, const char*);
+    void (*call_back_write)(struct SimulationState*, const char*, const char*);
+} SimulationState;
 
-void IS_processInputLine(InputState * this, const char* begin, const char* end);
+void SS_processInputLine(SimulationState * this, const char* begin, const char* end);
+void SS_processOutputLine(SimulationState * this, const char* begin, const char* end);
 
-InputState* InputState_init();
+SimulationState* SimulationState_init();
+void SimulationState_destruct(SimulationState* this);
 
-int IS_hasCpuBurst(char* line);
-int IS_hasIOBurst(char* line);
-int IS_hasIODevice(char* line);
+int SS_hasCpuBurst(char* line);
+int SS_hasIOBurst(char* line);
+int SS_hasIODevice(char* line);
 
-bool IS_hasNonProcessableLine(InputState * this, char* line);
+bool SS_hasNonProcessableLine(SimulationState * this, char* line);
 
-bool IS_processLineForTimeQuantum(InputState * this, char* line);
-bool IS_processLineForNewProcess(InputState * this, char* line);
-bool IS_processLineForProcessArrival(InputState * this, char* line);
-bool IS_processLineForProcessSchedule(InputState * this, char* line);
+bool SS_processLineForTimeQuantum(SimulationState * this, char* line);
+bool SS_processLineForNewProcess(SimulationState * this, char* line);
+bool SS_processLineForProcessArrival(SimulationState * this, char* line);
+bool SS_processLineForProcessSchedule(SimulationState * this, char* line);
 
-int IS_hasSubString(char* line, char* needle);
-bool IS_isEmptyLine(char* line);
-bool IS_isEndMultiLineComment(char* line);
-bool IS_isSingleLineComment(char* line);
-bool IS_isStartMultiLineComment(char* line);
+int SS_hasSubString(char* line, char* needle);
+bool SS_isEmptyLine(char* line);
+bool SS_isEndMultiLineComment(char* line);
+bool SS_isSingleLineComment(char* line);
+bool SS_isStartMultiLineComment(char* line);
 
 #endif	/* LINEINTERPRETER_H */
 

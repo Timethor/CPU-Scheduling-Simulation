@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=CPU Scheduler Simulation
+PROJECTNAME=CPU Scheduler Simulator
 
 # Active Configuration
 DEFAULTCONF=Debug

@@ -34,7 +34,7 @@ BurstNode* BurstNode_init();
 void BurstNode_destruct(BurstNode* this);
 
 //>>	Checks
-bool BurstNode_fullyFormed(BurstNode* bn);
+bool BN_fullyFormed(BurstNode* bn);
 
 
 #endif	/* BURSTNODE_H */

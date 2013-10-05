@@ -11,8 +11,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#include "Deque.h"
-
 enum LogLevel {
     LogLevel_ALL = INT_MIN,
     LogLevel_FINEST = 300,
@@ -32,11 +30,9 @@ typedef struct LogEntry {
     bool toFile;
 } LogEntry;
 
-DEQUE_PROTOTYPE(LogEntry);
-
 //>>	Construct / Destruct
-LogEntry* LogEntry_init(char* entry, LogEntry level, bool logtoConsole, bool logtoFile);
-void LogEntry_destruct(LogEntry* this)
+LogEntry* LogEntry_init(char* entry, enum LogLevel level, bool logtoConsole, bool logtoFile);
+void LogEntry_destruct(LogEntry * this);
 
 #endif	/* LOGENTRY_H */
 

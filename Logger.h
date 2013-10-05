@@ -8,18 +8,25 @@
 #ifndef LOGGER_H
 #define	LOGGER_H
 
-#include "LogEntry.h"
+#include "LogEntryList.h"
 
-typedef struct CPULogger {
+typedef struct Logger {
+    int inputHandle;
+    int outputHandle;
     char* buffer;
     int lastClockTime;
-    Log_deque records;
-    void (*LogStatement)(struct CPULogger*, const char*);
-} CPULogger;
+    enum LogLevel LoggerLevel;
+    bool debug;
+    LogEntry_deque records;
+    void (*log)(struct Logger*, const char*, ...);
+    bool (*canLog)(struct Logger*, int);
+} Logger;
 
+//>>	== PUBLIC FUNCTIONS ==
 
-void LogStatement(CPULogger * this, const char* append, ...);
-CPULogger* CPUL_init();
+//>>	Construct & Destruct
+Logger* Logger_init(char* jobInputName, char* jobOutputName, bool debug, enum LogLevel level);
+void Logger_destruct(Logger * this);
 
 #endif	/* LOGGER_H */
 

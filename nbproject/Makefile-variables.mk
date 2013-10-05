@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=cpu_scheduler_simulation
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/cpu_scheduler_simulation
+CND_ARTIFACT_NAME_Debug=cpu_scheduler_simulator
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/cpu_scheduler_simulator
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=cpuschedulersimulation.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/cpuschedulersimulation.tar
+CND_PACKAGE_NAME_Debug=cpuschedulersimulator.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/cpuschedulersimulator.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=cpu_scheduler_simulation
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/cpu_scheduler_simulation
+CND_ARTIFACT_NAME_Release=cpu_scheduler_simulator
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/cpu_scheduler_simulator
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=cpuschedulersimulation.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/cpuschedulersimulation.tar
+CND_PACKAGE_NAME_Release=cpuschedulersimulator.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/cpuschedulersimulator.tar
 #
 # include compiler specific variables
 #
