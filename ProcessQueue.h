@@ -32,12 +32,12 @@ bool PQ_hasWaitingProcess(ProcessQueue * this);
 bool PQ_hasRunningProcess(ProcessQueue * this);
 PCB* PQ_hasBurstEndedProcess(ProcessQueue * this);
 
-void PQ_systemWideTick(ProcessQueue * this);
-void PQ_stopRunningProcess(ProcessQueue * this);
-void PQ_startWaitingProcess(ProcessQueue * this);
-void PQ_enqueueProcess(ProcessQueue * this, PCB* process);
+void PQ_systemWideTick(ProcessQueue * this, Logger* logs);
+void PQ_stopRunningProcess(ProcessQueue * this, Logger* logs);
+void PQ_startWaitingProcess(ProcessQueue * this, Logger* logs);
+void PQ_enqueueProcess(ProcessQueue * this, PCB* process, Logger* logs);
 
-void PQ_printQueue(ProcessQueue * this);
+void PQ_printQueue(ProcessQueue * this, Logger* logs);
 
 
 

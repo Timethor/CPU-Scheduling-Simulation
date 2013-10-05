@@ -12,9 +12,9 @@
 #include "ProcessQueue.h"
 
 DEQUE_PROTOTYPE(ProcessQueue);
-void ProcessQueue_deque_SystemWideTick(ProcessQueue_deque * this);
-void ProcessQueue_deque_ProcArrival(ProcessQueue_deque * this, PCB* process);
-void ProcessQueue_deque_print(ProcessQueue_deque * this);
+void ProcessQueue_deque_SystemWideTick(ProcessQueue_deque * this, Logger* logs);
+void ProcessQueue_deque_ProcArrival(ProcessQueue_deque * this, PCB* process, Logger* logs);
+void ProcessQueue_deque_print(ProcessQueue_deque * this, Logger* logs);
 
 #endif	/* PROCESSQUEUELIST_H */
 

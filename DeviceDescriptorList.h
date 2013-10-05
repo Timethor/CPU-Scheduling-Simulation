@@ -18,9 +18,9 @@ DEQUE_PROTOTYPE(DeviceDescriptor);
 bool DeviceDescriptor_deque_hasDeviceId(DeviceDescriptor_deque * this, int id);
 DeviceDescriptor* DeviceDescriptor_deque_getDeviceId(DeviceDescriptor_deque * this, int id);
 
-void DeviceDescriptor_deque_ProcArrival(DeviceDescriptor_deque * this, PCB* process);
-void DeviceDescriptor_deque_SystemWideTick(DeviceDescriptor_deque * this);
-void DeviceDescriptor_deque_print(DeviceDescriptor_deque * this);
+void DeviceDescriptor_deque_ProcArrival(DeviceDescriptor_deque * this, PCB* process, Logger* logs);
+void DeviceDescriptor_deque_SystemWideTick(DeviceDescriptor_deque * this, Logger* logs);
+void DeviceDescriptor_deque_print(DeviceDescriptor_deque * this, Logger* logs);
 
 #endif	/* DEVICEDESCRIPTORLIST_H */
 

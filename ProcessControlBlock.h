@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include "BurstNodeList.h"
+#include "Logger.h"
 
 enum PCBState {
     PCB_NEW,
@@ -31,7 +32,7 @@ typedef struct PCB {
     //>>	The amount of time this process spends waiting until completion
     int waiting_time;
     //>>	The internal time that this process completed at
-    int running_time;
+    int turnaround_time;
     //>>	A linked list of burstNodes
     BurstNode_deque schedule;
 } PCB;
@@ -39,8 +40,8 @@ typedef struct PCB {
 PCB* PCB_init(int id);
 void PCB_destruct(PCB* this);
 
-void PCB_toString(PCB* pcb);
-void PCB_SystemWideTick(PCB * this);
+char* PCB_toString(PCB* pcb, char* buffer);
+void PCB_SystemWideTick(PCB * this, Logger* logs, bool inDevice);
 void PCB_checkProcessTermination(PCB * this);
 
 #endif	/* PROCESSCONTROLBLOCK_H */

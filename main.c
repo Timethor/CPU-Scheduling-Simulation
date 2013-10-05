@@ -20,23 +20,22 @@
  */
 int main(int argc, char** argv) {
 
-    printf("INIT SETTINGS!\n");
     Settings* set = Settings_init(argc, argv);
-
-    printf("INIT INPUTSTATE!\n");
+    void(*Printf) (Logger*, enum LogLevel, const char*, ...) = set->logger->log;
+    Printf(set->logger, LogLevel_CONFIG, "INIT INPUTSTATE!\n");
     SimulationState* ss = SimulationState_init();
 
-    printf("INIT FILEREADER!\n");
+    Printf(set->logger, LogLevel_CONFIG, "INIT FILEREADER!\n");
     FileReader* reader = FileReader_init(ss);
 
-    printf("Reading File!\n");
+    Printf(set->logger, LogLevel_CONFIG, "Reading File!\n");
     if (!reader->readLines(reader, set, ss)) {
         return EXIT_FAILURE;
     }
 
-    printf("==============INIT VCPU!=============\n");
+    Printf(set->logger, LogLevel_CONFIG, "==============INIT VCPU!=============\n");
     VirtualCPU* cpu = VirtualCPU_init(ss, set);
-    printf("\n==============VCPU TICKING!=============\n========================================\n========================================\n\n");
+    Printf(set->logger, LogLevel_CONFIG, "\n==============VCPU TICKING!=============\n========================================\n========================================\n\n");
     bool haveWorkToDo = true;
     while (!PCB_deque_empty(&ss->notYetArrived) || haveWorkToDo) {
         haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
@@ -44,7 +43,7 @@ int main(int argc, char** argv) {
             haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         }
     }
-    printf("Simulation Ends\n");
+    Printf(set->logger, LogLevel_CONFIG, "Simulation Ends\n");
     
     //>>	Wait time, turnover time cooker here
     

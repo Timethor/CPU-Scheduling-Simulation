@@ -14,18 +14,18 @@ typedef struct Logger {
     int inputHandle;
     int outputHandle;
     char* buffer;
-    int lastClockTime;
+    int currentClock;
+    bool clockHasChanged;
     enum LogLevel LoggerLevel;
-    bool debug;
     LogEntry_deque records;
-    void (*log)(struct Logger*, const char*, ...);
+    void (*log)(struct Logger*, enum LogLevel, const char*, ...);
     bool (*canLog)(struct Logger*, int);
 } Logger;
 
 //>>	== PUBLIC FUNCTIONS ==
 
 //>>	Construct & Destruct
-Logger* Logger_init(char* jobInputName, char* jobOutputName, bool debug, enum LogLevel level);
+Logger* Logger_init(char* jobInputName, char* jobOutputName, enum LogLevel level);
 void Logger_destruct(Logger * this);
 
 #endif	/* LOGGER_H */

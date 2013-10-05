@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <sys/time.h>
+#include <string.h>
 #include "ProcessControlBlockList.h"
 
 //#define DEBUG
@@ -13,29 +14,33 @@ PCB* PCB_init(int id) {
     PCB* process = malloc(sizeof (*process));
     process->id = id;
     process->arrival_time = -1;
-    process->running_time = 0;
+    process->turnaround_time = 0;
     process->waiting_time = 0;
     process->state = PCB_NEW;
     BurstNode_deque_init(&process->schedule, false, false);
     return process;
 }
 
-void PCB_destruct(PCB* this){
+void PCB_destruct(PCB* this) {
     free(this);
 }
 
-void PCB_toString(PCB* this) {
-    printf("Process %2d", this->id);
+char* PCB_toString(PCB* this, char* buffer) {
+    sprintf(buffer, "Process %2d", this->id);
+    return buffer;
 }
 
-void PCB_SystemWideTick(PCB* this) {
-    //    printf("Doing PCB TICK\n");
+void PCB_SystemWideTick(PCB* this, Logger* logs, bool inDevice) {
+    logs->log(logs, LogLevel_FINE, "\t\t\tDoing PCB TICK\n");
     switch (this->state) {
         case PCB_WAITING:
-            this->waiting_time++;
+            this->turnaround_time++;
+            if (!inDevice) {
+                this->waiting_time++;
+            }
             break;
         case PCB_RUNNING:
-            this->running_time++;
+            this->turnaround_time++;
             BurstNode* bn = BurstNode_deque_peekF(&this->schedule);
             bn->duration--;
             if (bn->duration == 0) {
@@ -44,10 +49,10 @@ void PCB_SystemWideTick(PCB* this) {
             }
             break;
         default:
-            //            printf("==============NO TICK!=================\n");
+            logs->log(logs, LogLevel_WARNING, "==============NO TICK!=================\n");
             break;
     };
-//    nanosleep((struct timespec[]){{0, 62500000}}, NULL);
+    //    nanosleep((struct timespec[]){{0, 62500000}}, NULL);
 }
 
 void PCB_checkProcessTermination(PCB* this) {

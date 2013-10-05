@@ -32,10 +32,10 @@ void DeviceDescriptor_destruct(DeviceDescriptor* this);
 
 PCB* DD_hasBurstEndedProcess(DeviceDescriptor * this);
 
-void DD_enqueueProcess(DeviceDescriptor * this, PCB* process);
-void DD_tryActivateDevice(DeviceDescriptor * this);
-void DD_SystemWideTick(DeviceDescriptor * this);
-void DD_printQueue(DeviceDescriptor * this);
+void DD_enqueueProcess(DeviceDescriptor * this, PCB* process, Logger* logs);
+void DD_tryActivateDevice(DeviceDescriptor * this, Logger* logs);
+void DD_SystemWideTick(DeviceDescriptor * this, Logger* logs);
+void DD_printQueue(DeviceDescriptor * this, Logger* logs);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 
