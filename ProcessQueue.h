@@ -37,7 +37,7 @@ void PQ_stopRunningProcess(ProcessQueue * this, Logger* logs);
 void PQ_startWaitingProcess(ProcessQueue * this, Logger* logs);
 void PQ_enqueueProcess(ProcessQueue * this, PCB* process, Logger* logs);
 
-void PQ_printQueue(ProcessQueue * this, Logger* logs);
+void PQ_printQueue(ProcessQueue * this, Logger* logs, enum LogLevel level);
 
 
 

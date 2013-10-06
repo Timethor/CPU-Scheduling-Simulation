@@ -6,10 +6,6 @@
 #include <string.h>
 #include "ProcessControlBlockList.h"
 
-//#define DEBUG
-#include "debug.h"
-#include "ProcessQueueList.h"
-
 PCB* PCB_init(int id) {
     PCB* process = malloc(sizeof (*process));
     process->id = id;
@@ -22,6 +18,7 @@ PCB* PCB_init(int id) {
 }
 
 void PCB_destruct(PCB* this) {
+    BurstNode_deque_freeElements(&this->schedule);
     free(this);
 }
 
@@ -52,7 +49,6 @@ void PCB_SystemWideTick(PCB* this, Logger* logs, bool inDevice) {
             logs->log(logs, LogLevel_WARNING, "==============NO TICK!=================\n");
             break;
     };
-    //    nanosleep((struct timespec[]){{0, 62500000}}, NULL);
 }
 
 void PCB_checkProcessTermination(PCB* this) {

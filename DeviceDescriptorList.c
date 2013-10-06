@@ -42,14 +42,14 @@ void DeviceDescriptor_deque_SystemWideTick(DeviceDescriptor_deque* this, Logger*
     }
 }
 
-void DeviceDescriptor_deque_print(DeviceDescriptor_deque* this, Logger* logs) {
+void DeviceDescriptor_deque_print(DeviceDescriptor_deque* this, Logger* logs, enum LogLevel level) {
     DeviceDescriptor_dequeI it;
     DeviceDescriptor_dequeI_init(&it, this);
     while (true) {
         DeviceDescriptor* dd = DeviceDescriptor_dequeI_examine(&it);
         if (dd == NULL)
             break;
-        DD_printQueue(dd, logs);
+        DD_printQueue(dd, logs, level);
         if (DeviceDescriptor_dequeI_next(&it) == NULL)
             break;
     }

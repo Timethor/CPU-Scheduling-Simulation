@@ -62,7 +62,7 @@ void DD_SystemWideTick(DeviceDescriptor* this, Logger* logs) {
     }
 }
 
-void DD_printQueue(DeviceDescriptor* this, Logger* logs) {
+void DD_printQueue(DeviceDescriptor* this, Logger* logs, enum LogLevel level) {
     if (this == NULL) {
         logs->log(logs, LogLevel_INFO, "Can't print null queue\n");
         return;
@@ -87,5 +87,5 @@ void DD_printQueue(DeviceDescriptor* this, Logger* logs) {
         }
     }
     strcat(buffer, "]\n");
-    logs->log(logs, LogLevel_INFO, buffer);
+    logs->log(logs, level, buffer);
 }

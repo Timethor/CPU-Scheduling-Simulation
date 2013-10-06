@@ -53,3 +53,7 @@ FileReader* FileReader_init(SimulationState* istate) {
     fr->readLines = FR_read_lines;
     return fr;
 }
+
+void FileReader_destruct(FileReader* this){
+    free(this);
+}

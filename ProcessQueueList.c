@@ -24,14 +24,14 @@ void ProcessQueue_deque_ProcArrival(ProcessQueue_deque* this, PCB* process, Logg
     PQ_enqueueProcess(queue, process, logs);
 }
 
-void ProcessQueue_deque_print(ProcessQueue_deque* this, Logger* logs) {
+void ProcessQueue_deque_print(ProcessQueue_deque* this, Logger* logs, enum LogLevel level) {
     ProcessQueue_dequeI it;
     ProcessQueue_dequeI_init(&it, this);
     while (true) {
         ProcessQueue* pq = ProcessQueue_dequeI_examine(&it);
         if (pq == NULL)
             break;
-        PQ_printQueue(pq, logs);
+        PQ_printQueue(pq, logs, level);
         if (ProcessQueue_dequeI_next(&it) == NULL)
             break;
     }

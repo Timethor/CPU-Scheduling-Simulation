@@ -35,7 +35,7 @@ PCB* DD_hasBurstEndedProcess(DeviceDescriptor * this);
 void DD_enqueueProcess(DeviceDescriptor * this, PCB* process, Logger* logs);
 void DD_tryActivateDevice(DeviceDescriptor * this, Logger* logs);
 void DD_SystemWideTick(DeviceDescriptor * this, Logger* logs);
-void DD_printQueue(DeviceDescriptor * this, Logger* logs);
+void DD_printQueue(DeviceDescriptor * this, Logger* logs, enum LogLevel level);
 
 #endif	/* DEVICEDESCRIPTOR_H */
 

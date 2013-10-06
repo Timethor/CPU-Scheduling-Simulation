@@ -22,6 +22,8 @@ typedef struct VirtualCPU {
     PCB_deque terminated;
     Settings* settings;
     bool (*doClockCycle)(struct VirtualCPU *, PCB_deque*);
+    int (*getAvgTurnAroundTime)(struct VirtualCPU*);
+    int (*getAvgWaitingTime)(struct VirtualCPU*);
 } VirtualCPU;
 
 //>>	== PUBLIC FUNCTION PROTO ==    <<//

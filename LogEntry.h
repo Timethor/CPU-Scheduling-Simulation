@@ -26,12 +26,10 @@ enum LogLevel {
 typedef struct LogEntry {
     char* entry;
     enum LogLevel level;
-    bool tToConsole;
-    bool toFile;
 } LogEntry;
 
 //>>	Construct / Destruct
-LogEntry* LogEntry_init(char* entry, enum LogLevel level, bool logtoConsole, bool logtoFile);
+LogEntry* LogEntry_init(char* entry, enum LogLevel level);
 void LogEntry_destruct(LogEntry * this);
 
 #endif	/* LOGENTRY_H */

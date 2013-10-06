@@ -17,6 +17,7 @@
 typedef struct Settings{
     char* jobInputName;
     char* jobOutputName;
+    bool optfileProvided;
     Logger* logger;
 } Settings;
 

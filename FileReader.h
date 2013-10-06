@@ -29,7 +29,8 @@ typedef struct FileReader {
 } FileReader;
 
 FileReader* FileReader_init(SimulationState* istate);
-int FR_read_lines(FileReader* this, Settings* settings, SimulationState* cpu);
+int FR_read_lines(FileReader * this, Settings* settings, SimulationState* cpu);
+void FileReader_destruct(FileReader * this);
 
 #endif	/* FILEREADER_H */
 

@@ -109,7 +109,7 @@ void PQ_enqueueProcess(ProcessQueue* this, PCB* process, Logger* logs) {
     }
 }
 
-void PQ_printQueue(ProcessQueue* this, Logger* logs) {
+void PQ_printQueue(ProcessQueue* this, Logger* logs, enum LogLevel level) {
     if (this == NULL) {
         logs->log(logs, LogLevel_WARNING, "Cant print null queue\n");
         return;
@@ -139,7 +139,7 @@ void PQ_printQueue(ProcessQueue* this, Logger* logs) {
         }
     }
     strcat(buffer, "]\n");
-    logs->log(logs, LogLevel_INFO, buffer);
+    logs->log(logs, level, buffer);
 }
 
 PCB* PQ_getQuantumViolator(ProcessQueue* this) {

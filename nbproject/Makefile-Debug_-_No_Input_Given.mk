@@ -23,7 +23,7 @@ AS=as
 # Macros
 CND_PLATFORM=GNU-Linux-x86
 CND_DLIB_EXT=so
-CND_CONF=Debug
+CND_CONF=Debug_-_No_Input_Given
 CND_DISTDIR=dist
 CND_BUILDDIR=build
 

@@ -28,8 +28,8 @@ typedef struct FileWriter {
     int (*writeLines)(struct FileWriter*, Settings*, SimulationState*);
 } FileWriter;
 
-FileWriter* FileReader_init(SimulationState* istate);
-int FW_write_lines(FileWriter* this, Settings* settings, SimulationState* cpu);
+FileWriter* FileWriter_init(SimulationState* istate);
+int FW_write_lines(Settings* settings, char* textToWrite);
 
 #endif	/* FILEWRITER_H */
 

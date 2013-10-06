@@ -19,6 +19,14 @@
                     <name>Release</name>
                     <type>1</type>
                 </confElem>
+                <confElem>
+                    <name>Debug_-_No_Output_Given</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>Debug_-_No_Input_Given</name>
+                    <type>1</type>
+                </confElem>
             </confList>
         </data>
     </configuration>

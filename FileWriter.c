@@ -1,55 +1,76 @@
 #include "FileWriter.h"
 
-int FW_write_lines(FileWriter* this, Settings* settings, SimulationState* istate) {
-    //>>	
-    struct stat fs;
-    char *buf, *buf_end;
-    char *begin, *end, c;
-    int fd = settings->logger->outputHandle;
+int FW_write_lines(Settings* settings, char* textToWrite) {
+    size_t bytesWritten = 0;
+    int my_offset = 0;
+    int fd1;
+    int PageSize;
+    void *address;
+    fd1 = open(settings->jobOutputName,
+            (O_CREAT | O_TRUNC | O_RDWR),
+            (S_IRWXU | S_IRWXG | S_IRWXO));
+    if (fd1 < 0)
+        perror("open() error");
+    else {
 
-    if (fstat(fd, &fs) == -1) {
-        err(1, "stat: %s", settings->jobInputName);
-        return false;
-    }
-
-    buf = mmap(0, fs.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if (buf == (void*) - 1) {
-        err(1, "mmap: %s", settings->jobInputName);
-        close(fd);
-        return false;
-    }
-
-    buf_end = buf + fs.st_size;
-
-    begin = end = buf;
-    //>>	Main loop for each line in file
-    while (!istate->error_thrown) {
-        if (!(*end == '\r' || *end == '\n')) {
-            if (++end < buf_end) continue;
-        } else if (1 + end < buf_end) {
-            /* see if we got "\r\n" or "\n\r" here */
-            c = *(1 + end);
-            if ((c == '\r' || c == '\n') && c != *end)
-                ++end;
+        bytesWritten = write(fd1, textToWrite, strlen(textToWrite));
+        if (bytesWritten != strlen(textToWrite)) {
+            perror("write() error");
+            int closeRC = close(fd1);
+            return -1;
         }
-        /* call the call back and check error indication. Announce
-           error here, because we didn't tell call_back the file name */
-        //memset(r, 32, sizeof (r) - 1);
-        this->call_back(istate, begin, end);
+        //
+        //        PageSize = (int) sysconf(_SC_PAGESIZE);
+        //        if (PageSize < 0) {
+        //            perror("sysconf() error");
+        //        } else {
+        //
+        //            off_t lastoffset = lseek(fd1, PageSize - 1, SEEK_SET);
+        //            if (lastoffset < 0) {
+        //                perror("lseek() error");
+        //            } else {
+        //                bytesWritten = write(fd1, " ", 1); /* grow file 1 to 1 page. */
+        //
+        //                int len;
+        //
+        //                my_offset = 0;
+        //                len = settings->logger->filesize;
+        //                address = mmap(NULL,
+        //                        len,
+        //                        PROT_READ,
+        //                        MAP_SHARED,
+        //                        fd1,
+        //                        my_offset);
+        //                if (address != MAP_FAILED) {
+        //                    /* print data from file 1 */
+        //                    printf("\n%s", address);
+        //                } else {
+        //                    perror("munmap() error=");
+        //                }
+        //                /*
+        //                 *  Unmap two pages.
+        //                 */
+        //                if (munmap(address, 2 * PageSize) < 0) {
+        //                    perror("munmap() error");
+        //                } else;
+        //
+        //            }
+        //        }
 
-        if ((begin = ++end) >= buf_end)
-            break;
+        close(fd1);
+        //        unlink("tmp/mmaptest1");
     }
-
-    munmap(buf, fs.st_size);
-    close(fd);
-    if (istate->error_thrown) return false;
-    return true;
+    /*
+     *  Unmap two pages.
+     */
+    if (munmap(address, strlen(textToWrite)) < 0) {
+        perror("munmap() error");
+    } else;
 }
 
 FileWriter* FileWriter_init(SimulationState* istate) {
     FileWriter* fw = malloc(sizeof (*fw));
-    fw->call_back = istate->call_back_write;
-    fw->writeLines = FW_write_lines;
+    //    fw->call_back = istate->call_back_write;
+    //    fw->writeLines = FW_write_lines;
     return fw;
 }

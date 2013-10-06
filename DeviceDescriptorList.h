@@ -20,7 +20,7 @@ DeviceDescriptor* DeviceDescriptor_deque_getDeviceId(DeviceDescriptor_deque * th
 
 void DeviceDescriptor_deque_ProcArrival(DeviceDescriptor_deque * this, PCB* process, Logger* logs);
 void DeviceDescriptor_deque_SystemWideTick(DeviceDescriptor_deque * this, Logger* logs);
-void DeviceDescriptor_deque_print(DeviceDescriptor_deque * this, Logger* logs);
+void DeviceDescriptor_deque_print(DeviceDescriptor_deque * this, Logger* logs, enum LogLevel level);
 
 #endif	/* DEVICEDESCRIPTORLIST_H */
 
