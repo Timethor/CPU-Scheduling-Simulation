@@ -10,6 +10,10 @@
 
 #include "LogEntryList.h"
 
+//>>	The most unorganized portion of the code. If it was needed, and didn't
+//>>	have a place it kind of went here, not my proudest moments but it works.
+//>>	Some of these could have actually been put in the SimulationState struct
+//>>	but it was getting cluttered so here it is!
 typedef struct Logger {
     int inputHandle;
     int outputHandle;

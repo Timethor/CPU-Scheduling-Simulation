@@ -10,24 +10,21 @@ void VCPU_MergeWithInputState(VirtualCPU * this, SimulationState* istate);
 bool VCPU_canEnd(VirtualCPU * this);
 bool VCPU_checkDeviceQueuesClear(VirtualCPU * this);
 bool VCPU_doClockCycle(VirtualCPU * this, PCB_deque* notYetArrived);
-
 ProcessQueue* VCPU_getHighestWaitingProcessQueue(VirtualCPU * this);
 ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU * this);
-
-
-int VCPU_getAverageTurnaroundTime(VirtualCPU* this);
-int VCPU_getAverageWaitingTime(VirtualCPU* this);
-
 void VCPU_doPreemptProcess(VirtualCPU * this);
 void VCPU_doCheckProcessStateChange(VirtualCPU * this);
 void VCPU_doProcessArrivingProcesses(VirtualCPU * this, PCB_deque* notYetArrived);
 void VCPU_doDispatcherProcessing(VirtualCPU * this);
-    void VCPU_doCPUDispatcherProcessing(VirtualCPU * this);
-    void VCPU_doIODispatcherProcessing(VirtualCPU * this);
-
+void VCPU_doCPUDispatcherProcessing(VirtualCPU * this);
+void VCPU_doIODispatcherProcessing(VirtualCPU * this);
 void VCPU_doSystemWideTick(VirtualCPU * this);
-
 void VCPU_doPrintQueues(VirtualCPU * this, enum LogLevel level);
+int VCPU_getAverageTurnaroundTime(VirtualCPU* this);
+int VCPU_getAverageWaitingTime(VirtualCPU* this);
+
+
+//>>	== See Note in Report about _init and _destruct ==    <<//
 
 VirtualCPU* VirtualCPU_init(SimulationState* istate, Settings* settings) {
     VirtualCPU* this = malloc(sizeof (*this));
@@ -51,6 +48,14 @@ void VirtualCPU_destruct(VirtualCPU* this) {
     free(this);
 }
 
+//>>	=== Utility Functions, the lot of them. === <<//
+
+/**
+ * Utility function for transferring the simulation state queues that were read
+ * from the input file over to the VCPU queue-deque.
+ * Prints a small report that can be seen by using `-v 4` or above on the 
+ * command line
+ */
 void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     void(*LogPrintf) (Logger*, enum LogLevel, const char*, ...) = this->settings->logger->log;
     int i;
@@ -68,6 +73,10 @@ void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, LogLevel_CONFIG);
 }
 
+/**
+ * Iterates of the DD_deque until it finds an instance of a non-clear queue
+ * otherwise returning true
+ */
 bool VCPU_checkDeviceQueuesClear(VirtualCPU* this) {
     DeviceDescriptor_dequeI ddI;
     DeviceDescriptor_dequeI_init(&ddI, &this->devices);
@@ -81,6 +90,44 @@ bool VCPU_checkDeviceQueuesClear(VirtualCPU* this) {
     return clear;
 }
 
+/**
+ * Gets and returns the Highest priority WAITING Process in the queues
+ */
+ProcessQueue* VCPU_getHighestWaitingProcessQueue(VirtualCPU* this) {
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
+    while (current != NULL) {
+        if (PQ_hasWaitingProcess(current))
+
+            return current;
+        current = ProcessQueue_dequeI_next(&pqI);
+    }
+    return NULL;
+}
+
+/**
+ * Gets and returns the Highest priority RUNNING Process in the queues
+ */
+ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU* this) {
+    ProcessQueue_dequeI pqI;
+    ProcessQueue_dequeI_init(&pqI, &this->queues);
+    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
+    while (current != NULL) {
+        if (PQ_hasRunningProcess(current))
+
+            return current;
+        current = ProcessQueue_dequeI_next(&pqI);
+    }
+    return NULL;
+}
+
+/**
+ * Determines if the simulation is over by finding out if there are any queues
+ * that still have processes, if the ready queues are empty and determines if
+ * the device queues are clear. Ultimately, if all queues are empty, true is
+ * returned, else false;
+ */
 bool VCPU_canEnd(VirtualCPU* this) {
     ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
     ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
@@ -89,7 +136,21 @@ bool VCPU_canEnd(VirtualCPU* this) {
     }
     return VCPU_checkDeviceQueuesClear(this);
 }
+/**
+ * Convenience function, prints all Ready Queues in the PQ_deque, then the same 
+ * for the DD_deque
+ */
+void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
+    ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
+    DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
+}
 
+//>>	=== The Bread & butter ==   <<//
+
+/**
+ * Every `tick` the 5 stages are called and in these, the CPU functions as
+ * designated.
+ */
 bool VCPU_doClockCycle(VirtualCPU* this, PCB_deque* notYetArrived) {
     this->settings->logger->clockHasChanged = true;
     this->settings->logger->currentClock = this->clockTime;
@@ -104,35 +165,9 @@ bool VCPU_doClockCycle(VirtualCPU* this, PCB_deque* notYetArrived) {
     VCPU_doDispatcherProcessing(this);
     //>>	Do a system wide tick for all nodes in all queues
     VCPU_doSystemWideTick(this);
+
     //>>	Check if we are done
-
     return !VCPU_canEnd(this);
-}
-
-ProcessQueue* VCPU_getHighestWaitingProcessQueue(VirtualCPU* this) {
-    ProcessQueue_dequeI pqI;
-    ProcessQueue_dequeI_init(&pqI, &this->queues);
-    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
-    while (current != NULL) {
-        if (PQ_hasWaitingProcess(current))
-
-            return current;
-        current = ProcessQueue_dequeI_next(&pqI);
-    }
-    return NULL;
-}
-
-ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU* this) {
-    ProcessQueue_dequeI pqI;
-    ProcessQueue_dequeI_init(&pqI, &this->queues);
-    ProcessQueue* current = ProcessQueue_dequeI_examine(&pqI);
-    while (current != NULL) {
-        if (PQ_hasRunningProcess(current))
-
-            return current;
-        current = ProcessQueue_dequeI_next(&pqI);
-    }
-    return NULL;
 }
 
 /*
@@ -175,11 +210,6 @@ void VCPU_doPreemptProcess(VirtualCPU* this) {
     }
 }
 
-void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
-    ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
-    DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
-}
-
 /*
  *  For each processQueue
  *      check for PCB with state == PCB_BURST_FINISHED
@@ -190,6 +220,8 @@ void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
  *          do ProcessQueue_deque_ProcArrival()
  */
 void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
+    //>>	Process queue state change checks, If we find a burst that has 
+    //>>	completed, send it to it's next queue destination
     ProcessQueue_dequeI pqI;
     ProcessQueue_dequeI_init(&pqI, &this->queues);
     ProcessQueue* currentPQ = ProcessQueue_dequeI_examine(&pqI);
@@ -214,6 +246,8 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
         currentPQ = ProcessQueue_dequeI_next(&pqI);
     }
 
+    //>>	Device queue state change checks, If we find a burst that has 
+    //>>	completed, send it to it's next queue destination
     DeviceDescriptor_dequeI ddI;
     DeviceDescriptor_dequeI_init(&ddI, &this->devices);
     DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
@@ -240,8 +274,12 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
     }
 }
 
+/**
+ * Interestingly enough, a process can start with a I/O burst instead of the CPU
+ * burst required in the spec. Options! Options! Options! b/c it wasn't that hard
+ * to add and was fun to experiment with...
+ */
 void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived) {
-
     while (!PCB_deque_empty(notYetArrived) && PCB_deque_peekF(notYetArrived)->arrival_time == this->clockTime) {
         PCB* requester = PCB_deque_pollF(notYetArrived);
 
@@ -253,6 +291,7 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
             if (front != NULL && running != NULL && front->id < running->id) {
                 PQ_stopRunningProcess(running, this->settings->logger);
             }
+            //>>	END Preempt any running process in lower queues
             VCPU_doPrintQueues(this, LogLevel_INFO);
         } else if (BurstNode_deque_peekF(&requester->schedule)->type == BT_IO) {
             DeviceDescriptor_deque_ProcArrival(&this->devices, requester, this->settings->logger);
@@ -262,7 +301,7 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
 }
 
 /*
- *  Can we find a queue that is running?
+ *  Can we find a ready queue that is running?
  *      yes: no need to dispatch
  *      no: can we find a queue that is waiting?
  *          yes: try to start it
@@ -279,11 +318,11 @@ void VCPU_doDispatcherProcessing(VirtualCPU * this) {
     VCPU_doCPUDispatcherProcessing(this);
     VCPU_doIODispatcherProcessing(this);
 }
-
+/**
+ * If no queues are running processes, get the highest priority queue and start 
+ * its first process
+ */
 void VCPU_doCPUDispatcherProcessing(VirtualCPU * this) {
-
-    //>>	If no queues are running processes, get the highest priority queue 
-    //>>	and start its first process
     if (VCPU_getHighestRunningProcessQueue(this) == NULL) {
         ProcessQueue_dequeI pqI;
         ProcessQueue_dequeI_init(&pqI, &this->queues);
@@ -297,9 +336,10 @@ void VCPU_doCPUDispatcherProcessing(VirtualCPU * this) {
     }
 }
 
+/**
+ * For each Device, if it is not busy, get it working!
+ */
 void VCPU_doIODispatcherProcessing(VirtualCPU * this) {
-
-    //>>	For each Device, if !busy, get it working
     DeviceDescriptor_dequeI ddI;
     DeviceDescriptor_dequeI_init(&ddI, &this->devices);
     DeviceDescriptor* current = DeviceDescriptor_dequeI_examine(&ddI);
@@ -309,12 +349,20 @@ void VCPU_doIODispatcherProcessing(VirtualCPU * this) {
     }
 }
 
+/**
+ * Pulse the PCB's in all queues and incr the VCPU clock counter
+ */
 void VCPU_doSystemWideTick(VirtualCPU * this) {
     this->clockTime++;
     ProcessQueue_deque_SystemWideTick(&this->queues, this->settings->logger);
     DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
 }
 
+/**
+ * Calculates the Average Turnaround time of the simulation based on the time
+ * tracked by the individual PCB's that have terminated (which should be all of
+ * them at this point...)
+ */
 int VCPU_getAverageTurnaroundTime(VirtualCPU* this) {
     PCB_dequeI it;
     PCB_dequeI_init(&it, &this->terminated);
@@ -329,6 +377,11 @@ int VCPU_getAverageTurnaroundTime(VirtualCPU* this) {
     return ta / num;
 }
 
+/**
+ * Calculates the Average Waiting time of the simulation based on the time
+ * tracked by the individual PCB's that have terminated (which should be all of
+ * them at this point...)
+ */
 int VCPU_getAverageWaitingTime(VirtualCPU* this) {
     PCB_dequeI it;
     PCB_dequeI_init(&it, &this->terminated);

@@ -11,6 +11,9 @@
 #include <limits.h>
 #include <stdbool.h>
 
+
+//>>	This is a very rudimentary mockery of the Java.util.logging.level
+//>>	LogLevels ... it works, that's all that counts xD
 enum LogLevel {
     LogLevel_ALL = INT_MIN,
     LogLevel_FINEST = 300,
