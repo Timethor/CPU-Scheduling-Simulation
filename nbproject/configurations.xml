@@ -63,92 +63,6 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
-      <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>default</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
-      </toolsSet>
-      <compileType>
-        <cTool>
-          <standard>3</standard>
-          <commandLine>-ggdb</commandLine>
-        </cTool>
-      </compileType>
-      <item path=".gitignore" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="BurstNodeList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNodeList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Deque.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptorList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptorList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="FileReader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="FileReader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="FileWriter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="FileWriter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LogEntry.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LogEntry.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LogEntryList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LogEntryList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Logger.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Logger.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlockList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlockList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueueList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueueList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Settings.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Settings.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-    </conf>
     <conf name="Release" type="1">
       <toolsSet>
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
@@ -158,20 +72,36 @@
       </toolsSet>
       <compileType>
         <cTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
           <standard>3</standard>
-          <commandLine>-std=c99</commandLine>
+          <warningLevel>3</warningLevel>
         </cTool>
         <ccTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
+          <warningLevel>3</warningLevel>
         </ccTool>
         <fortranCompilerTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <warningLevel>3</warningLevel>
         </fortranCompilerTool>
         <asmTool>
-          <developmentMode>5</developmentMode>
+          <developmentMode>6</developmentMode>
         </asmTool>
       </compileType>
+      <packaging>
+        <packType>Tar</packType>
+        <verbose>false</verbose>
+        <packFileList>
+          <packFileListElem type="File"
+                            to="${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}"
+                            from="${OUTPUT_PATH}"
+                            perm="755"
+                            owner="root"
+                            group="bin"/>
+        </packFileList>
+      </packaging>
       <item path=".gitignore" ex="false" tool="3" flavor2="0">
       </item>
       <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
@@ -245,7 +175,7 @@
       <item path="procA.list" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
-    <conf name="Debug_-_No_Output_Given" type="1">
+    <conf name="Debug" type="1">
       <toolsSet>
         <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
@@ -254,95 +184,21 @@
       </toolsSet>
       <compileType>
         <cTool>
+          <developmentMode>5</developmentMode>
           <standard>3</standard>
           <commandLine>-ggdb</commandLine>
+          <warningLevel>2</warningLevel>
         </cTool>
-      </compileType>
-      <item path=".gitignore" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="BurstNodeList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="BurstNodeList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Deque.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptor.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="DeviceDescriptorList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="DeviceDescriptorList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="FileReader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="FileReader.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="FileWriter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="FileWriter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LineInterpreter.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LineInterpreter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LogEntry.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LogEntry.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="LogEntryList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="LogEntryList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Logger.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Logger.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlock.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessControlBlockList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessControlBlockList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueue.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueue.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="ProcessQueueList.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="ProcessQueueList.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="Settings.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="Settings.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="VirtualCpu.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="VirtualCpu.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="procA.list" ex="false" tool="3" flavor2="0">
-      </item>
-    </conf>
-    <conf name="Debug_-_No_Input_Given" type="1">
-      <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
-        <compilerSet>default</compilerSet>
-        <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
-      </toolsSet>
-      <compileType>
-        <cTool>
-          <standard>3</standard>
+        <ccTool>
           <commandLine>-ggdb</commandLine>
-        </cTool>
+          <warningLevel>2</warningLevel>
+        </ccTool>
+        <fortranCompilerTool>
+          <warningLevel>2</warningLevel>
+        </fortranCompilerTool>
+        <asmTool>
+          <warningLevel>2</warningLevel>
+        </asmTool>
       </compileType>
       <item path=".gitignore" ex="false" tool="3" flavor2="0">
       </item>

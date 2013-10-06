@@ -58,8 +58,8 @@ OBJECTFILES= \
 CFLAGS=-ggdb
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-ggdb
+CXXFLAGS=-ggdb
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -81,87 +81,87 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator: ${OBJECTFILE
 ${OBJECTDIR}/BurstNode.o: BurstNode.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNode.o BurstNode.c
 
 ${OBJECTDIR}/BurstNodeList.o: BurstNodeList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNodeList.o BurstNodeList.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/BurstNodeList.o BurstNodeList.c
 
 ${OBJECTDIR}/DeviceDescriptor.o: DeviceDescriptor.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptor.o DeviceDescriptor.c
 
 ${OBJECTDIR}/DeviceDescriptorList.o: DeviceDescriptorList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptorList.o DeviceDescriptorList.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/DeviceDescriptorList.o DeviceDescriptorList.c
 
 ${OBJECTDIR}/FileReader.o: FileReader.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileReader.o FileReader.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileReader.o FileReader.c
 
 ${OBJECTDIR}/FileWriter.o: FileWriter.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileWriter.o FileWriter.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/FileWriter.o FileWriter.c
 
 ${OBJECTDIR}/LineInterpreter.o: LineInterpreter.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LineInterpreter.o LineInterpreter.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LineInterpreter.o LineInterpreter.c
 
 ${OBJECTDIR}/LogEntry.o: LogEntry.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LogEntry.o LogEntry.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LogEntry.o LogEntry.c
 
 ${OBJECTDIR}/LogEntryList.o: LogEntryList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LogEntryList.o LogEntryList.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/LogEntryList.o LogEntryList.c
 
 ${OBJECTDIR}/Logger.o: Logger.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Logger.o Logger.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Logger.o Logger.c
 
 ${OBJECTDIR}/ProcessControlBlock.o: ProcessControlBlock.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlock.o ProcessControlBlock.c
 
 ${OBJECTDIR}/ProcessControlBlockList.o: ProcessControlBlockList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlockList.o ProcessControlBlockList.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessControlBlockList.o ProcessControlBlockList.c
 
 ${OBJECTDIR}/ProcessQueue.o: ProcessQueue.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueue.o ProcessQueue.c
 
 ${OBJECTDIR}/ProcessQueueList.o: ProcessQueueList.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueueList.o ProcessQueueList.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/ProcessQueueList.o ProcessQueueList.c
 
 ${OBJECTDIR}/Settings.o: Settings.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Settings.o Settings.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Settings.o Settings.c
 
 ${OBJECTDIR}/VirtualCpu.o: VirtualCpu.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/VirtualCpu.o VirtualCpu.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
 
 # Subprojects
 .build-subprojects:
