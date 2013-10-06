@@ -5,6 +5,13 @@
 
 #include "LineInterpreter.h"
 
+/**
+ * Handles the allocation of Simulation State `object`s
+ * _deque_ functions are declared via macros within the DEQUE.h
+ * Sets up the three deques along with some function pointers and other
+ * state data for processing the simulation file format
+ */
+ 
 SimulationState* SimulationState_init() {
     SimulationState* this = malloc(sizeof (*this));
     this->in_comment = false;
@@ -18,6 +25,7 @@ SimulationState* SimulationState_init() {
     this->bn = NULL;
     return this;
 }
+
 
 void SimulationState_destruct(SimulationState* this) {
     free(this->bn);
@@ -112,7 +120,7 @@ bool SS_processLineForProcessSchedule(SimulationState* this, char* line) {
         //>>	this venal and virulent vermin to no avail. The only verdict is 
         //>>	vengeance; a vendetta, held as a votive, probably in vain, for 
         //>>	the value and veracity of such shall one day vindicate the vigilant
-        //>>	and the virtuous.
+        //>>	and the virtuous from the vexation it provides.
         this->bn = BurstNode_init();
     }
     if (found != -1) {
