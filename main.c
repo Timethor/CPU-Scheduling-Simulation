@@ -16,6 +16,8 @@
 #include "VirtualCpu.h"
 #include "FileWriter.h"
 
+void output(Settings* set);
+
 /**
  * Due to the generic nature in which this programs input parsing was written, 
  * this program can handle unique situations outside the specification given for
@@ -49,6 +51,9 @@ int main(int argc, char** argv) {
     //>>	This will read the lines from the file designated in `set` and save 
     //>>	the info in `ss`
     if (!reader->readLines(reader, set, ss)) {
+        Printf(set->logger, LogLevel_SEVERE, "\tRead Failed!\n");
+        Printf(set->logger, LogLevel_SEVERE, "\tCheck your input file. It should have at least rwxr-xr-- permissions \n");
+        output(set);
         return EXIT_FAILURE;
     }
     Printf(set->logger, LogLevel_CONFIG, "\tCompleted Input File Read!\n");
@@ -75,23 +80,14 @@ int main(int argc, char** argv) {
     Printf(set->logger, LogLevel_INFO, "Average Waiting Time    : %5d", cpu->getAvgWaitingTime(cpu));
     Printf(set->logger, LogLevel_INFO, "Average Turnaround Time : %5d\n\n", cpu->getAvgTurnAroundTime(cpu));
 
-    //>>	This function call simultaneously prints the results to console, if
-    //>>	the user doesn`t indicate not to, and returns a huge char* for writing
-    //>>	to file
-    char* toFileText = set->logger->doPrintResults(set->logger);
-    if (!set->optfileProvided) {
-        fprintf(stderr, "\nREMINDER:: Output file not provided, defaulting to %s\n", set->jobOutputName);
-    }
-    //>>	Write the huge char* to file and free it!
-    FW_write_lines(set, toFileText);
-    free(toFileText);
+    output(set);
 
     //>>	These _destruct functions are the opposite of the _init functions...
     //>>	Anything malloc'ed will be free'd, any lists will be emptied and the
     //>>	Associated object type will have it's _destruct function called, and
     //>>	so on until we hit the atom `object`, in most cases this is 
     //>>	the `BurstNode` struct.
-    
+
     SimulationState_destruct(ss);
     FileReader_destruct(reader);
     VirtualCPU_destruct(cpu);
@@ -100,4 +96,19 @@ int main(int argc, char** argv) {
     //>>	has a call to Settings_destruct :D
 
     return EXIT_SUCCESS;
+}
+
+
+//>>	This function simultaneously prints the results to console, if
+//>>	the user doesn`t indicate not to, and returns a huge char* for writing
+//>>	to file
+
+void output(Settings* set) {
+    char* toFileText = set->logger->doPrintResults(set->logger);
+    if (!set->optfileProvided) {
+        fprintf(stderr, "\nREMINDER:: Output file not provided, defaulting to %s\n", set->jobOutputName);
+    }
+    //>>	Write the huge char* to file and free it!
+    FW_write_lines(set, toFileText);
+    free(toFileText);
 }
