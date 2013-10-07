@@ -119,7 +119,7 @@ void LOG_LogStatement(Logger* this, enum LogLevel level, const char* format, ...
             this->clockHasChanged = false;
         } else
             sprintf(formatBuffer2, "%-16s %s", timeBuffer, formatBuffer);
-                printf(formatBuffer2);
+//                printf(formatBuffer2);
         this->filesize += strlen(formatBuffer2) + 5;
         LogEntry* le = LogEntry_init(formatBuffer2, level);
         LogEntry_deque_pushL(&this->records, le);
