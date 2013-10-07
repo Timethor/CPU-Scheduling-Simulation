@@ -29,7 +29,7 @@ typedef struct FileWriter {
 } FileWriter;
 
 FileWriter* FileWriter_init(SimulationState* istate);
-int FW_write_lines(Settings* settings, char* textToWrite);
+void FW_write_lines(Settings* settings, char* textToWrite);
 
 #endif	/* FILEWRITER_H */
 

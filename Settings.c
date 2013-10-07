@@ -10,8 +10,9 @@
 // Printout of how to use the program properly
 
 void printUsage(int argc, char*argv[]) {
-    printf("usage:\n %s [-f] Input_File [Output_File] [-v number]\n", argv[0]);
+    printf("usage:\n %s [-fr] Input_File [Output_File] [-v number]\n", argv[0]);
     printf("\t -f : Run in FileOnly Mode, will not print to console.\n");
+    printf("\t -r : Round Robin Only, a FCFS queue will not be added as the end queue.\n");
     printf("\tInput_File : The file to load scheduler simulation data from\n");
     printf("\tOutput_File : [Optional] The file to save results. Defaults to Input_File.result\n");
     printf("\t -v number: Run in Verbose Mode, 1 to 8, Default: 3, Default -v (no arguments): 4\n");
@@ -36,11 +37,14 @@ Settings* Settings_init(int argc, char *argv[]) {
     }
 
     int c, v = 3;
-    bool fileOnly = false;
-    while ((c = getopt(argc, argv, "fv:")) != -1)
+    bool fileOnly = false, RROnly = false;
+    while ((c = getopt(argc, argv, "frv:")) != -1)
         switch (c) {
             case 'f':
                 fileOnly = true;
+                break;
+            case 'r':
+                RROnly = true;
                 break;
             case 'v':
                 v = strtol(optarg, NULL, 10);
@@ -79,7 +83,7 @@ Settings* Settings_init(int argc, char *argv[]) {
 
     Settings* this = malloc(sizeof (*this));
     if (argv[optind] == NULL) {
-        fprintf(stderr, "Input file needs to be provided.\n", optopt);
+        fprintf(stderr, "Input file needs to be provided.\n");
         exit(EXIT_FAILURE);
     }
     this->jobInputName = argv[optind];
@@ -94,7 +98,7 @@ Settings* Settings_init(int argc, char *argv[]) {
         this->jobOutputName = argv[optind + 1];
     }
     this->logger = Logger_init(this->jobInputName, this->jobOutputName, v, fileOnly);
-
+    this->roundRobinOnly = RROnly;
     return this;
 }
 

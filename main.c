@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     //>>	Malloc and initialize the elements of SimulationState
     //>>	Simulation state holds the majority of the information for parsing
     //>>	the input file. I was done quite generically as stated above.
-    SimulationState* ss = SimulationState_init();
+    SimulationState* ss = SimulationState_init(set);
 
     Printf(set->logger, LogLevel_CONFIG, "=========== INIT  FileReader! ===========\n");
     //>>	Malloc and initialize the elements of ... etc, all _init functions 

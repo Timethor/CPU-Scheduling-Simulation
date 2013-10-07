@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "LineInterpreter.h"
+#include "Settings.h"
 
 /**
  * Handles the allocation of Simulation State `object`s
@@ -11,10 +12,11 @@
  * Sets up the three deques along with some function pointers and other
  * state data for processing the simulation file format
  */
- 
-SimulationState* SimulationState_init() {
+
+SimulationState* SimulationState_init(Settings* settings) {
     SimulationState* this = malloc(sizeof (*this));
     this->in_comment = false;
+    this->addFCFSToEnd = !settings->roundRobinOnly;
     this->stage = FS_TQ;
     this->seen_stage_req = -1;
     this->error_thrown = false;
@@ -25,7 +27,6 @@ SimulationState* SimulationState_init() {
     this->bn = NULL;
     return this;
 }
-
 
 void SimulationState_destruct(SimulationState* this) {
     free(this->bn);
@@ -177,12 +178,14 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
         if (this->stage != FS_PN_SCHEDULE && this->seen_stage_req != -1) {
             if (this->stage == FS_TQ) {
                 ProcessQueue* FCFS = ProcessQueue_deque_peekL(&this->proto_queues);
-                if (FCFS != NULL) {
-                    FCFS = PQ_init_FCFS(FCFS->id + 1);
-                } else {
-                    FCFS = PQ_init_FCFS(1);
+                if (this->addFCFSToEnd) {
+                    if (FCFS != NULL) {
+                        FCFS = PQ_init_FCFS(FCFS->id + 1);
+                    } else {
+                        FCFS = PQ_init_FCFS(1);
+                    }
+                    ProcessQueue_deque_pushL(&this->proto_queues, FCFS);
                 }
-                ProcessQueue_deque_pushL(&this->proto_queues, FCFS);
             }
             this->stage++;
             this->seen_stage_req = -1;

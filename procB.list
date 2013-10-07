@@ -10,8 +10,7 @@ Super Round Robin Policy Comment */
 
 // Single Line Comment
 
-Time Quantum 1: 50
-Time Quantum 2: 70
+Time Quantum 1: 100
 
 Process ID: 1
 Arrival time: 0 
@@ -20,7 +19,7 @@ I/O burst: 200
 I/O device id: 1
 CPU burst: 50
 I/O burst: 120
-I/O device id: 1
+I/O device id: 2
 
 
 Process ID: 2
@@ -30,4 +29,4 @@ I/O burst: 200
 I/O device id: 1
 CPU burst: 80
 I/O burst: 250
-I/O device id: 2
+I/O device id: 1

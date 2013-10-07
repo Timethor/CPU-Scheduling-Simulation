@@ -21,7 +21,11 @@ void ProcessQueue_deque_ProcArrival(ProcessQueue_deque* this, PCB* process, Logg
     }
     logs->log(logs, LogLevel_INFO, "%s requests CPU\n", PCB_toString(process, s));
     ProcessQueue* queue = ProcessQueue_deque_peekF(this);
+    if (queue != NULL){
     PQ_enqueueProcess(queue, process, logs);
+    } else {
+        printf("QUEUE PEEK FAILED, NO QUEUES!!");
+    }
 }
 
 void ProcessQueue_deque_print(ProcessQueue_deque* this, Logger* logs, enum LogLevel level) {

@@ -18,6 +18,7 @@ typedef struct Settings{
     char* jobInputName;
     char* jobOutputName;
     bool optfileProvided;
+    bool roundRobinOnly;
     Logger* logger;
 } Settings;
 

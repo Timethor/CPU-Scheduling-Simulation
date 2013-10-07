@@ -25,6 +25,7 @@ typedef struct SimulationState {
     BurstNode* bn;
     int seen_stage_req;
     bool error_thrown;
+    bool addFCFSToEnd;
     PCB_deque notYetArrived;
     DeviceDescriptor_deque proto_devices;
     ProcessQueue_deque proto_queues;

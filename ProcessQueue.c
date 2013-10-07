@@ -55,6 +55,7 @@ bool PQ_hasRunningProcess(ProcessQueue* this) {
 PCB* PQ_hasBurstEndedProcess(ProcessQueue* this) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL && firstInQueue->state == PCB_BURST_FINISHED) {
+        this->quantumCheck = 0;
         PCB_checkProcessTermination(firstInQueue);
         return PCB_deque_pollF(&this->queue);
     }
@@ -89,7 +90,7 @@ void PQ_stopRunningProcess(ProcessQueue* this, Logger* logs) {
     PCB* firstInQueue = PCB_deque_peekF(&this->queue);
     if (firstInQueue != NULL && firstInQueue->state == PCB_RUNNING) {
         char s[16];
-        logs->log(logs, LogLevel_INFO, "%s is preemptedB\n", PCB_toString(firstInQueue, s));
+        logs->log(logs, LogLevel_INFO, "%s is preempted\n", PCB_toString(firstInQueue, s));
         firstInQueue->state = PCB_WAITING;
     }
 }

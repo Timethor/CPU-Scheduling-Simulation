@@ -58,11 +58,29 @@ void VirtualCPU_destruct(VirtualCPU* this) {
  */
 void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     void(*LogPrintf) (Logger*, enum LogLevel, const char*, ...) = this->settings->logger->log;
+    if (ProcessQueue_deque_length(&istate->proto_queues) == 0) {
+        if (istate->addFCFSToEnd) {
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "=========================================\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| Malformed Input File!                 |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| Running with Single FCFS queue!       |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "=========================================\n");
+        } else {
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "=========================================\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| Malformed Input File! User designated |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| no FCFS queue to be added at end but  |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| no Round Robin declarations found.    |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "| Falling Back to Single FCFS queue!    |\n");
+            LogPrintf(this->settings->logger, LogLevel_WARNING, "=========================================\n");
+        }
+        ProcessQueue* FCFS = PQ_init_FCFS(1);
+        ProcessQueue_deque_pushL(&istate->proto_queues, FCFS);
+    }
     int i;
     for (i = DeviceDescriptor_deque_length(&istate->proto_devices); i > 0; i--) {
         DeviceDescriptor_deque_pushL(&this->devices, DeviceDescriptor_deque_pollF(&istate->proto_devices));
     }
     for (i = ProcessQueue_deque_length(&istate->proto_queues); i > 0; i--) {
+
         ProcessQueue_deque_pushL(&this->queues, ProcessQueue_deque_pollF(&istate->proto_queues));
     }
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "\tPost SYNC-MERGE Status::\n");
@@ -83,6 +101,7 @@ bool VCPU_checkDeviceQueuesClear(VirtualCPU* this) {
     DeviceDescriptor* current = DeviceDescriptor_dequeI_examine(&ddI);
     bool clear = true;
     while (current != NULL && clear == true) {
+
         if (!PCB_deque_empty(&current->queue))
             clear = false;
         current = DeviceDescriptor_dequeI_next(&ddI);
@@ -132,15 +151,18 @@ bool VCPU_canEnd(VirtualCPU* this) {
     ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
     ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
     if (running != NULL || waiting != NULL) {
+
         return false;
     }
     return VCPU_checkDeviceQueuesClear(this);
 }
+
 /**
  * Convenience function, prints all Ready Queues in the PQ_deque, then the same 
  * for the DD_deque
  */
 void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
+
     ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
 }
@@ -167,6 +189,7 @@ bool VCPU_doClockCycle(VirtualCPU* this, PCB_deque* notYetArrived) {
     VCPU_doSystemWideTick(this);
 
     //>>	Check if we are done
+
     return !VCPU_canEnd(this);
 }
 
@@ -195,13 +218,14 @@ void VCPU_doPreemptProcess(VirtualCPU* this) {
         running = ProcessQueue_dequeI_next(&pqI);
         if (movingProcess != NULL) {
             VCPU_doCheckProcessStateChange(this);
-            this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s is preemptedA\n", PCB_toString(movingProcess, s));
+            this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s is preempted\n", PCB_toString(movingProcess, s));
             movingProcess->state = PCB_WAITING;
             if (running != NULL) {
                 this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s is demoted to Ready Queue Q%d\n", PCB_toString(movingProcess, s), running->id);
                 PQ_enqueueProcess(running, movingProcess, this->settings->logger);
             } else {
-                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s is requeued to Ready Queue Q%d\n", PCB_toString(movingProcess, s), running->id);
+
+                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s is requeued to Ready Queue Q%d\n", PCB_toString(movingProcess, s), prev->id);
                 PQ_enqueueProcess(prev, movingProcess, this->settings->logger);
             }
             VCPU_doPrintQueues(this, LogLevel_INFO);
@@ -265,6 +289,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doPrintQueues(this, LogLevel_INFO);
                 VCPU_doCPUDispatcherProcessing(this);
             } else {
+
                 this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
                 PCB_deque_pushL(&this->terminated, requester);
                 VCPU_doPrintQueues(this, LogLevel_INFO);
@@ -294,6 +319,7 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
             //>>	END Preempt any running process in lower queues
             VCPU_doPrintQueues(this, LogLevel_INFO);
         } else if (BurstNode_deque_peekF(&requester->schedule)->type == BT_IO) {
+
             DeviceDescriptor_deque_ProcArrival(&this->devices, requester, this->settings->logger);
             VCPU_doPrintQueues(this, LogLevel_INFO);
         }
@@ -315,9 +341,11 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
  *                  no: set to running state
  */
 void VCPU_doDispatcherProcessing(VirtualCPU * this) {
+
     VCPU_doCPUDispatcherProcessing(this);
     VCPU_doIODispatcherProcessing(this);
 }
+
 /**
  * If no queues are running processes, get the highest priority queue and start 
  * its first process
@@ -328,6 +356,7 @@ void VCPU_doCPUDispatcherProcessing(VirtualCPU * this) {
         ProcessQueue_dequeI_init(&pqI, &this->queues);
         ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
         if (waiting != NULL) {
+
             PQ_startWaitingProcess(waiting, this->settings->logger);
             VCPU_doPrintQueues(this, LogLevel_INFO);
             char s[16];
@@ -344,6 +373,7 @@ void VCPU_doIODispatcherProcessing(VirtualCPU * this) {
     DeviceDescriptor_dequeI_init(&ddI, &this->devices);
     DeviceDescriptor* current = DeviceDescriptor_dequeI_examine(&ddI);
     while (current != NULL) {
+
         DD_tryActivateDevice(current, this->settings->logger);
         current = DeviceDescriptor_dequeI_next(&ddI);
     }
@@ -353,6 +383,7 @@ void VCPU_doIODispatcherProcessing(VirtualCPU * this) {
  * Pulse the PCB's in all queues and incr the VCPU clock counter
  */
 void VCPU_doSystemWideTick(VirtualCPU * this) {
+
     this->clockTime++;
     ProcessQueue_deque_SystemWideTick(&this->queues, this->settings->logger);
     DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
@@ -370,6 +401,7 @@ int VCPU_getAverageTurnaroundTime(VirtualCPU* this) {
     int ta = 0;
     int num = 0;
     while (process != NULL) {
+
         num++;
         ta += process->turnaround_time;
         process = PCB_dequeI_next(&it);
