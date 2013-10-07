@@ -1,3 +1,9 @@
+/* 
+ * File:   LogEntry.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on October 4, 2013, 4:25 PM
+ */
 
 #include <stdlib.h>
 #include <string.h>

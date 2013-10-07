@@ -1,6 +1,6 @@
 /* 
  * File:   Settings.h
- * Author: Timethor
+ * Author: Nicholas `Timethor` Rich     G00399909
  *
  * Created on October 1, 2013, 8:24 AM
  */

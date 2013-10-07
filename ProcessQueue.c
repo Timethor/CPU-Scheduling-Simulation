@@ -1,3 +1,10 @@
+/* 
+ * File:   ProcessQueue.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on September 21, 2013, 11:17 AM
+ */
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>

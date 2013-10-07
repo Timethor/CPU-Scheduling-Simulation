@@ -1,3 +1,9 @@
+/* 
+ * File:   DeviceDescriptor.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on September 21, 2013, 5:58 PM
+ */
 
 #include <stdlib.h>
 #include <string.h>

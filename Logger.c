@@ -1,3 +1,9 @@
+/* 
+ * File:   Logger.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on October 4, 2013, 4:03 PM
+ */
 
 #include <stdlib.h>
 #include <sys/types.h>

@@ -1,3 +1,10 @@
+/* 
+ * File:   FileWriter.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on October 4, 2013, 7:11 PM
+ */
+
 #include "FileWriter.h"
 
 void FW_write_lines(Settings* settings, char* textToWrite) {

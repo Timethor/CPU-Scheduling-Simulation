@@ -1,6 +1,6 @@
 /* 
  * File:   LineInterpreter.h
- * Author: Timethor
+ * Author: Nicholas `Timethor` Rich     G00399909
  *
  * Created on October 1, 2013, 2:18 PM
  */

@@ -1,6 +1,6 @@
 /* 
  * File:   main.c
- * Author: Timethor
+ * Author: Nicholas `Timethor` Rich     G00399909
  *
  * Created on September 20, 2013, 8:45 PM
  */

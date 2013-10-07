@@ -1,3 +1,10 @@
+/* 
+ * File:   ProcessControlBlock.c
+ * Author: Nicholas `Timethor` Rich     G00399909
+ *
+ * Created on September 21, 2013, 11:18 AM
+ */
+
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdarg.h>

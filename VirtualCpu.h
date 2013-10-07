@@ -1,6 +1,6 @@
 /* 
  * File:   VirtualCpu.h
- * Author: Timethor
+ * Author: Nicholas `Timethor` Rich     G00399909
  *
  * Created on September 21, 2013, 11:18 AM
  */
