@@ -13,12 +13,7 @@
 #include "LineInterpreter.h"
 #include "Settings.h"
 
-/**
- * Handles the allocation of Simulation State `object`s
- * _deque_ functions are declared via macros within the DEQUE.h
- * Sets up the three deques along with some function pointers and other
- * state data for processing the simulation file format
- */
+//>>	== See Note in Report about _init and _destruct ==    <<//
 
 SimulationState* SimulationState_init(Settings* settings) {
     SimulationState* this = malloc(sizeof (*this));
@@ -42,6 +37,8 @@ void SimulationState_destruct(SimulationState* this) {
     PCB_deque_freeElements(&this->notYetArrived);
     free(this);
 }
+
+//>>	=== Utility Functions, the lot of them. === <<//
 
 /*
  * Callback function for mmap file read, appropriately sets line_buffer to the value
@@ -79,6 +76,9 @@ int SS_hasSubString(char* line, char* needle) {
     return -1;
 }
 
+/**
+ * Finds out if this line has time quantum in it and processes as needed
+ */
 bool SS_processLineForTimeQuantum(SimulationState* this, char* line) {
     char needle[] = "time quantum ";
     int found = SS_hasSubString(line, needle);
@@ -92,6 +92,9 @@ bool SS_processLineForTimeQuantum(SimulationState* this, char* line) {
     return true;
 }
 
+/**
+ * Finds out if this line has process id: in it and processes as needed
+ */
 bool SS_processLineForNewProcess(SimulationState* this, char* line) {
     char needle[] = "process id: ";
     int found = SS_hasSubString(line, needle);
@@ -107,6 +110,9 @@ bool SS_processLineForNewProcess(SimulationState* this, char* line) {
     return true;
 }
 
+/**
+ * Finds out if this line has arrival time: in it and processes as needed
+ */
 bool SS_processLineForProcessArrival(SimulationState* this, char* line) {
     char needle[] = "arrival time: ";
     int found = SS_hasSubString(line, needle);
@@ -119,6 +125,9 @@ bool SS_processLineForProcessArrival(SimulationState* this, char* line) {
     return true;
 }
 
+/**
+ * Finds out if this line has process schedule data in it and processes as needed
+ */
 bool SS_processLineForProcessSchedule(SimulationState* this, char* line) {
     BurstNode_deque* sched = &PCB_deque_peekL(&this->notYetArrived)->schedule;
     int found = SS_hasCpuBurst(line);
@@ -164,6 +173,8 @@ bool SS_processLineForProcessSchedule(SimulationState* this, char* line) {
     return false;
 }
 
+//>>	=== Helper functions for SS_processLineForProcessSchedule ===   <<//
+
 int SS_hasCpuBurst(char* line) {
     char needle[] = "cpu burst: ";
     return SS_hasSubString(line, needle);
@@ -179,12 +190,19 @@ int SS_hasIODevice(char* line) {
     return SS_hasSubString(line, needle);
 }
 
+/**
+ * If we find an empty line or any type of C comment process as needed
+ */
 bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
     if (SS_isEmptyLine(line)) {
         this->in_comment = false;
+        //>>	We found an empty line where we are not in the schedule stage
+        //>>	and our stage is ready to transition.
         if (this->stage != FS_PN_SCHEDULE && this->seen_stage_req != -1) {
             if (this->stage == FS_TQ) {
                 ProcessQueue* FCFS = ProcessQueue_deque_peekL(&this->proto_queues);
+                //>>	Add a FCFS queue to the end of the list unless the user 
+                //>>	Says not to.
                 if (this->addFCFSToEnd) {
                     if (FCFS != NULL) {
                         FCFS = PQ_init_FCFS(FCFS->id + 1);
@@ -217,6 +235,9 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
     return false;
 }
 
+//>>	=== Helper functions for SS_hasNonProcessableLine ===   <<//
+
+/* and correspond to all types of nonProcessable lines, like comments and empties */
 bool SS_isEmptyLine(char* line) {
     return (line[0] == ' ' || line[0] == '\r' || line[0] == '\n');
 }
