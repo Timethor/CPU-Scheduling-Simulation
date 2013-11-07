@@ -13,7 +13,7 @@ typedef struct AddressSpace {
 } AddressSpace;
 
 //>>	Construct / Destruct
-AddressSpace* AddressSpace_init(int param, enum LogLevel level);
+AddressSpace* AddressSpace_init(int param);
 void AddressSpace_destruct(AddressSpace * this);
 
 #endif	/* ADDRESSSPACE_H */

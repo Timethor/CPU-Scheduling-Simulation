@@ -10,7 +10,7 @@
 
 #include "AddressSpace.h"
 
-AddressSpace* AddressSpace_init(int param, enum LogLevel level) {
+AddressSpace* AddressSpace_init(int param) {
     AddressSpace* this = malloc(sizeof (*this));
     this->param = param;
     return this;

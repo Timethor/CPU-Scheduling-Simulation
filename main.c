@@ -57,7 +57,10 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     Printf(set->logger, LogLevel_CONFIG, "\tCompleted Input File Read!\n");
-
+    
+    
+    return EXIT_SUCCESS;
+    
     Printf(set->logger, LogLevel_CONFIG, "============== INIT V-CPU! ==============\n");
 
     VirtualCPU* cpu = VirtualCPU_init(ss, set);
