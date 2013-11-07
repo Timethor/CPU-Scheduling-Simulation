@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "BurstNodeList.h"
 #include "Logger.h"
+#include "AddressSpaceList.h"
 
 enum PCBState {
     PCB_NEW,
@@ -35,6 +36,8 @@ typedef struct PCB {
     int turnaround_time;
     //>>	A linked list of burstNodes
     BurstNode_deque schedule;
+    //>>	AddressSpace
+    AddressSpace_deque a_space;
 } PCB;
 
 PCB* PCB_init(int id);

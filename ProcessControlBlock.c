@@ -14,17 +14,19 @@
 #include "ProcessControlBlockList.h"
 
 PCB* PCB_init(int id) {
-    PCB* process = malloc(sizeof (*process));
-    process->id = id;
-    process->arrival_time = -1;
-    process->turnaround_time = 0;
-    process->waiting_time = 0;
-    process->state = PCB_NEW;
-    BurstNode_deque_init(&process->schedule, false, false);
-    return process;
+    PCB* this = malloc(sizeof (*this));
+    this->id = id;
+    this->arrival_time = -1;
+    this->turnaround_time = 0;
+    this->waiting_time = 0;
+    this->state = PCB_NEW;
+    AddressSpace_deque_init(&this->a_space, false, false);
+    BurstNode_deque_init(&this->schedule, false, false);
+    return this;
 }
 
 void PCB_destruct(PCB* this) {
+    AddressSpace_deque_freeElements(&this->a_space);
     BurstNode_deque_freeElements(&this->schedule);
     free(this);
 }
