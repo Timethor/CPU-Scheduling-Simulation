@@ -22,9 +22,7 @@ void BurstNode_destruct(BurstNode* this) {
 }
 
 bool BN_fullyFormed(BurstNode* bn) {
-    return (bn->type != BT_NONE) ?
-            (bn->type == BT_CPU ?
-            (bn->duration != BT_NONE ? true : false) :
-            ((bn->duration != BT_NONE && bn->queue_id != BT_NONE) ? true : false)
-            ) : false;
+    return (bn->type == BT_NONE ? false :
+            (bn->duration == BT_NONE ? false :
+            (bn->queue_id == BT_NONE ? false : true)));
 }

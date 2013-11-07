@@ -15,6 +15,7 @@ enum burstType {
     BT_NONE = -1,
     BT_CPU,
     BT_IO,
+    BT_MM,
 };
 
 // Structure of PCB (process control block)
