@@ -151,6 +151,10 @@ bool SS_processLineForPolicyParams(SimulationState * this, char* line) {
     this->stage++;
     //>>	save policy params for MemManager later (MOVE THIS PROP TO MEMMAN)
     this->policyParams = strtol((line + found), NULL, 10);
+    if ((this->policy == MP_VSP || this->policy == MP_SEG) && (this->policyParams < 0 || this->policyParams > 2)) {
+        //>>	Policy param here should only ever be 0,1,2 so error otherwise
+        return false;
+    }//>>	we dont need a check for PAG Policy
     return true;
 }
 
@@ -162,7 +166,7 @@ bool SS_processLineForLifetime(SimulationState * this, char* line) {
         return false;
     this->seen_stage_req = -1;
     this->stage++;
-    
+
     int time = strtol((line + found), NULL, 10);
     if (this->bn == NULL) {
         //>>	Here lies the source of a memory leak. Much has been done to vanquish
@@ -177,7 +181,7 @@ bool SS_processLineForLifetime(SimulationState * this, char* line) {
     BurstNode_deque_pushL(sched, this->bn);
     this->bn = NULL;
     return true;
-    
+
 }
 
 bool SS_processLineForAddressSpace(SimulationState * this, char* line) {
