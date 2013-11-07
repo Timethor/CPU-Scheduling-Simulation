@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   MemoryManager.h
  * Author: Timethor
  *
@@ -8,16 +8,26 @@
 #ifndef MEMORYMANAGER_H
 #define	MEMORYMANAGER_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include <stdbool.h>
 
+#include "DeviceDescriptorList.h"
+#include "ProcessQueueList.h"
+#include "LineInterpreter.h"
+#include "Settings.h"
+#include "MemoryRegionList.h"
 
+typedef struct MemoryManager {
+    enum MemoryPolicy policy;
+    int memKiloSize;
+    int policyParams;
+    MemoryRegion_deque memory;
+} MemoryManager;
 
+//>>	== PUBLIC FUNCTION PROTO ==    <<//
 
-#ifdef	__cplusplus
-}
-#endif
+//>>	Construct & Destruct
+MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params);
+void MemoryManager_destruct(MemoryManager * this);
 
 #endif	/* MEMORYMANAGER_H */
 

@@ -109,11 +109,11 @@ bool SS_processLineForMemorySize(SimulationState * this, char* line, Logger* log
     this->stage = FS_M_MS;
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	save our memory size for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	save our memory size for MemManager later
     this->memKiloSize = strtol((line + found), NULL, 10);
     char memKiloSize[20];
     sprintf(memKiloSize, "%d", this->memKiloSize);
-    logger->log(logger, LogLevel_FINER, "\tSeen Memory Size: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen Memory Size:\t");
     logger->log(logger, LogLevel_FINER, memKiloSize);
     logger->log(logger, LogLevel_FINER, "\n");
     return true;
@@ -127,16 +127,14 @@ bool SS_processLineForMemoryPolicy(SimulationState * this, char* line, Logger* l
     //>>	set the stage
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	Set the policy type for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	Set the policy type for MemManager later
     if (strlen((line + found)) <= 4) {
         SS_determinePolicy(this, (line + found), logger);
     } else {
         return false;
     }
-    char policy[20];
-    sprintf(policy, "%d", this->policy);
-    logger->log(logger, LogLevel_FINER, "\tSeen Memory Management Policy: ");
-    logger->log(logger, LogLevel_FINER, policy);
+    logger->log(logger, LogLevel_FINER, "\tSeen Memory Management Policy:");
+    logger->log(logger, LogLevel_FINER, (this->policy == MP_PAG ? "PAG" : (this->policy == MP_SEG ? "SEG" : (this->policy == MP_VSP ? "VSP" : "INF"))));
     logger->log(logger, LogLevel_FINER, "\n");
     return true;
 }
@@ -149,11 +147,11 @@ bool SS_processLineForPolicyParams(SimulationState * this, char* line, Logger* l
     //>>	set the stage
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	save policy params for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	save policy params for MemManager later
     this->policyParams = strtol((line + found), NULL, 10);
     char policyParams[20];
     sprintf(policyParams, "%d", this->policyParams);
-    logger->log(logger, LogLevel_FINER, "\tSeen Policy Params: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen Policy Params:\t");
     logger->log(logger, LogLevel_FINER, policyParams);
     logger->log(logger, LogLevel_FINER, "\n");
     if ((this->policy == MP_VSP || this->policy == MP_SEG) && (this->policyParams < 0 || this->policyParams > 2)) {
@@ -175,7 +173,7 @@ bool SS_processLineForLifetime(SimulationState * this, char* line, Logger* logge
     int time = strtol((line + found), NULL, 10);
     char _time[20];
     sprintf(_time, "%d", time);
-    logger->log(logger, LogLevel_FINER, "\tSeen Lifetime in Memory: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen Lifetime in Memory:");
     logger->log(logger, LogLevel_FINER, _time);
     logger->log(logger, LogLevel_FINER, "\n");
     if (this->bn == NULL) {
@@ -218,9 +216,9 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* l
         char len[20];
         sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
         sprintf(len, "%zu", length);
-        logger->log(logger, LogLevel_FINER, "\tSeen Address Space - First Elem:");
+        logger->log(logger, LogLevel_FINER, "\tSeen Address Space - First Elem:\t");
         logger->log(logger, LogLevel_FINER, param);
-        logger->log(logger, LogLevel_FINER, ", Count: ");
+        logger->log(logger, LogLevel_FINER, ", Count:\t");
         logger->log(logger, LogLevel_FINER, len);
         logger->log(logger, LogLevel_FINER, "\n");
     } else {
@@ -228,7 +226,7 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* l
         AddressSpace_deque_pushL(a_space, new);
         char param[20];
         sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
-        logger->log(logger, LogLevel_FINER, "\tSeen Address Space:");
+        logger->log(logger, LogLevel_FINER, "\tSeen Address Space:\t");
         logger->log(logger, LogLevel_FINER, param);
         logger->log(logger, LogLevel_FINER, "\n");
     }
@@ -250,7 +248,7 @@ bool SS_processLineForTimeQuantum(SimulationState* this, char* line, Logger* log
     int quantum = strtol((line + found + 2), NULL, 10);
     char _quantum[20];
     sprintf(_quantum, "%d", quantum);
-    logger->log(logger, LogLevel_FINER, "\tSeen Time Quantum: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen Time Quantum:\t");
     logger->log(logger, LogLevel_FINER, _quantum);
     logger->log(logger, LogLevel_FINER, "\n");
     ProcessQueue* RoundRobin1 = PQ_init_RoundRobin(id, quantum);
@@ -276,7 +274,7 @@ bool SS_processLineForNewProcess(SimulationState* this, char* line, Logger* logg
     sprintf(_id, "%d", id);
     PCB* process = PCB_init(id);
     PCB_deque_pushL(&this->notYetArrived, process);
-    logger->log(logger, LogLevel_FINER, "\tSeen New Process: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen New Process:\t");
     logger->log(logger, LogLevel_FINER, _id);
     logger->log(logger, LogLevel_FINER, "\n");
     return true;
@@ -297,7 +295,7 @@ bool SS_processLineForProcessArrival(SimulationState* this, char* line, Logger* 
     PCB_deque_peekL(&this->notYetArrived)->arrival_time = time;
     char _time[20];
     sprintf(_time, "%d", time);
-    logger->log(logger, LogLevel_FINER, "\tSeen Arrival Time: ");
+    logger->log(logger, LogLevel_FINER, "\tSeen Arrival Time:\t");
     logger->log(logger, LogLevel_FINER, _time);
     logger->log(logger, LogLevel_FINER, "\n");
     return true;
@@ -435,24 +433,24 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line, Logger* logger)
         } else if (this->stage == FS_PN_SCHEDULE && this->seen_stage_req == -1) {
             this->stage = FS_PN_NEW;
         }
-        logger->log(logger, LogLevel_FINER, "----------\n");
+        logger->log(logger, LogLevel_FINER, "\t----------\n");
         return true;
     }
     if (SS_isStartMultiLineComment(line)) {
         if (!SS_isEndMultiLineComment(line)) {
             this->in_comment = true;
         }
-        logger->log(logger, LogLevel_FINER, "----------\n");
+        logger->log(logger, LogLevel_FINER, "\t----------\n");
         return true;
     } else if (SS_isEndMultiLineComment(line)) {
         this->in_comment = false;
-        logger->log(logger, LogLevel_FINER, "----------\n");
+        logger->log(logger, LogLevel_FINER, "\t----------\n");
         return true;
     } else if (this->in_comment == true) {
-        logger->log(logger, LogLevel_FINER, "----------\n");
+        logger->log(logger, LogLevel_FINER, "\t----------\n");
         return true;
     } else if (SS_isSingleLineComment(line)) {
-        logger->log(logger, LogLevel_FINER, "----------\n");
+        logger->log(logger, LogLevel_FINER, "\t----------\n");
         return true;
     }
     return false;

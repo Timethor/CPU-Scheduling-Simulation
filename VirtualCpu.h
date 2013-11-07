@@ -14,6 +14,7 @@
 #include "ProcessQueueList.h"
 #include "LineInterpreter.h"
 #include "Settings.h"
+#include "MemoryManager.h"
 
 typedef struct VirtualCPU {
     int clockTime;
@@ -21,6 +22,7 @@ typedef struct VirtualCPU {
     ProcessQueue_deque queues;
     PCB_deque terminated;
     Settings* settings;
+    MemoryManager* mman;
     bool (*doClockCycle)(struct VirtualCPU *, PCB_deque*);
     int (*getAvgTurnAroundTime)(struct VirtualCPU*);
     int (*getAvgWaitingTime)(struct VirtualCPU*);

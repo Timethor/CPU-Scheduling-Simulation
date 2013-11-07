@@ -5,6 +5,8 @@
  * Created on November 7, 2013, 6:20 AM
  */
 
+#include <stdlib.h>
+
 #include "MemoryRegion.h"
 
 MemoryRegion* MemoryRegiony_init(int processId, int kiloStart, int kiloEnd) {

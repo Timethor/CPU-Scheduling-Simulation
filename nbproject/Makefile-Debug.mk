@@ -47,6 +47,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/LogEntry.o \
 	${OBJECTDIR}/LogEntryList.o \
 	${OBJECTDIR}/Logger.o \
+	${OBJECTDIR}/MemoryManager.o \
 	${OBJECTDIR}/MemoryRegion.o \
 	${OBJECTDIR}/MemoryRegionList.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
@@ -141,6 +142,11 @@ ${OBJECTDIR}/Logger.o: Logger.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Logger.o Logger.c
+
+${OBJECTDIR}/MemoryManager.o: MemoryManager.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/MemoryManager.o MemoryManager.c
 
 ${OBJECTDIR}/MemoryRegion.o: MemoryRegion.c 
 	${MKDIR} -p ${OBJECTDIR}
