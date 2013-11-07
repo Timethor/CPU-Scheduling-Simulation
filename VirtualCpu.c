@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   VirtualCpu.c
  * Author: Nicholas `Timethor` Rich     G00399909
  *

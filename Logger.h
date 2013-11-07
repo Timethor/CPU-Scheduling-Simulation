@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   Logger.h
  * Author: Nicholas `Timethor` Rich     G00399909
  *

@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   BurstNodeList.c
  * Author: Nicholas `Timethor` Rich     G00399909
  *

@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   FileReader.h
  * Author: Nicholas `Timethor` Rich     G00399909
  *

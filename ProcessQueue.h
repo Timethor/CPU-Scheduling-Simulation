@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   ProcessQueue.h
  * Author: Nicholas `Timethor` Rich     G00399909
  *

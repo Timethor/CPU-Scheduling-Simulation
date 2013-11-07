@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   DeviceDescriptor.h
  * Author: Nicholas `Timethor` Rich     G00399909
  *
