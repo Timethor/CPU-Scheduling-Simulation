@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   MemoryRegion.h
  * Author: Timethor
  *
@@ -8,16 +8,17 @@
 #ifndef MEMORYREGION_H
 #define	MEMORYREGION_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+typedef struct MemoryRegion {
+    int processId;
+    int kiloStart;
+    int kiloEnd;
+} MemoryRegion;
 
+//>>	Construct / Destruct
+MemoryRegion* MemoryRegion_init(int processId, int kiloStart, int kiloEnd);
+void MemoryRegion_destruct(MemoryRegion * this);
 
-
-
-#ifdef	__cplusplus
-}
-#endif
+int MR_getSize(MemoryRegion* this);
 
 #endif	/* MEMORYREGION_H */
 

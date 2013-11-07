@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   MemoryRegionList.h
  * Author: Timethor
  *
@@ -8,16 +8,10 @@
 #ifndef MEMORYREGIONLIST_H
 #define	MEMORYREGIONLIST_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include "Deque.h"
+#include "MemoryRegion.h"
 
-
-
-
-#ifdef	__cplusplus
-}
-#endif
+DEQUE_PROTOTYPE(MemoryRegion);
 
 #endif	/* MEMORYREGIONLIST_H */
 
