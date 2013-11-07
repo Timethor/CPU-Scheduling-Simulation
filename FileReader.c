@@ -50,7 +50,10 @@ int FR_read_lines(FileReader* this, Settings* settings, SimulationState* istate)
 
     munmap(buf, fs.st_size);
     close(fd);
-    if (istate->error_thrown) return false;
+    if (istate->error_thrown){ 
+        settings->logger->log(settings->logger, LogLevel_SEVERE, "Malformed Document!!! Please make sure you follow the file format.\n");
+        return false;
+    }
     return true;
 }
 
