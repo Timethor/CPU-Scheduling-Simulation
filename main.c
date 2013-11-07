@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     }
     Printf(set->logger, LogLevel_CONFIG, "\tCompleted Input File Read!\n");
     
-    
+    output(set);
     return EXIT_SUCCESS;
     
     Printf(set->logger, LogLevel_CONFIG, "============== INIT V-CPU! ==============\n");

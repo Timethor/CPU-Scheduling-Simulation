@@ -19,6 +19,7 @@ SimulationState* SimulationState_init(Settings* settings) {
     SimulationState* this = malloc(sizeof (*this));
     this->in_comment = false;
     this->addFCFSToEnd = !settings->roundRobinOnly;
+    this->policy = MP_INF;
     this->stage = FS_TQ;
     this->seen_stage_req = -1;
     this->error_thrown = false;
@@ -44,7 +45,8 @@ void SimulationState_destruct(SimulationState* this) {
  * Callback function for mmap file read, appropriately sets line_buffer to the value
  * of the memory location passed
  */
-void SS_processInputLine(SimulationState* this, const char* begin, const char* end) {
+void SS_processInputLine(SimulationState* this, const char* begin, const char* end, Logger* logger) {
+    void(*LogPrintf) (Logger*, enum LogLevel, const char*, ...) = logger->log;
     char line[end - begin + 1];
     int copyend = (end - begin + 1);
     strncpy(line, begin, copyend);
@@ -53,16 +55,48 @@ void SS_processInputLine(SimulationState* this, const char* begin, const char* e
     if (SS_hasNonProcessableLine(this, line)) {
         return;
     }
-    if (this->stage == FS_TQ && SS_processLineForTimeQuantum(this, line)) {
+    //>>	This now also searches for Memory Size and if found changes the enum state so we can do state++
+    //>>	For the Memory Management type of input processing
+    if (this->stage == FS_TQ && (SS_processLineForTimeQuantum(this, line) || SS_processLineForMemorySize(this, line))) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen TQ or MS\n");
         return;
     }
+    //>>	The above if statement must come before this one b/c ...MemorySize sets a different state if it is found;
     if ((this->stage == FS_PN_NEW || this->stage == FS_TQ) && SS_processLineForNewProcess(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen New Proc\n");
         return;
     }
     if (this->stage == FS_PN_AT && SS_processLineForProcessArrival(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen Proc AT\n");
         return;
     }
     if (this->stage == FS_PN_SCHEDULE && SS_processLineForProcessSchedule(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen Proc Sched\n");
+        return;
+    }
+    //>>	New For Project 2, defines processing state => action correlation
+    if (this->stage == FS_M_MMP && SS_processLineForMemoryPolicy(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen Mem Policy\n");
+        return;
+    }
+    if (this->stage == FS_M_PP && SS_processLineForPolicyParams(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen Mem Policy Params\n");
+        return;
+    }
+    if (this->stage == FS_M_PID && SS_processLineForNewProcess(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen New MEM MAN Proc\n");
+        return;
+    }
+    if (this->stage == FS_M_AT && SS_processLineForProcessArrival(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc AT\n");
+        return;
+    }
+    if (this->stage == FS_M_LIM && SS_processLineForLifetime(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc LIM\n");
+        return;
+    }
+    if (this->stage == FS_M_AS && SS_processLineForAddressSpace(this, line)) {
+        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc AS\n");
         return;
     }
     this->error_thrown = true;
@@ -74,6 +108,104 @@ int SS_hasSubString(char* line, char* needle) {
         return strlen(needle);
     }
     return -1;
+}
+
+bool SS_processLineForMemorySize(SimulationState * this, char* line) {
+    char needle[] = "memory size: ";
+    int found = SS_hasSubString(line, needle);
+    if (found == -1)
+        return false;
+    //>>	set the stage
+    this->stage = FS_M_MS;
+    this->seen_stage_req = -1;
+    this->stage++;
+    //>>	save our memory size for MemManager later (MOVE THIS PROP TO MEMMAN)
+    this->memKiloSize = strtol((line + found), NULL, 10);
+    return true;
+}
+
+bool SS_processLineForMemoryPolicy(SimulationState * this, char* line) {
+    char needle[] = "memory management policy: ";
+    int found = SS_hasSubString(line, needle);
+    if (found == -1)
+        return false;
+    //>>	set the stage
+    this->seen_stage_req = -1;
+    this->stage++;
+    //>>	Set the policy type for MemManager later (MOVE THIS PROP TO MEMMAN)
+    if (strlen((line + found)) <= 4) {
+        SS_determinePolicy(this, (line + found));
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool SS_processLineForPolicyParams(SimulationState * this, char* line) {
+    char needle[] = "policy parameter: ";
+    int found = SS_hasSubString(line, needle);
+    if (found == -1)
+        return false;
+    //>>	set the stage
+    this->seen_stage_req = -1;
+    this->stage++;
+    //>>	save policy params for MemManager later (MOVE THIS PROP TO MEMMAN)
+    this->policyParams = strtol((line + found), NULL, 10);
+    return true;
+}
+
+bool SS_processLineForLifetime(SimulationState * this, char* line) {
+    BurstNode_deque* sched = &PCB_deque_peekL(&this->notYetArrived)->schedule;
+    char needle[] = "lifetime in memory: ";
+    int found = SS_hasSubString(line, needle);
+    if (found == -1)
+        return false;
+    this->seen_stage_req = -1;
+    this->stage++;
+    
+    int time = strtol((line + found), NULL, 10);
+    if (this->bn == NULL) {
+        //>>	Here lies the source of a memory leak. Much has been done to vanquish
+        //>>	this venal and virulent vermin to no avail. The only verdict is 
+        //>>	vengeance; a vendetta, held as a votive, probably in vain, for 
+        //>>	the value and veracity of such shall one day vindicate the vigilant
+        //>>	and the virtuous from the vexation it provides.
+        this->bn = BurstNode_init();
+    }
+    this->bn->type = BT_MM;
+    this->bn->duration = time;
+    BurstNode_deque_pushL(sched, this->bn);
+    this->bn = NULL;
+    return true;
+    
+}
+
+bool SS_processLineForAddressSpace(SimulationState * this, char* line) {
+    AddressSpace_deque* a_space = &PCB_deque_peekL(&this->notYetArrived)->a_space;
+    char needle[] = "address space: ";
+    int found = SS_hasSubString(line, needle);
+    if (found == -1)
+        return false;
+    if (this->policy == MP_SEG) {
+        //>>	If we see that SEG policy is used, get all peices of address space.
+        char** list;
+        size_t index, length;
+        explode((line + found), " ", &list, &length);
+        /* push list to deque */
+        for (index = 0; index < length; ++index) {
+            AddressSpace* new = AddressSpace_init(strtol(list[index], NULL, 10));
+            AddressSpace_deque_pushL(a_space, new);
+        }
+        /* free list */
+        for (index = 0; index < length; ++index)
+            free(list[index]);
+        free(list);
+    } else {
+        AddressSpace* new = AddressSpace_init(strtol((line + found), NULL, 10));
+        AddressSpace_deque_pushL(a_space, new);
+    }
+    this->seen_stage_req = true;
+    return true;
 }
 
 /**
@@ -101,7 +233,7 @@ bool SS_processLineForNewProcess(SimulationState* this, char* line) {
     if (found == -1)
         return false;
     this->seen_stage_req = -1;
-    if (this->stage != FS_PN_NEW)
+    if (this->stage == FS_TQ)
         this->stage = FS_PN_NEW;
     this->stage++;
     int id = strtol((line + found), NULL, 10);
@@ -123,6 +255,41 @@ bool SS_processLineForProcessArrival(SimulationState* this, char* line) {
     int time = strtol((line + found), NULL, 10);
     PCB_deque_peekL(&this->notYetArrived)->arrival_time = time;
     return true;
+}
+
+//>>	=== Helper functions for SS_determinePolicy ===   <<//
+
+int SS_policyTypeVSP(char* line) {
+    char needle[] = "vsp";
+    return SS_hasSubString(line, needle);
+}
+
+int SS_policyTypePAG(char* line) {
+    char needle[] = "pag";
+    return SS_hasSubString(line, needle);
+}
+
+int SS_policyTypeSEG(char* line) {
+    char needle[] = "seg";
+    return SS_hasSubString(line, needle);
+}
+
+/**
+ * Simply sets this->policy according to the input with enum values
+ */
+void SS_determinePolicy(SimulationState * this, char* line) {
+    int found = SS_policyTypeVSP(line);
+    if (found != -1) {
+        this->policy = MP_VSP;
+    }
+    found = SS_policyTypePAG(line);
+    if (found != -1) {
+        this->policy = MP_PAG;
+    }
+    found = SS_policyTypeSEG(line);
+    if (found != -1) {
+        this->policy = MP_SEG;
+    }
 }
 
 /**
@@ -212,7 +379,11 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
                     ProcessQueue_deque_pushL(&this->proto_queues, FCFS);
                 }
             }
-            this->stage++;
+            if (this->stage == FS_M_AS) {
+                this->stage = FS_M_PID;
+            } else {
+                this->stage++;
+            }
             this->seen_stage_req = -1;
         } else if (this->stage == FS_PN_SCHEDULE && this->seen_stage_req == -1) {
             this->stage = FS_PN_NEW;
@@ -274,4 +445,56 @@ bool SS_isStartMultiLineComment(char* line) {
         return true;
     }
     return false;
+}
+
+char* my_strdup(const char *src) {
+    char *tmp = malloc(strlen(src) + 1);
+    if (tmp)
+        strcpy(tmp, src);
+    return tmp;
+}
+
+void explode(const char *src, const char *tokens, char ***list, size_t *len) {
+    if (src == NULL || list == NULL || len == NULL)
+        return;
+
+    char *str, *copy, **_list = NULL, **tmp;
+    *list = NULL;
+    *len = 0;
+
+    copy = my_strdup(src);
+    if (copy == NULL)
+        return;
+
+    str = strtok(copy, tokens);
+    if (str == NULL)
+        goto free_and_exit;
+
+    _list = realloc(NULL, sizeof *_list);
+    if (_list == NULL)
+        goto free_and_exit;
+
+    _list[*len] = my_strdup(str);
+    if (_list[*len] == NULL)
+        goto free_and_exit;
+    (*len)++;
+
+
+    while ((str = strtok(NULL, tokens))) {
+        tmp = realloc(_list, (sizeof *_list) * (*len + 1));
+        if (tmp == NULL)
+            goto free_and_exit;
+
+        _list = tmp;
+
+        _list[*len] = strdup(str);
+        if (_list[*len] == NULL)
+            goto free_and_exit;
+        (*len)++;
+    }
+
+
+free_and_exit:
+    *list = _list;
+    free(copy);
 }
