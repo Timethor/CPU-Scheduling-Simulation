@@ -40,9 +40,9 @@ typedef struct SimulationState {
     bool error_thrown;
     bool addFCFSToEnd;
     enum FormatStage stage;
-    enum MemoryPolicy policy;   //>>	(MOVE THIS PROP TO MEMMAN)
-    int memKiloSize;            //>>	(MOVE THIS PROP TO MEMMAN)
-    int policyParams;           //>>	(MOVE THIS PROP TO MEMMAN)
+    enum MemoryPolicy policy;   
+    int memKiloSize;            
+    int policyParams;           
     int seen_stage_req;
     BurstNode* bn;
     PCB_deque notYetArrived;

@@ -109,7 +109,7 @@ bool SS_processLineForMemorySize(SimulationState * this, char* line, Logger* log
     this->stage = FS_M_MS;
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	save our memory size for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	save our memory size for MemManager later
     this->memKiloSize = strtol((line + found), NULL, 10);
     char memKiloSize[20];
     sprintf(memKiloSize, "%d", this->memKiloSize);
@@ -127,7 +127,7 @@ bool SS_processLineForMemoryPolicy(SimulationState * this, char* line, Logger* l
     //>>	set the stage
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	Set the policy type for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	Set the policy type for MemManager later
     if (strlen((line + found)) <= 4) {
         SS_determinePolicy(this, (line + found), logger);
     } else {
@@ -149,7 +149,7 @@ bool SS_processLineForPolicyParams(SimulationState * this, char* line, Logger* l
     //>>	set the stage
     this->seen_stage_req = -1;
     this->stage++;
-    //>>	save policy params for MemManager later (MOVE THIS PROP TO MEMMAN)
+    //>>	save policy params for MemManager later
     this->policyParams = strtol((line + found), NULL, 10);
     char policyParams[20];
     sprintf(policyParams, "%d", this->policyParams);

@@ -21,6 +21,7 @@ typedef struct VirtualCPU {
     ProcessQueue_deque queues;
     PCB_deque terminated;
     Settings* settings;
+    MemoryManager* mman;
     bool (*doClockCycle)(struct VirtualCPU *, PCB_deque*);
     int (*getAvgTurnAroundTime)(struct VirtualCPU*);
     int (*getAvgWaitingTime)(struct VirtualCPU*);

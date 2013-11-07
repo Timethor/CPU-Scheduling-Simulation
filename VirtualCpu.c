@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "VirtualCpu.h"
+#include "MemoryManager.h"
 
 //>>	== PRIVATE FUNCTION PROTO ==    <<//
 void VCPU_MergeWithInputState(VirtualCPU * this, SimulationState* istate);
@@ -35,6 +36,7 @@ int VCPU_getAverageWaitingTime(VirtualCPU* this);
 
 VirtualCPU* VirtualCPU_init(SimulationState* istate, Settings* settings) {
     VirtualCPU* this = malloc(sizeof (*this));
+    this->mman = NULL;
     this->clockTime = 0;
     this->settings = settings;
     this->doClockCycle = VCPU_doClockCycle;
@@ -52,6 +54,9 @@ void VirtualCPU_destruct(VirtualCPU* this) {
     ProcessQueue_deque_freeElements(&this->queues);
     PCB_deque_freeElements(&this->terminated);
     Settings_destruct(this->settings);
+    this->settings = NULL;
+    MemoryManager_destruct(this->mman);
+    this->mman = NULL;
     free(this);
 }
 
@@ -96,6 +101,7 @@ void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "Initial Queue Status::\n");
     ProcessQueue_deque_print(&this->queues, this->settings->logger, LogLevel_CONFIG);
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, LogLevel_CONFIG);
+    this->mman = MemoryManager_init(istate->policy, istate->memKiloSize, istate->policyParams);
 }
 
 /**
