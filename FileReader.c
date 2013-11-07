@@ -42,7 +42,7 @@ int FR_read_lines(FileReader* this, Settings* settings, SimulationState* istate)
         /* call the call back and check error indication. Announce
            error here, because we didn't tell call_back the file name */
         //memset(r, 32, sizeof (r) - 1);
-        this->call_back(istate, begin, end);
+        this->call_back(istate, begin, end, settings->logger);
 
         if ((begin = ++end) >= buf_end)
             break;

@@ -24,7 +24,7 @@
 #include "LineInterpreter.h"
 
 typedef struct FileReader {
-    void (*call_back)(SimulationState*, const char*, const char*);
+    void (*call_back)(SimulationState*, const char*, const char*, Logger* logger);
     int (*readLines)(struct FileReader*, Settings*, SimulationState*);
 } FileReader;
 
