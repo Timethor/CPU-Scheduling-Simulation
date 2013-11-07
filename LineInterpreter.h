@@ -62,24 +62,24 @@ int SS_hasCpuBurst(char* line);
 int SS_hasIOBurst(char* line);
 int SS_hasIODevice(char* line);
 
-bool SS_hasNonProcessableLine(SimulationState * this, char* line);
+bool SS_hasNonProcessableLine(SimulationState * this, char* line, Logger* logger);
 
 //>>	New for Project 2, initialization info
-bool SS_processLineForMemorySize(SimulationState * this, char* line);
-bool SS_processLineForMemoryPolicy(SimulationState * this, char* line);
-void SS_determinePolicy(SimulationState * this, char* line);
-bool SS_processLineForPolicyParams(SimulationState * this, char* line);
+bool SS_processLineForMemorySize(SimulationState * this, char* line, Logger* logger);
+bool SS_processLineForMemoryPolicy(SimulationState * this, char* line, Logger* logger);
+void SS_determinePolicy(SimulationState * this, char* line, Logger* logger);
+bool SS_processLineForPolicyParams(SimulationState * this, char* line, Logger* logger);
 
 //>>	New for Project 2, Process info
-bool SS_processLineForLifetime(SimulationState * this, char* line);
-bool SS_processLineForAddressSpace(SimulationState * this, char* line);
+bool SS_processLineForLifetime(SimulationState * this, char* line, Logger* logger);
+bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* logger);
 
 //>>	Old from Project 1, but will use for Project 2
-bool SS_processLineForNewProcess(SimulationState * this, char* line);
-bool SS_processLineForProcessArrival(SimulationState * this, char* line);
+bool SS_processLineForNewProcess(SimulationState * this, char* line, Logger* logger);
+bool SS_processLineForProcessArrival(SimulationState * this, char* line, Logger* logger);
 
-bool SS_processLineForTimeQuantum(SimulationState * this, char* line);
-bool SS_processLineForProcessSchedule(SimulationState * this, char* line);
+bool SS_processLineForTimeQuantum(SimulationState * this, char* line, Logger* logger);
+bool SS_processLineForProcessSchedule(SimulationState * this, char* line, Logger* logger);
 
 int SS_hasSubString(char* line, char* needle);
 bool SS_isEmptyLine(char* line);

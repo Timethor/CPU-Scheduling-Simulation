@@ -46,57 +46,47 @@ void SimulationState_destruct(SimulationState* this) {
  * of the memory location passed
  */
 void SS_processInputLine(SimulationState* this, const char* begin, const char* end, Logger* logger) {
-    void(*LogPrintf) (Logger*, enum LogLevel, const char*, ...) = logger->log;
     char line[end - begin + 1];
     int copyend = (end - begin + 1);
     strncpy(line, begin, copyend);
     line[copyend] = 0;
 
-    if (SS_hasNonProcessableLine(this, line)) {
+    if (SS_hasNonProcessableLine(this, line, logger)) {
         return;
     }
     //>>	This now also searches for Memory Size and if found changes the enum state so we can do state++
     //>>	For the Memory Management type of input processing
-    if (this->stage == FS_TQ && (SS_processLineForTimeQuantum(this, line) || SS_processLineForMemorySize(this, line))) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen TQ or MS\n");
+    if (this->stage == FS_TQ && (SS_processLineForTimeQuantum(this, line, logger) || SS_processLineForMemorySize(this, line, logger))) {
+
         return;
     }
     //>>	The above if statement must come before this one b/c ...MemorySize sets a different state if it is found;
-    if ((this->stage == FS_PN_NEW || this->stage == FS_TQ) && SS_processLineForNewProcess(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen New Proc\n");
+    if ((this->stage == FS_PN_NEW || this->stage == FS_TQ) && SS_processLineForNewProcess(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_PN_AT && SS_processLineForProcessArrival(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen Proc AT\n");
+    if (this->stage == FS_PN_AT && SS_processLineForProcessArrival(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_PN_SCHEDULE && SS_processLineForProcessSchedule(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen Proc Sched\n");
+    if (this->stage == FS_PN_SCHEDULE && SS_processLineForProcessSchedule(this, line, logger)) {
         return;
     }
     //>>	New For Project 2, defines processing state => action correlation
-    if (this->stage == FS_M_MMP && SS_processLineForMemoryPolicy(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen Mem Policy\n");
+    if (this->stage == FS_M_MMP && SS_processLineForMemoryPolicy(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_M_PP && SS_processLineForPolicyParams(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen Mem Policy Params\n");
+    if (this->stage == FS_M_PP && SS_processLineForPolicyParams(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_M_PID && SS_processLineForNewProcess(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen New MEM MAN Proc\n");
+    if (this->stage == FS_M_PID && SS_processLineForNewProcess(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_M_AT && SS_processLineForProcessArrival(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc AT\n");
+    if (this->stage == FS_M_AT && SS_processLineForProcessArrival(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_M_LIM && SS_processLineForLifetime(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc LIM\n");
+    if (this->stage == FS_M_LIM && SS_processLineForLifetime(this, line, logger)) {
         return;
     }
-    if (this->stage == FS_M_AS && SS_processLineForAddressSpace(this, line)) {
-        LogPrintf(logger, LogLevel_FINER, "\tSeen MEM MAN Proc AS\n");
+    if (this->stage == FS_M_AS && SS_processLineForAddressSpace(this, line, logger)) {
         return;
     }
     this->error_thrown = true;
@@ -110,7 +100,7 @@ int SS_hasSubString(char* line, char* needle) {
     return -1;
 }
 
-bool SS_processLineForMemorySize(SimulationState * this, char* line) {
+bool SS_processLineForMemorySize(SimulationState * this, char* line, Logger* logger) {
     char needle[] = "memory size: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
@@ -121,10 +111,15 @@ bool SS_processLineForMemorySize(SimulationState * this, char* line) {
     this->stage++;
     //>>	save our memory size for MemManager later (MOVE THIS PROP TO MEMMAN)
     this->memKiloSize = strtol((line + found), NULL, 10);
+    char memKiloSize[20];
+    sprintf(memKiloSize, "%d", this->memKiloSize);
+    logger->log(logger, LogLevel_FINER, "\tSeen Memory Size: ");
+    logger->log(logger, LogLevel_FINER, memKiloSize);
+    logger->log(logger, LogLevel_FINER, "\n");
     return true;
 }
 
-bool SS_processLineForMemoryPolicy(SimulationState * this, char* line) {
+bool SS_processLineForMemoryPolicy(SimulationState * this, char* line, Logger* logger) {
     char needle[] = "memory management policy: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
@@ -134,14 +129,19 @@ bool SS_processLineForMemoryPolicy(SimulationState * this, char* line) {
     this->stage++;
     //>>	Set the policy type for MemManager later (MOVE THIS PROP TO MEMMAN)
     if (strlen((line + found)) <= 4) {
-        SS_determinePolicy(this, (line + found));
+        SS_determinePolicy(this, (line + found), logger);
     } else {
         return false;
     }
+    char policy[20];
+    sprintf(policy, "%d", this->policy);
+    logger->log(logger, LogLevel_FINER, "\tSeen Memory Management Policy: ");
+    logger->log(logger, LogLevel_FINER, policy);
+    logger->log(logger, LogLevel_FINER, "\n");
     return true;
 }
 
-bool SS_processLineForPolicyParams(SimulationState * this, char* line) {
+bool SS_processLineForPolicyParams(SimulationState * this, char* line, Logger* logger) {
     char needle[] = "policy parameter: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
@@ -151,6 +151,11 @@ bool SS_processLineForPolicyParams(SimulationState * this, char* line) {
     this->stage++;
     //>>	save policy params for MemManager later (MOVE THIS PROP TO MEMMAN)
     this->policyParams = strtol((line + found), NULL, 10);
+    char policyParams[20];
+    sprintf(policyParams, "%d", this->policyParams);
+    logger->log(logger, LogLevel_FINER, "\tSeen Policy Params: ");
+    logger->log(logger, LogLevel_FINER, policyParams);
+    logger->log(logger, LogLevel_FINER, "\n");
     if ((this->policy == MP_VSP || this->policy == MP_SEG) && (this->policyParams < 0 || this->policyParams > 2)) {
         //>>	Policy param here should only ever be 0,1,2 so error otherwise
         return false;
@@ -158,16 +163,21 @@ bool SS_processLineForPolicyParams(SimulationState * this, char* line) {
     return true;
 }
 
-bool SS_processLineForLifetime(SimulationState * this, char* line) {
+bool SS_processLineForLifetime(SimulationState * this, char* line, Logger* logger) {
     BurstNode_deque* sched = &PCB_deque_peekL(&this->notYetArrived)->schedule;
     char needle[] = "lifetime in memory: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
         return false;
+    //>>	Set the stage
     this->seen_stage_req = -1;
     this->stage++;
-
     int time = strtol((line + found), NULL, 10);
+    char _time[20];
+    sprintf(_time, "%d", time);
+    logger->log(logger, LogLevel_FINER, "\tSeen Lifetime in Memory: ");
+    logger->log(logger, LogLevel_FINER, _time);
+    logger->log(logger, LogLevel_FINER, "\n");
     if (this->bn == NULL) {
         //>>	Here lies the source of a memory leak. Much has been done to vanquish
         //>>	this venal and virulent vermin to no avail. The only verdict is 
@@ -184,7 +194,7 @@ bool SS_processLineForLifetime(SimulationState * this, char* line) {
 
 }
 
-bool SS_processLineForAddressSpace(SimulationState * this, char* line) {
+bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* logger) {
     AddressSpace_deque* a_space = &PCB_deque_peekL(&this->notYetArrived)->a_space;
     char needle[] = "address space: ";
     int found = SS_hasSubString(line, needle);
@@ -204,9 +214,23 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line) {
         for (index = 0; index < length; ++index)
             free(list[index]);
         free(list);
+        char param[20];
+        char len[20];
+        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
+        sprintf(len, "%zu", length);
+        logger->log(logger, LogLevel_FINER, "\tSeen Address Space - First Elem:");
+        logger->log(logger, LogLevel_FINER, param);
+        logger->log(logger, LogLevel_FINER, ", Count: ");
+        logger->log(logger, LogLevel_FINER, len);
+        logger->log(logger, LogLevel_FINER, "\n");
     } else {
         AddressSpace* new = AddressSpace_init(strtol((line + found), NULL, 10));
         AddressSpace_deque_pushL(a_space, new);
+        char param[20];
+        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
+        logger->log(logger, LogLevel_FINER, "\tSeen Address Space:");
+        logger->log(logger, LogLevel_FINER, param);
+        logger->log(logger, LogLevel_FINER, "\n");
     }
     this->seen_stage_req = true;
     return true;
@@ -215,14 +239,20 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line) {
 /**
  * Finds out if this line has time quantum in it and processes as needed
  */
-bool SS_processLineForTimeQuantum(SimulationState* this, char* line) {
+bool SS_processLineForTimeQuantum(SimulationState* this, char* line, Logger* logger) {
     char needle[] = "time quantum ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
         return false;
+    //>>	set the stage
     this->seen_stage_req = true;
     int id = strtol((line + found), NULL, 10);
     int quantum = strtol((line + found + 2), NULL, 10);
+    char _quantum[20];
+    sprintf(_quantum, "%d", quantum);
+    logger->log(logger, LogLevel_FINER, "\tSeen Time Quantum: ");
+    logger->log(logger, LogLevel_FINER, _quantum);
+    logger->log(logger, LogLevel_FINER, "\n");
     ProcessQueue* RoundRobin1 = PQ_init_RoundRobin(id, quantum);
     ProcessQueue_deque_pushL(&this->proto_queues, RoundRobin1);
     return true;
@@ -231,33 +261,45 @@ bool SS_processLineForTimeQuantum(SimulationState* this, char* line) {
 /**
  * Finds out if this line has process id: in it and processes as needed
  */
-bool SS_processLineForNewProcess(SimulationState* this, char* line) {
+bool SS_processLineForNewProcess(SimulationState* this, char* line, Logger* logger) {
     char needle[] = "process id: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
         return false;
+    //>>	set the stage
     this->seen_stage_req = -1;
     if (this->stage == FS_TQ)
         this->stage = FS_PN_NEW;
     this->stage++;
     int id = strtol((line + found), NULL, 10);
+    char _id[20];
+    sprintf(_id, "%d", id);
     PCB* process = PCB_init(id);
     PCB_deque_pushL(&this->notYetArrived, process);
+    logger->log(logger, LogLevel_FINER, "\tSeen New Process: ");
+    logger->log(logger, LogLevel_FINER, _id);
+    logger->log(logger, LogLevel_FINER, "\n");
     return true;
 }
 
 /**
  * Finds out if this line has arrival time: in it and processes as needed
  */
-bool SS_processLineForProcessArrival(SimulationState* this, char* line) {
+bool SS_processLineForProcessArrival(SimulationState* this, char* line, Logger* logger) {
     char needle[] = "arrival time: ";
     int found = SS_hasSubString(line, needle);
     if (found == -1)
         return false;
+    //>>	 set the stage
     this->seen_stage_req = -1;
     this->stage++;
     int time = strtol((line + found), NULL, 10);
     PCB_deque_peekL(&this->notYetArrived)->arrival_time = time;
+    char _time[20];
+    sprintf(_time, "%d", time);
+    logger->log(logger, LogLevel_FINER, "\tSeen Arrival Time: ");
+    logger->log(logger, LogLevel_FINER, _time);
+    logger->log(logger, LogLevel_FINER, "\n");
     return true;
 }
 
@@ -281,7 +323,7 @@ int SS_policyTypeSEG(char* line) {
 /**
  * Simply sets this->policy according to the input with enum values
  */
-void SS_determinePolicy(SimulationState * this, char* line) {
+void SS_determinePolicy(SimulationState * this, char* line, Logger* logger) {
     int found = SS_policyTypeVSP(line);
     if (found != -1) {
         this->policy = MP_VSP;
@@ -299,7 +341,8 @@ void SS_determinePolicy(SimulationState * this, char* line) {
 /**
  * Finds out if this line has process schedule data in it and processes as needed
  */
-bool SS_processLineForProcessSchedule(SimulationState* this, char* line) {
+bool SS_processLineForProcessSchedule(SimulationState* this, char* line, Logger* logger) {
+    logger->log(logger, LogLevel_FINER, "\tSeen Process Schedule\n");
     BurstNode_deque* sched = &PCB_deque_peekL(&this->notYetArrived)->schedule;
     int found = SS_hasCpuBurst(line);
     if (this->bn == NULL) {
@@ -364,7 +407,7 @@ int SS_hasIODevice(char* line) {
 /**
  * If we find an empty line or any type of C comment process as needed
  */
-bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
+bool SS_hasNonProcessableLine(SimulationState* this, char* line, Logger* logger) {
     if (SS_isEmptyLine(line)) {
         this->in_comment = false;
         //>>	We found an empty line where we are not in the schedule stage
@@ -392,19 +435,24 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line) {
         } else if (this->stage == FS_PN_SCHEDULE && this->seen_stage_req == -1) {
             this->stage = FS_PN_NEW;
         }
+        logger->log(logger, LogLevel_FINER, "----------\n");
         return true;
     }
     if (SS_isStartMultiLineComment(line)) {
         if (!SS_isEndMultiLineComment(line)) {
             this->in_comment = true;
         }
+        logger->log(logger, LogLevel_FINER, "----------\n");
         return true;
     } else if (SS_isEndMultiLineComment(line)) {
         this->in_comment = false;
+        logger->log(logger, LogLevel_FINER, "----------\n");
         return true;
     } else if (this->in_comment == true) {
+        logger->log(logger, LogLevel_FINER, "----------\n");
         return true;
     } else if (SS_isSingleLineComment(line)) {
+        logger->log(logger, LogLevel_FINER, "----------\n");
         return true;
     }
     return false;
