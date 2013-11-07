@@ -35,6 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/AddressSpace.o \
+	${OBJECTDIR}/AddressSpaceList.o \
 	${OBJECTDIR}/BurstNode.o \
 	${OBJECTDIR}/BurstNodeList.o \
 	${OBJECTDIR}/DeviceDescriptor.o \
@@ -45,6 +47,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/LogEntry.o \
 	${OBJECTDIR}/LogEntryList.o \
 	${OBJECTDIR}/Logger.o \
+	${OBJECTDIR}/MemoryRegion.o \
+	${OBJECTDIR}/MemoryRegionList.o \
 	${OBJECTDIR}/ProcessControlBlock.o \
 	${OBJECTDIR}/ProcessControlBlockList.o \
 	${OBJECTDIR}/ProcessQueue.o \
@@ -77,6 +81,16 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpu_scheduler_simulator ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/AddressSpace.o: AddressSpace.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/AddressSpace.o AddressSpace.c
+
+${OBJECTDIR}/AddressSpaceList.o: AddressSpaceList.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/AddressSpaceList.o AddressSpaceList.c
 
 ${OBJECTDIR}/BurstNode.o: BurstNode.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -127,6 +141,16 @@ ${OBJECTDIR}/Logger.o: Logger.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/Logger.o Logger.c
+
+${OBJECTDIR}/MemoryRegion.o: MemoryRegion.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/MemoryRegion.o MemoryRegion.c
+
+${OBJECTDIR}/MemoryRegionList.o: MemoryRegionList.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -Wall -std=c99 -ggdb -MMD -MP -MF $@.d -o ${OBJECTDIR}/MemoryRegionList.o MemoryRegionList.c
 
 ${OBJECTDIR}/ProcessControlBlock.o: ProcessControlBlock.c 
 	${MKDIR} -p ${OBJECTDIR}

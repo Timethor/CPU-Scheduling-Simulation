@@ -4,6 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>AddressSpace.h</itemPath>
+      <itemPath>AddressSpaceList.h</itemPath>
       <itemPath>BurstNode.h</itemPath>
       <itemPath>BurstNodeList.h</itemPath>
       <itemPath>Deque.h</itemPath>
@@ -15,6 +17,8 @@
       <itemPath>LogEntry.h</itemPath>
       <itemPath>LogEntryList.h</itemPath>
       <itemPath>Logger.h</itemPath>
+      <itemPath>MemoryRegion.h</itemPath>
+      <itemPath>MemoryRegionList.h</itemPath>
       <itemPath>ProcessControlBlock.h</itemPath>
       <itemPath>ProcessControlBlockList.h</itemPath>
       <itemPath>ProcessQueue.h</itemPath>
@@ -31,6 +35,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>AddressSpace.c</itemPath>
+      <itemPath>AddressSpaceList.c</itemPath>
       <itemPath>BurstNode.c</itemPath>
       <itemPath>BurstNodeList.c</itemPath>
       <itemPath>DeviceDescriptor.c</itemPath>
@@ -41,6 +47,8 @@
       <itemPath>LogEntry.c</itemPath>
       <itemPath>LogEntryList.c</itemPath>
       <itemPath>Logger.c</itemPath>
+      <itemPath>MemoryRegion.c</itemPath>
+      <itemPath>MemoryRegionList.c</itemPath>
       <itemPath>ProcessControlBlock.c</itemPath>
       <itemPath>ProcessControlBlockList.c</itemPath>
       <itemPath>ProcessQueue.c</itemPath>
@@ -104,6 +112,14 @@
       </packaging>
       <item path=".gitignore" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="AddressSpace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="AddressSpace.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="AddressSpaceList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="AddressSpaceList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
@@ -145,6 +161,14 @@
       <item path="Logger.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MemoryRegion.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="MemoryRegion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MemoryRegionList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="MemoryRegionList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -202,6 +226,14 @@
       </compileType>
       <item path=".gitignore" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="AddressSpace.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="AddressSpace.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="AddressSpaceList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="AddressSpaceList.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="BurstNode.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="BurstNode.h" ex="false" tool="3" flavor2="0">
@@ -243,6 +275,14 @@
       <item path="Logger.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="Logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MemoryRegion.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="MemoryRegion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="MemoryRegionList.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="MemoryRegionList.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="ProcessControlBlock.c" ex="false" tool="0" flavor2="0">
       </item>
