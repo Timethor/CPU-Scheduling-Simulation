@@ -269,7 +269,7 @@ bool SS_processLineForTimeQuantum(SimulationState* this, char* line, Logger* log
     logger->log(logger, LogLevel_FINER, "\tSeen Time Quantum:\t");
     logger->log(logger, LogLevel_FINER, _quantum);
     logger->log(logger, LogLevel_FINER, "\n");
-    ProcessQueue* RoundRobin1 = PQ_init_RoundRobin(id, quantum);
+    ProcessQueue* RoundRobin1 = PQ_init_RoundRobin(id, quantum, false);
     ProcessQueue_deque_pushL(&this->proto_queues, RoundRobin1);
     return true;
 }
@@ -435,9 +435,9 @@ bool SS_hasNonProcessableLine(SimulationState* this, char* line, Logger* logger)
                 //>>	Says not to.
                 if (this->addFCFSToEnd) {
                     if (FCFS != NULL) {
-                        FCFS = PQ_init_FCFS(FCFS->id + 1);
+                        FCFS = PQ_init_FCFS(FCFS->id + 1, false);
                     } else {
-                        FCFS = PQ_init_FCFS(1);
+                        FCFS = PQ_init_FCFS(1, false);
                     }
                     ProcessQueue_deque_pushL(&this->proto_queues, FCFS);
                 }

@@ -11,8 +11,8 @@
 #include "ProcessQueue.h"
 #include "Logger.h"
 
-ProcessQueue* PQ_init_RoundRobin(int id, int quantum) {
-    ProcessQueue* this = PQ_init(id);
+ProcessQueue* PQ_init_RoundRobin(int id, int quantum, bool multiProc) {
+    ProcessQueue* this = PQ_init(id, multiProc);
     this->quantum = quantum;
     return this;
 }
@@ -21,8 +21,8 @@ bool PQ_isRoundRobin(ProcessQueue* this) {
     return (this->quantum == -1 ? false : true);
 }
 
-ProcessQueue* PQ_init_FCFS(int id) {
-    ProcessQueue* this = PQ_init(id);
+ProcessQueue* PQ_init_FCFS(int id, bool multiProc) {
+    ProcessQueue* this = PQ_init(id, multiProc);
     this->quantum = -1;
     return this;
 }
@@ -31,9 +31,10 @@ bool PQ_isFCFS(ProcessQueue* this) {
     return (this->quantum == -1 ? true : false);
 }
 
-ProcessQueue* PQ_init(int id) {
+ProcessQueue* PQ_init(int id, bool multiProc) {
     ProcessQueue* this = malloc(sizeof (*this));
     this->id = id;
+    this->hasMultiProcessor = multiProc;
     this->quantumCheck = 0;
     PCB_deque_init(&this->queue, false, false);
     return this;
@@ -43,28 +44,72 @@ void ProcessQueue_destruct(ProcessQueue* this) {
     free(this);
 }
 
-bool PQ_hasWaitingProcess(ProcessQueue* this) {
-    PCB* firstInQueue = PCB_deque_peekF(&this->queue);
-    if (firstInQueue != NULL) {
-        return (firstInQueue->state == PCB_WAITING ? true : false);
+PCB* PQ_getNextWaitingProcess(ProcessQueue * this) {
+    if (!this->hasMultiProcessor) {
+        PCB* firstInQueue = PCB_deque_peekF(&this->queue);
+        if (firstInQueue != NULL) {
+            return (firstInQueue->state == PCB_WAITING ? firstInQueue : NULL);
+        }
+    } else {
+        PCB_dequeI it;
+        PCB_dequeI_init(&it, &this->queue);
+        PCB* pcb = PCB_dequeI_examine(&it);
+        while (pcb != NULL) {
+            if (pcb->state == PCB_WAITING)
+                return pcb;
+            pcb = PCB_dequeI_next(&it);
+        }
     }
-    return false;
+    return NULL;
+}
+
+PCB* PQ_getNextRunningProcess(ProcessQueue * this) {
+    if (!this->hasMultiProcessor) {
+        PCB* firstInQueue = PCB_deque_peekF(&this->queue);
+        if (firstInQueue != NULL) {
+            return (firstInQueue->state == PCB_RUNNING ? firstInQueue : NULL);
+        }
+    } else {
+        PCB_dequeI it;
+        PCB_dequeI_init(&it, &this->queue);
+        PCB* pcb = PCB_dequeI_examine(&it);
+        while (pcb != NULL) {
+            if (pcb->state == PCB_RUNNING)
+                return pcb;
+            pcb = PCB_dequeI_next(&it);
+        }
+    }
+    return NULL;
+}
+
+bool PQ_hasWaitingProcess(ProcessQueue* this) {
+    return PQ_getNextWaitingProcess(this) == NULL ? false : true;
 }
 
 bool PQ_hasRunningProcess(ProcessQueue* this) {
-    PCB* firstInQueue = PCB_deque_peekF(&this->queue);
-    if (firstInQueue != NULL) {
-        return (firstInQueue->state == PCB_RUNNING ? true : false);
-    }
-    return false;
+    return PQ_getNextRunningProcess(this) == NULL ? false : true;
 }
 
 PCB* PQ_hasBurstEndedProcess(ProcessQueue* this) {
-    PCB* firstInQueue = PCB_deque_peekF(&this->queue);
-    if (firstInQueue != NULL && firstInQueue->state == PCB_BURST_FINISHED) {
-        this->quantumCheck = 0;
-        PCB_checkProcessTermination(firstInQueue);
-        return PCB_deque_pollF(&this->queue);
+    if (!this->hasMultiProcessor) {
+        PCB* firstInQueue = PCB_deque_peekF(&this->queue);
+        if (firstInQueue != NULL && firstInQueue->state == PCB_BURST_FINISHED) {
+            this->quantumCheck = 0;
+            PCB_checkProcessTermination(firstInQueue);
+            return PCB_deque_pollF(&this->queue);
+        }
+    } else {
+        PCB_dequeI it;
+        PCB_dequeI_init(&it, &this->queue);
+        PCB* pcb = PCB_dequeI_examine(&it);
+        while (pcb != NULL) {
+            if (pcb->state == PCB_BURST_FINISHED) {
+                this->quantumCheck = 0;
+                PCB_checkProcessTermination(pcb);
+                return PCB_deque_pollN(&this->queue, pcb);
+            }
+            pcb = PCB_dequeI_next(&it);
+        }
     }
     return NULL;
 }

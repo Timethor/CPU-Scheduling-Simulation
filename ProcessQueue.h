@@ -16,12 +16,13 @@ typedef struct ProcessQueue {
     int id;
     int quantum;
     int quantumCheck;
+    bool hasMultiProcessor;
     PCB_deque queue;
 } ProcessQueue;
 
-ProcessQueue* PQ_init_RoundRobin(int id, int quantum);
-ProcessQueue* PQ_init_FCFS(int id);
-ProcessQueue* PQ_init(int id);
+ProcessQueue* PQ_init_RoundRobin(int id, int quantum, bool multiProc);
+ProcessQueue* PQ_init_FCFS(int id, bool multiProc);
+ProcessQueue* PQ_init(int id, bool multiProc);
 void ProcessQueue_destruct(ProcessQueue* this);
 
 PCB* PQ_getQuantumViolator(ProcessQueue * this);
@@ -30,6 +31,8 @@ bool PQ_isRoundRobin(ProcessQueue * this);
 bool PQ_isFCFS(ProcessQueue * this);
 bool PQ_hasWaitingProcess(ProcessQueue * this);
 bool PQ_hasRunningProcess(ProcessQueue * this);
+PCB* PQ_getNextWaitingProcess(ProcessQueue * this);
+PCB* PQ_getNextRunningProcess(ProcessQueue * this);
 PCB* PQ_hasBurstEndedProcess(ProcessQueue * this);
 
 void PQ_systemWideTick(ProcessQueue * this, Logger* logs);
