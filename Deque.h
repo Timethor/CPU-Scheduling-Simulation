@@ -234,7 +234,34 @@
     type* type##_deque_peekL(type##_deque* container){ \
         if (container->tail==NULL) return NULL; \
         return container->tail->data; \
-    }
+    } \
+    \
+    type##_dequeN* type##_deque_getCar(type##_deque* container, type* data){ \
+        if (container->head==NULL) { \
+            if (container->trace) \
+                    printf("TRACE:: Getting Car: %s_Deque Empty\n", #type); \
+            return NULL; \
+        } \
+        if (type##_deque_peekF(container) == data) { \
+            return container->head; \
+        } \
+        if (type##_deque_peekL(container) == data){ \
+            return container->tail; \
+        } \
+        type##_dequeN* first = container->head->next; \
+        while (first != NULL) { \
+            if (first->data == data) { \
+                if (container->trace) \
+                    printf("TRACE:: Getting Car: %s_Deque !Empty - Found it!\n", #type); \
+                return first; \
+            } \
+            first = first->next; \
+        } \
+        if (container->trace) \
+                    printf("TRACE:: Getting Car: %s_Deque !Empty - NODE NOT FOUND!!\n", #type); \
+        return NULL; \
+    } \
+    \
 
 // Defines type specific iterator function
 #define DEQUE_ITERATOR(type) \
