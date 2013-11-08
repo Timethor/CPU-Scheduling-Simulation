@@ -164,10 +164,12 @@ bool VCPU_canEnd(VirtualCPU* this) {
     ProcessQueue* running = VCPU_getHighestRunningProcessQueue(this);
     ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
     if (running != NULL || waiting != NULL) {
-
         return false;
     }
-    return VCPU_checkDeviceQueuesClear(this);
+    if (this->mman->policy == MP_INF) {
+        return VCPU_checkDeviceQueuesClear(this);
+    }
+    return true;
 }
 
 /**
@@ -175,9 +177,13 @@ bool VCPU_canEnd(VirtualCPU* this) {
  * for the DD_deque
  */
 void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
-
     ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
-    DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
+    if (this->mman->policy == MP_INF) {
+        DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
+    }
+    if (this->mman->policy != MP_INF) {
+        //t>>	MMAN_printMemoryMap();
+    }
 }
 
 //>>	=== The Bread & butter ==   <<//
@@ -283,32 +289,34 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
         currentPQ = ProcessQueue_dequeI_next(&pqI);
     }
 
-    //>>	Device queue state change checks, If we find a burst that has 
-    //>>	completed, send it to it's next queue destination
-    DeviceDescriptor_dequeI ddI;
-    DeviceDescriptor_dequeI_init(&ddI, &this->devices);
-    DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
-    while (currentDD != NULL) {
-        PCB* requester = DD_hasBurstEndedProcess(currentDD);
-        if (requester != NULL) {
-            char s[16];
-            this->settings->logger->log(this->settings->logger, LogLevel_INFO, "I/O Burst of %s completes\n", PCB_toString(requester, s));
-            VCPU_doPrintQueues(this, LogLevel_INFO);
-            VCPU_doIODispatcherProcessing(this);
-            if (requester->state != PCB_TERMINATED) {
-                currentDD->state = DD_IDLE;
-                requester->state = PCB_WAITING;
-                ProcessQueue_deque_ProcArrival(&this->queues, requester, this->settings->logger);
+    if (this->mman->policy == MP_INF) {
+        //>>	Device queue state change checks, If we find a burst that has 
+        //>>	completed, send it to it's next queue destination
+        DeviceDescriptor_dequeI ddI;
+        DeviceDescriptor_dequeI_init(&ddI, &this->devices);
+        DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
+        while (currentDD != NULL) {
+            PCB* requester = DD_hasBurstEndedProcess(currentDD);
+            if (requester != NULL) {
+                char s[16];
+                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "I/O Burst of %s completes\n", PCB_toString(requester, s));
                 VCPU_doPrintQueues(this, LogLevel_INFO);
-                VCPU_doCPUDispatcherProcessing(this);
-            } else {
+                VCPU_doIODispatcherProcessing(this);
+                if (requester->state != PCB_TERMINATED) {
+                    currentDD->state = DD_IDLE;
+                    requester->state = PCB_WAITING;
+                    ProcessQueue_deque_ProcArrival(&this->queues, requester, this->settings->logger);
+                    VCPU_doPrintQueues(this, LogLevel_INFO);
+                    VCPU_doCPUDispatcherProcessing(this);
+                } else {
 
-                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
-                PCB_deque_pushL(&this->terminated, requester);
-                VCPU_doPrintQueues(this, LogLevel_INFO);
+                    this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
+                    PCB_deque_pushL(&this->terminated, requester);
+                    VCPU_doPrintQueues(this, LogLevel_INFO);
+                }
             }
+            currentDD = DeviceDescriptor_dequeI_next(&ddI);
         }
-        currentDD = DeviceDescriptor_dequeI_next(&ddI);
     }
 }
 
@@ -331,8 +339,8 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
             }
             //>>	END Preempt any running process in lower queues
             VCPU_doPrintQueues(this, LogLevel_INFO);
-        } else if (BurstNode_deque_peekF(&requester->schedule)->type == BT_IO) {
 
+        } else if (BurstNode_deque_peekF(&requester->schedule)->type == BT_IO) {
             DeviceDescriptor_deque_ProcArrival(&this->devices, requester, this->settings->logger);
             VCPU_doPrintQueues(this, LogLevel_INFO);
         }
@@ -354,9 +362,10 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
  *                  no: set to running state
  */
 void VCPU_doDispatcherProcessing(VirtualCPU * this) {
-
     VCPU_doCPUDispatcherProcessing(this);
-    VCPU_doIODispatcherProcessing(this);
+    if (this->mman->policy == MP_INF) {
+        VCPU_doIODispatcherProcessing(this);
+    }
 }
 
 /**
@@ -399,7 +408,9 @@ void VCPU_doSystemWideTick(VirtualCPU * this) {
 
     this->clockTime++;
     ProcessQueue_deque_SystemWideTick(&this->queues, this->settings->logger);
-    DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
+    if (this->mman->policy == MP_INF) {
+        DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
+    }
 }
 
 /**
