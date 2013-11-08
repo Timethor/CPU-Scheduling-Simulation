@@ -16,7 +16,7 @@ MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params
     this->memKiloSize = size;
     this->policy = policy;
     this->policyParams = params;
-    this->freeSpace = 0;
+    this->freeSpace = (this->policy == MP_INF ? INT_MAX : 0);
     MemoryRegion_deque_init(&this->memory, false, false);
     if (policy == MP_PAG) {
         int index = 0;
@@ -43,23 +43,32 @@ void MemoryManager_destruct(MemoryManager * this) {
     free(this);
 }
 
-bool MMAN_checkVSPAllocationPotential(MemoryManager* this, PCB* process) {
+MemoryRegion* MMAN_getVSPAllocation(MemoryManager* this, PCB* process) {
     int sizeNeeded = AddressSpace_deque_peekF(&process->a_space)->size;
-    if (this->policyParams == MFM_BEST && MMAN_getBestFitAllocation(this, sizeNeeded) != NULL)
-        return true;
-    if (this->policyParams == MFM_WORST && MMAN_getWorstFitAllocation(this, sizeNeeded) != NULL)
-        return true;
-    if (this->policyParams == MFM_FIRST && MMAN_getFirstFitAllocation(this, sizeNeeded) != NULL)
-        return true;
-    return false;
+    MemoryRegion* fit = NULL;
+    if (this->policyParams == MFM_BEST)
+        fit = MMAN_getBestFitAllocation(this, sizeNeeded);
+    else if (this->policyParams == MFM_WORST)
+        fit = MMAN_getWorstFitAllocation(this, sizeNeeded);
+    else if (this->policyParams == MFM_FIRST)
+        fit = MMAN_getFirstFitAllocation(this, sizeNeeded);
+    return fit;
+}
+
+bool MMAN_checkVSPAllocationPotential(MemoryManager* this, PCB* process) {
+    return MMAN_getVSPAllocation(this, process) == NULL ? false : true;
+}
+
+MemoryRegion* MMAN_getPAGAllocation(MemoryManager* this, PCB* process) {
+    return MMAN_getVSPAllocation(this, process);
 }
 
 bool MMAN_checkPAGAllocationPotential(MemoryManager* this, PCB* process) {
     return MMAN_checkVSPAllocationPotential(this, process);
 }
 
-bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
-    MemoryRegion_deque segments;
+MemoryRegion_deque* MMAN_getSEGAllocation(MemoryManager* this, PCB* process) {
+    MemoryRegion_deque* segments = malloc(sizeof (MemoryRegion_deque));
     AddressSpace_dequeI it;
     AddressSpace_dequeI_init(&it, &process->a_space);
     AddressSpace* as = AddressSpace_dequeI_examine(&it);
@@ -72,11 +81,10 @@ bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
                 break;
             }
             seg->processId = -2;
-            MemoryRegion_deque_pushL(&segments, seg);
+            MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
         }
-    }
-    if (this->policyParams == MFM_WORST) {
+    } else if (this->policyParams == MFM_WORST) {
         while (as != NULL && allAllocated == true) {
             MemoryRegion* seg = MMAN_getWorstFitAllocation(this, as->size);
             if (seg == NULL) {
@@ -84,11 +92,10 @@ bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
                 break;
             }
             seg->processId = -2;
-            MemoryRegion_deque_pushL(&segments, seg);
+            MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
         }
-    }
-    if (this->policyParams == MFM_FIRST) {
+    } else if (this->policyParams == MFM_FIRST) {
         while (as != NULL && allAllocated == true) {
             MemoryRegion* seg = MMAN_getFirstFitAllocation(this, as->size);
             if (seg == NULL) {
@@ -96,17 +103,36 @@ bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
                 break;
             }
             seg->processId = -2;
-            MemoryRegion_deque_pushL(&segments, seg);
+            MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
         }
     }
-    MemoryRegion* r = MemoryRegion_deque_pollF(&segments);
-    while (r != NULL) {
-        //>>	reset and delink prospective nodes
-        r->processId = -1;
-        r = MemoryRegion_deque_pollF(&segments);
+    if (!allAllocated) {
+        MemoryRegion* r = MemoryRegion_deque_pollF(segments);
+        while (r != NULL) {
+            //>>	reset and delink prospective nodes
+            r->processId = -1;
+            r = MemoryRegion_deque_pollF(segments);
+        }
+        free(segments);
+        return NULL;
     }
-    return allAllocated;
+    return segments;
+}
+
+bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
+    MemoryRegion_deque* segments = MMAN_getSEGAllocation(this, process);
+    if (segments != NULL) {
+        MemoryRegion * r = MemoryRegion_deque_pollF(segments);
+        while (r != NULL) {
+            //>>	reset and delink prospective nodes
+            r->processId = -1;
+            r = MemoryRegion_deque_pollF(segments);
+        }
+        free(segments);
+        return true;
+    }
+    return false;
 }
 
 bool MMAN_checkAllocationPotential(MemoryManager* this, PCB* process) {
@@ -123,6 +149,34 @@ bool MMAN_checkAllocationPotential(MemoryManager* this, PCB* process) {
     }
     //>>	END basic Check
     if (this->policy == MP_PAG) {
+        return MMAN_checkPAGAllocationPotential(this, process);
+    }
+    if (this->policy == MP_SEG) {
+        return MMAN_checkSEGAllocationPotential(this, process);
+    }
+    if (this->policy == MP_VSP) {
+        return MMAN_checkVSPAllocationPotential(this, process);
+    }
+    if (this->policy == MP_INF) {
+        return true;
+    }
+    return false;
+}
+
+bool MMAN_getAllocation(MemoryManager* this, PCB* process) {
+    AddressSpace_dequeI it;
+    AddressSpace_dequeI_init(&it, &process->a_space);
+    AddressSpace* as = AddressSpace_dequeI_examine(&it);
+    int totalAddressSize = 0;
+    while (as != NULL) {
+        totalAddressSize += as->size;
+        as = AddressSpace_dequeI_next(&it);
+    }
+    if (this->freeSpace < totalAddressSize) {
+        return false;
+    }
+    //>>	END basic Check
+    if (this->policy == MP_PAG && MMAN_checkPAGAllocationPotential(this, process)) {
         return MMAN_checkPAGAllocationPotential(this, process);
     }
     if (this->policy == MP_SEG) {
@@ -157,7 +211,7 @@ MemoryRegion* MMAN_getBestFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
         int neededPages = 0;
         int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
         while (currentPages > 0) {
@@ -219,7 +273,7 @@ MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
         int neededPages = 0;
         int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
         while (currentPages > 0) {
@@ -276,7 +330,7 @@ MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
         int neededPages = 0;
         int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
         while (currentPages > 0) {
@@ -330,18 +384,29 @@ void MMAN_printMemoryMap(MemoryManager* this, Logger* logger) {
     MemoryRegion_dequeI it;
     MemoryRegion_dequeI_init(&it, &this->memory);
     MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
+    logger->log(logger, LogLevel_INFO, "Memory Map:\n");
     if (this->policy == MP_PAG) {
         while (mr != NULL) {
             mr = MemoryRegion_dequeI_next(&it);
+            char s[30];
+            logger->log(logger, LogLevel_INFO, "\t%s\n", MR_toString(mr, s));
         }
     }
 }
 
-bool MMAN_allocateProcess(MemoryManager* this, PCB* process) {
-    return false;
+bool MMAN_allocateProcess(MemoryManager* this, PCB* process, Logger* logger) {
+    logger->log(logger, LogLevel_FINE, "Allocating Process\n");
+    if (this->policy == MP_VSP) {
+        MemoryRegion* tobealloced = MMAN_getVSPAllocation(this, process);
+    } else if (this->policy == MP_SEG) {
+
+    } else if (this->policy == MP_PAG) {
+
+    }
+    return true;
 }
 
-void MMAN_deAllocateProcess(MemoryManager* this, PCB* process) {
+void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger) {
     MemoryRegion_dequeI it;
     MemoryRegion_dequeI_init(&it, &this->memory);
     MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);

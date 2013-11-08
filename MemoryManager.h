@@ -42,8 +42,8 @@ MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager * this, int sizeNeeded);
 MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager * this, int sizeNeeded);
 
 void MMAN_printMemoryMap(MemoryManager* this, Logger* logger);
-bool MMAN_allocateProcess(MemoryManager* this, PCB* process);
-void MMAN_deAllocateProcess(MemoryManager* this, PCB* process);
+bool MMAN_allocateProcess(MemoryManager* this, PCB* process, Logger* logger);
+void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger);
 
 #endif	/* MEMORYMANAGER_H */
 
