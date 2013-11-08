@@ -194,7 +194,7 @@ bool SS_processLineForLifetime(SimulationState * this, char* line, Logger* logge
         //>>	and the virtuous from the vexation it provides.
         this->bn = BurstNode_init();
     }
-    this->bn->type = BT_MM;
+    this->bn->type = BT_CPU;
     this->bn->duration = time;
     BurstNode_deque_pushL(sched, this->bn);
     this->bn = NULL;

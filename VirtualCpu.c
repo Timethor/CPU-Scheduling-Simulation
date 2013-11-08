@@ -98,6 +98,7 @@ void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "\tPost SYNC-MERGE Status::\n");
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "\t\tSizeOf:: This->Process_Queue:: %d\n", ProcessQueue_deque_length(&this->queues));
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "\t\tSizeOf:: This->Device_Queue:: %d\n", DeviceDescriptor_deque_length(&this->devices));
+    LogPrintf(this->settings->logger, LogLevel_CONFIG, "\t\tSizeOf:: IState->NotYetArrived:: %d\n", PCB_deque_length(&istate->notYetArrived));
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "Initial Queue Status::\n");
     ProcessQueue_deque_print(&this->queues, this->settings->logger, LogLevel_CONFIG);
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, LogLevel_CONFIG);
@@ -166,10 +167,7 @@ bool VCPU_canEnd(VirtualCPU* this) {
     if (running != NULL || waiting != NULL) {
         return false;
     }
-    if (this->mman->policy == MP_INF) {
-        return VCPU_checkDeviceQueuesClear(this);
-    }
-    return true;
+    return VCPU_checkDeviceQueuesClear(this);
 }
 
 /**
@@ -178,9 +176,7 @@ bool VCPU_canEnd(VirtualCPU* this) {
  */
 void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
     ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
-    if (this->mman->policy == MP_INF) {
-        DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
-    }
+    DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
     if (this->mman->policy != MP_INF) {
         //t>>	MMAN_printMemoryMap();
     }
@@ -289,34 +285,32 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
         currentPQ = ProcessQueue_dequeI_next(&pqI);
     }
 
-    if (this->mman->policy == MP_INF) {
-        //>>	Device queue state change checks, If we find a burst that has 
-        //>>	completed, send it to it's next queue destination
-        DeviceDescriptor_dequeI ddI;
-        DeviceDescriptor_dequeI_init(&ddI, &this->devices);
-        DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
-        while (currentDD != NULL) {
-            PCB* requester = DD_hasBurstEndedProcess(currentDD);
-            if (requester != NULL) {
-                char s[16];
-                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "I/O Burst of %s completes\n", PCB_toString(requester, s));
+    //>>	Device queue state change checks, If we find a burst that has 
+    //>>	completed, send it to it's next queue destination
+    DeviceDescriptor_dequeI ddI;
+    DeviceDescriptor_dequeI_init(&ddI, &this->devices);
+    DeviceDescriptor* currentDD = DeviceDescriptor_dequeI_examine(&ddI);
+    while (currentDD != NULL) {
+        PCB* requester = DD_hasBurstEndedProcess(currentDD);
+        if (requester != NULL) {
+            char s[16];
+            this->settings->logger->log(this->settings->logger, LogLevel_INFO, "I/O Burst of %s completes\n", PCB_toString(requester, s));
+            VCPU_doPrintQueues(this, LogLevel_INFO);
+            VCPU_doIODispatcherProcessing(this);
+            if (requester->state != PCB_TERMINATED) {
+                currentDD->state = DD_IDLE;
+                requester->state = PCB_WAITING;
+                ProcessQueue_deque_ProcArrival(&this->queues, requester, this->settings->logger);
                 VCPU_doPrintQueues(this, LogLevel_INFO);
-                VCPU_doIODispatcherProcessing(this);
-                if (requester->state != PCB_TERMINATED) {
-                    currentDD->state = DD_IDLE;
-                    requester->state = PCB_WAITING;
-                    ProcessQueue_deque_ProcArrival(&this->queues, requester, this->settings->logger);
-                    VCPU_doPrintQueues(this, LogLevel_INFO);
-                    VCPU_doCPUDispatcherProcessing(this);
-                } else {
+                VCPU_doCPUDispatcherProcessing(this);
+            } else {
 
-                    this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
-                    PCB_deque_pushL(&this->terminated, requester);
-                    VCPU_doPrintQueues(this, LogLevel_INFO);
-                }
+                this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
+                PCB_deque_pushL(&this->terminated, requester);
+                VCPU_doPrintQueues(this, LogLevel_INFO);
             }
-            currentDD = DeviceDescriptor_dequeI_next(&ddI);
         }
+        currentDD = DeviceDescriptor_dequeI_next(&ddI);
     }
 }
 
@@ -363,9 +357,7 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
  */
 void VCPU_doDispatcherProcessing(VirtualCPU * this) {
     VCPU_doCPUDispatcherProcessing(this);
-    if (this->mman->policy == MP_INF) {
-        VCPU_doIODispatcherProcessing(this);
-    }
+    VCPU_doIODispatcherProcessing(this);
 }
 
 /**
@@ -408,9 +400,7 @@ void VCPU_doSystemWideTick(VirtualCPU * this) {
 
     this->clockTime++;
     ProcessQueue_deque_SystemWideTick(&this->queues, this->settings->logger);
-    if (this->mman->policy == MP_INF) {
-        DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
-    }
+    DeviceDescriptor_deque_SystemWideTick(&this->devices, this->settings->logger);
 }
 
 /**
@@ -425,12 +415,14 @@ int VCPU_getAverageTurnaroundTime(VirtualCPU* this) {
     int ta = 0;
     int num = 0;
     while (process != NULL) {
-
         num++;
         ta += process->turnaround_time;
         process = PCB_dequeI_next(&it);
     }
-    return ta / num;
+    if (num > 0) {
+        return ta / num;
+    }
+    return -1;
 }
 
 /**
@@ -442,12 +434,15 @@ int VCPU_getAverageWaitingTime(VirtualCPU* this) {
     PCB_dequeI it;
     PCB_dequeI_init(&it, &this->terminated);
     PCB* process = PCB_dequeI_examine(&it);
-    int ta = 0;
+    int wt = 0;
     int num = 0;
     while (process != NULL) {
         num++;
-        ta += process->waiting_time;
+        wt += process->waiting_time;
         process = PCB_dequeI_next(&it);
     }
-    return ta / num;
+    if (num > 0) {
+        return wt / num;
+    }
+    return -1;
 }
