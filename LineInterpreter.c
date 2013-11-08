@@ -52,42 +52,52 @@ void SS_processInputLine(SimulationState* this, const char* begin, const char* e
     line[copyend] = 0;
 
     if (SS_hasNonProcessableLine(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     //>>	This now also searches for Memory Size and if found changes the enum state so we can do state++
     //>>	For the Memory Management type of input processing
     if (this->stage == FS_TQ && (SS_processLineForTimeQuantum(this, line, logger) || SS_processLineForMemorySize(this, line, logger))) {
-
-        return;
+        if (!this->error_thrown)
+            return;
     }
     //>>	The above if statement must come before this one b/c ...MemorySize sets a different state if it is found;
     if ((this->stage == FS_PN_NEW || this->stage == FS_TQ) && SS_processLineForNewProcess(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_PN_AT && SS_processLineForProcessArrival(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_PN_SCHEDULE && SS_processLineForProcessSchedule(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     //>>	New For Project 2, defines processing state => action correlation
     if (this->stage == FS_M_MMP && SS_processLineForMemoryPolicy(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_M_PP && SS_processLineForPolicyParams(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_M_PID && SS_processLineForNewProcess(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_M_AT && SS_processLineForProcessArrival(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_M_LIM && SS_processLineForLifetime(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     if (this->stage == FS_M_AS && SS_processLineForAddressSpace(this, line, logger)) {
-        return;
+        if (!this->error_thrown)
+            return;
     }
     this->error_thrown = true;
 }
@@ -198,13 +208,16 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* l
     int found = SS_hasSubString(line, needle);
     if (found == -1)
         return false;
+    int total_size = 0;
     if (this->policy == MP_SEG) {
         //>>	If we see that SEG policy is used, get all peices of address space.
         char** list;
         size_t index, length;
         explode((line + found), " ", &list, &length);
         /* push list to deque */
+
         for (index = 0; index < length; ++index) {
+            total_size += strtol(list[index], NULL, 10);
             AddressSpace* new = AddressSpace_init(strtol(list[index], NULL, 10));
             AddressSpace_deque_pushL(a_space, new);
         }
@@ -214,21 +227,26 @@ bool SS_processLineForAddressSpace(SimulationState * this, char* line, Logger* l
         free(list);
         char param[20];
         char len[20];
-        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
+        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->size);
         sprintf(len, "%zu", length);
-        logger->log(logger, LogLevel_FINER, "\tSeen Address Space - First Elem:\t");
+        logger->log(logger, LogLevel_FINER, "\tSeen Address Space - 1st:");
         logger->log(logger, LogLevel_FINER, param);
-        logger->log(logger, LogLevel_FINER, ", Count:\t");
+        logger->log(logger, LogLevel_FINER, "\n\t\t\t\tCount:\t");
         logger->log(logger, LogLevel_FINER, len);
         logger->log(logger, LogLevel_FINER, "\n");
     } else {
-        AddressSpace* new = AddressSpace_init(strtol((line + found), NULL, 10));
+        total_size = strtol((line + found), NULL, 10);
+        AddressSpace* new = AddressSpace_init(total_size);
         AddressSpace_deque_pushL(a_space, new);
         char param[20];
-        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->param);
+        sprintf(param, "%d", AddressSpace_deque_peekF(a_space)->size);
         logger->log(logger, LogLevel_FINER, "\tSeen Address Space:\t");
         logger->log(logger, LogLevel_FINER, param);
         logger->log(logger, LogLevel_FINER, "\n");
+    }
+    if (total_size > this->memKiloSize) {
+        logger->log(logger, LogLevel_FINER, "Process Size too big!!");
+        this->error_thrown = true;
     }
     this->seen_stage_req = true;
     return true;
