@@ -44,6 +44,7 @@
     \
     type* type##_deque_pollF(type##_deque* container); \
     type* type##_deque_pollL(type##_deque* container); \
+    type* type##_deque_pollN(type##_deque* container, type* data); \
     void type##_deque_freeElements(type##_deque* container); \
     \
     type* type##_deque_peekF(type##_deque* container); \
@@ -123,8 +124,44 @@
         node->prev = newnode; \
     }
 
-// Defines type specific removal functions (pollF, pollL)
+// Defines type specific removal functions (pollN, pollF, pollL)
 #define DEQUE_REMOVAL(type) \
+    type* type##_deque_pollN(type##_deque* container, type* data){ \
+        if (container->head==NULL) { \
+            if (container->trace) \
+                    printf("TRACE:: Polling Node: %s_Deque Empty\n", #type); \
+            return NULL; \
+        } \
+        if (type##_deque_peekF(container) == data) { \
+            return type##_deque_pollF(container); \
+        } \
+        if (type##_deque_peekL(container) == data){ \
+            return type##_deque_pollL(container); \
+        } \
+        type##_dequeN* first = container->head->next; \
+        type##_dequeN* previous = NULL; \
+        while (first != NULL) { \
+            if (first->data == data) { \
+                type##_dequeN* ret = first; \
+                type* data = ret->data; \
+                previous = first->prev; \
+                first = first->next; \
+                previous->next = first; \
+                first->prev = previous; \
+                if (container->head!=NULL) container->head->prev = NULL; \
+                else container->tail=NULL; \
+                free(ret); \
+                if (container->trace) \
+                    printf("TRACE:: Polling Node: %s_Deque !Empty - Found it!\n", #type); \
+                return data; \
+            } \
+            first = first->next; \
+        } \
+        if (container->trace) \
+                    printf("TRACE:: Polling Node: %s_Deque !Empty - NODE NOT FOUND!!\n", #type); \
+        return NULL; \
+    } \
+    \
     type* type##_deque_pollF(type##_deque* container){ \
         if (container->head==NULL){ \
             if (container->trace) \
