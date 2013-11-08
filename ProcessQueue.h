@@ -31,6 +31,7 @@ bool PQ_isRoundRobin(ProcessQueue * this);
 bool PQ_isFCFS(ProcessQueue * this);
 bool PQ_hasWaitingProcess(ProcessQueue * this);
 bool PQ_hasRunningProcess(ProcessQueue * this);
+PCB_deque* PQ_getWaitingProcesses(ProcessQueue * this);
 PCB* PQ_getNextWaitingProcess(ProcessQueue * this);
 PCB* PQ_getNextRunningProcess(ProcessQueue * this);
 PCB* PQ_hasBurstEndedProcess(ProcessQueue * this);
