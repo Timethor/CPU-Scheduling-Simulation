@@ -5,8 +5,9 @@
  * Created on November 4, 2013, 4:23 PM
  */
 
+#define _GNU_SOURCE
+#include <stdlib.h>
 #include <limits.h>
-#include <math.h>
 
 #include "MemoryManager.h"
 
@@ -42,10 +43,6 @@ void MemoryManager_destruct(MemoryManager * this) {
     free(this);
 }
 
-bool MMAN_checkPAGAllocationPotential(MemoryManager* this, PCB* process) {
-    return MMAN_checkVSPAllocationPotential(this, process);
-}
-
 bool MMAN_checkVSPAllocationPotential(MemoryManager* this, PCB* process) {
     int sizeNeeded = AddressSpace_deque_peekF(&process->a_space)->size;
     if (this->policyParams == MFM_BEST && MMAN_getBestFitAllocation(this, sizeNeeded) != NULL)
@@ -55,6 +52,10 @@ bool MMAN_checkVSPAllocationPotential(MemoryManager* this, PCB* process) {
     if (this->policyParams == MFM_FIRST && MMAN_getFirstFitAllocation(this, sizeNeeded) != NULL)
         return true;
     return false;
+}
+
+bool MMAN_checkPAGAllocationPotential(MemoryManager* this, PCB* process) {
+    return MMAN_checkVSPAllocationPotential(this, process);
 }
 
 bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
@@ -156,8 +157,14 @@ MemoryRegion* MMAN_getBestFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        double neededPages = ceil(sizeNeeded / this->policyParams);
-        int currentPages = 0;
+        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        int neededPages = 0;
+        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
+        while (currentPages > 0) {
+            neededPages++;
+            currentPages -= this->policyParams;
+        }
+        currentPages = 0; //>>	Reset to real initial value
         MemoryRegion* current = NULL;
         while (mr != NULL) {
             if (mr->processId == -1) {
@@ -203,7 +210,6 @@ MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager* this, int sizeNeeded) {
     MemoryRegion_dequeI_init(&it, &this->memory);
     MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
     MemoryRegion* fit = NULL;
-    int worstSize = 0;
     if (this->policy == MP_VSP || this->policy == MP_SEG) {
         while (mr != NULL) {
             if (mr->processId == -1 && (mr->kiloEnd - mr->kiloStart + 1 >= sizeNeeded)) {
@@ -213,8 +219,14 @@ MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        double neededPages = ceil(sizeNeeded / this->policyParams);
-        int currentPages = 0;
+        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        int neededPages = 0;
+        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
+        while (currentPages > 0) {
+            neededPages++;
+            currentPages -= this->policyParams;
+        }
+        currentPages = 0; //>>	Reset to real initial value
         MemoryRegion* current = NULL;
         while (mr != NULL) {
             if (mr->processId == -1) {
@@ -264,8 +276,14 @@ MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager* this, int sizeNeeded) {
             mr = MemoryRegion_dequeI_next(&it);
         }
     } else if (this->policy == MP_PAG) {
-        double neededPages = ceil(sizeNeeded / this->policyParams);
-        int currentPages = 0;
+        //>>	Ceiling function in <math.h> wasnt cooperating, i guess this will work :(
+        int neededPages = 0;
+        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
+        while (currentPages > 0) {
+            neededPages++;
+            currentPages -= this->policyParams;
+        }
+        currentPages = 0; //>>	Reset to real initial value
         MemoryRegion* current = NULL;
         while (mr != NULL) {
             if (mr->processId == -1) {
@@ -304,4 +322,35 @@ MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager* this, int sizeNeeded) {
         }
     }
     return worst;
+}
+
+/* === END MESSINESS === */
+
+void MMAN_printMemoryMap(MemoryManager* this, Logger* logger) {
+    MemoryRegion_dequeI it;
+    MemoryRegion_dequeI_init(&it, &this->memory);
+    MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
+    if (this->policy == MP_PAG) {
+        while (mr != NULL) {
+            mr = MemoryRegion_dequeI_next(&it);
+        }
+    }
+}
+
+bool MMAN_allocateProcess(MemoryManager* this, PCB* process) {
+    return false;
+}
+
+void MMAN_deAllocateProcess(MemoryManager* this, PCB* process) {
+    MemoryRegion_dequeI it;
+    MemoryRegion_dequeI_init(&it, &this->memory);
+    MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
+    if (this->policy == MP_PAG) {
+        while (mr != NULL) {
+            if (mr->processId == process->id) {
+                mr->processId = -1;
+            }
+            mr = MemoryRegion_dequeI_next(&it);
+        }
+    }
 }

@@ -9,7 +9,7 @@
 
 #include "MemoryRegion.h"
 
-MemoryRegion* MemoryRegiony_init(int processId, int kiloStart, int kiloEnd) {
+MemoryRegion* MemoryRegion_init(int processId, int kiloStart, int kiloEnd) {
     MemoryRegion* this = malloc(sizeof (*this));
     this->processId = processId;
     this->kiloStart = kiloStart;

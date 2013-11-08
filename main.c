@@ -66,9 +66,6 @@ int main(int argc, char** argv) {
     //>>	doClockCycle will be called until the program thinks it is done. Th-
     //>>	en it will run one more time to ensure it was right.
     bool haveWorkToDo = true;
-        
-    output(set);
-    return EXIT_SUCCESS;
     
     while (!PCB_deque_empty(&ss->notYetArrived) || haveWorkToDo) {
         haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
