@@ -16,10 +16,17 @@
 #include "Settings.h"
 #include "MemoryRegionList.h"
 
+enum MemoryFitMode {
+    MFM_FIRST = 0,
+    MFM_BEST,
+    MFM_WORST
+};
+
 typedef struct MemoryManager {
     enum MemoryPolicy policy;
     int memKiloSize;
     int policyParams;
+    int freeSpace;
     MemoryRegion_deque memory;
 } MemoryManager;
 
@@ -28,6 +35,11 @@ typedef struct MemoryManager {
 //>>	Construct & Destruct
 MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params);
 void MemoryManager_destruct(MemoryManager * this);
+
+bool MMAN_checkAllocationPotential(MemoryManager * this, PCB* process);
+MemoryRegion* MMAN_getBestFitAllocation(MemoryManager * this, int sizeNeeded);
+MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager * this, int sizeNeeded);
+MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager * this, int sizeNeeded);
 
 #endif	/* MEMORYMANAGER_H */
 

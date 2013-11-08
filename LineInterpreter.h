@@ -29,7 +29,7 @@ enum FormatStage {
 
 
 enum MemoryPolicy {
-    MP_INF,
+    MP_INF = -1,
     MP_VSP,
     MP_PAG,
     MP_SEG
