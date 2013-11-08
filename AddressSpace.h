@@ -9,11 +9,11 @@
 #define	ADDRESSSPACE_H
 
 typedef struct AddressSpace {
-    int param;
+    int size;
 } AddressSpace;
 
 //>>	Construct / Destruct
-AddressSpace* AddressSpace_init(int param);
+AddressSpace* AddressSpace_init(int size);
 void AddressSpace_destruct(AddressSpace * this);
 
 #endif	/* ADDRESSSPACE_H */

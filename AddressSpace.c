@@ -10,9 +10,9 @@
 
 #include "AddressSpace.h"
 
-AddressSpace* AddressSpace_init(int param) {
+AddressSpace* AddressSpace_init(int size) {
     AddressSpace* this = malloc(sizeof (*this));
-    this->param = param;
+    this->size = size;
     return this;
 }
 
