@@ -24,7 +24,6 @@ ProcessQueue* VCPU_getHighestRunningProcessQueue(VirtualCPU * this);
 void VCPU_doPreemptProcess(VirtualCPU * this);
 void VCPU_doCheckProcessStateChange(VirtualCPU * this);
 void VCPU_doProcessArrivingProcesses(VirtualCPU * this, PCB_deque* notYetArrived);
-void VCPU_doMemoryManagement(VirtualCPU * this);
 void VCPU_doDispatcherProcessing(VirtualCPU * this);
 void VCPU_doCPUDispatcherProcessing(VirtualCPU * this);
 void VCPU_doIODispatcherProcessing(VirtualCPU * this);
@@ -72,6 +71,7 @@ void VirtualCPU_destruct(VirtualCPU* this) {
  */
 void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     void(*LogPrintf) (Logger*, enum LogLevel, const char*, ...) = this->settings->logger->log;
+    this->mman = MemoryManager_init(istate->policy, istate->memKiloSize, istate->policyParams);
     if (ProcessQueue_deque_length(&istate->proto_queues) == 0) {
         if (istate->addFCFSToEnd) {
 
@@ -108,7 +108,6 @@ void VCPU_MergeWithInputState(VirtualCPU* this, SimulationState* istate) {
     LogPrintf(this->settings->logger, LogLevel_CONFIG, "Initial Queue Status::\n");
     ProcessQueue_deque_print(&this->queues, this->settings->logger, LogLevel_CONFIG);
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, LogLevel_CONFIG);
-    this->mman = MemoryManager_init(istate->policy, istate->memKiloSize, istate->policyParams);
 }
 
 /**
@@ -206,8 +205,6 @@ bool VCPU_doClockCycle(VirtualCPU* this, PCB_deque* notYetArrived) {
     VCPU_doProcessArrivingProcesses(this, notYetArrived);
     //>>	Grab a process from Ready Queues
     VCPU_doDispatcherProcessing(this);
-    //>>	Do MemManager processing
-    VCPU_doMemoryManagement(this);
     //>>	Do a system wide tick for all nodes in all queues
     VCPU_doSystemWideTick(this);
 
@@ -286,7 +283,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doIODispatcherProcessing(this);
             } else {
                 //>>	Here our process is ending so lets unload it from memory
-                MMAN_deAllocateProcess(this->mman, requester);
+                //>>	MMAN_deAllocateProcess(this->mman, requester, this->settings->logger);
                 this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
                 PCB_deque_pushL(&this->terminated, requester);
                 VCPU_doPrintQueues(this, LogLevel_INFO);
@@ -350,10 +347,6 @@ void VCPU_doProcessArrivingProcesses(VirtualCPU* this, PCB_deque* notYetArrived)
     }
 }
 
-void VCPU_doMemoryManagement(VirtualCPU* this) {
-
-}
-
 /*
  *  Can we find a ready queue that is running?
  *      yes: no need to dispatch
@@ -394,16 +387,20 @@ void VCPU_doCPUDispatcherProcessing(VirtualCPU * this) {
         ProcessQueue_dequeI pqI;
         ProcessQueue_dequeI_init(&pqI, &this->queues);
         ProcessQueue* waiting = VCPU_getHighestWaitingProcessQueue(this);
-        if (waiting != NULL) {
+        if (waiting != NULL) { //>>	Start all processes that are waiting
             //>>	Only start a process if there is enough memory
-            PCB* waitingProc = PQ_getNextWaitingProcess(waiting);
-            if (MMAN_checkAllocationPotential(this->mman, waitingProc) && MMAN_allocateProcess(this->mman, waitingProc)) {
-                //>>	
-                PQ_startWaitingProcess(waiting, this->settings->logger);
+            PCB_deque* waitingList = PQ_getWaitingProcesses(waiting);
+            PCB* waitingProc = PCB_deque_pollF(waitingList);
+            while (waitingProc != NULL){
+                if (MMAN_checkAllocationPotential(this->mman, waitingProc) && MMAN_allocateProcess(this->mman, waitingProc, this->settings->logger)) {
+                    PQ_startWaitingProcess(waiting, this->settings->logger);
+                    VCPU_doPrintQueues(this, LogLevel_INFO);
+                    char s[16];
+                    this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s starts running\n", PCB_toString(waitingProc, s));
+                }
+                waitingProc = PCB_deque_pollF(waitingList);
             }
-            VCPU_doPrintQueues(this, LogLevel_INFO);
-            char s[16];
-            this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s starts running\n", PCB_toString(PCB_deque_peekF(&waiting->queue), s));
+            free(waitingList);
         }
     }
 }
