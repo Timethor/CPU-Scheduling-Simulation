@@ -50,9 +50,9 @@ int MR_getSize(MemoryRegion* this) {
     return this->kiloEnd - this->kiloStart;
 }
 
-char* MR_toString(MemoryRegion* this, char* buffer) {
+char* MR_toString(MemoryRegion* this, char* buffer, const char* holeName) {
     if (this->processId == -1) {
-        sprintf(buffer, "Hole");
+        sprintf(buffer, holeName);
     } else {
         if (this->partition == -1)
             sprintf(buffer, "Process %2d", this->processId);

@@ -45,6 +45,7 @@ VirtualCPU* VirtualCPU_init(SimulationState* istate, Settings* settings) {
     this->getAvgWaitingTime = VCPU_getAverageWaitingTime;
     DeviceDescriptor_deque_init(&this->devices, false, false);
     ProcessQueue_deque_init(&this->queues, false, false);
+    PCB_deque_init(&this->terminated, false, false);
     this->settings->logger->log(this->settings->logger, LogLevel_CONFIG, "\tStarting SYNC-MERGE\n");
     VCPU_MergeWithInputState(this, istate);
     return this;
@@ -280,7 +281,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doIODispatcherProcessing(this);
             } else {
                 //>>	Here our process is ending so lets unload it from memory
-                MMAN_deAllocateProcess(this->mman, requester, this->settings->logger);
+                MMAN_deAllocateProcess(this->mman, requester->id);
                 this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
                 PCB_deque_pushL(&this->terminated, requester);
                 VCPU_doPrintQueues(this, LogLevel_INFO);

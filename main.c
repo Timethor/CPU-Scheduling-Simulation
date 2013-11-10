@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     Printf(set->logger, LogLevel_CONFIG, "\tCompleted Input File Read!\n");
-    
+
     Printf(set->logger, LogLevel_CONFIG, "============== INIT V-CPU! ==============\n");
 
     VirtualCPU* cpu = VirtualCPU_init(ss, set);
@@ -66,14 +66,16 @@ int main(int argc, char** argv) {
     //>>	doClockCycle will be called until the program thinks it is done. Th-
     //>>	en it will run one more time to ensure it was right.
     bool haveWorkToDo = true;
-    
+
     while (!PCB_deque_empty(&ss->notYetArrived) || haveWorkToDo) {
         haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         if (!haveWorkToDo) {
             haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         }
-        if (cpu->clockTime > 100000){
-            Printf(set->logger, LogLevel_CONFIG, "Probably have an inf loop sir :\\\n");
+        //>>	This is no longer needed as it was helpful in testing implementation,
+        //>>	but it is good to have in just in case...
+        if (cpu->clockTime > 250000) {
+            Printf(set->logger, LogLevel_CONFIG, "Simulation never ends! Ending for you.\\n");
             break;
         }
     }
@@ -85,8 +87,12 @@ int main(int argc, char** argv) {
     Printf(set->logger, LogLevel_INFO, "Average Waiting Time    : %5d", cpu->getAvgWaitingTime(cpu));
     Printf(set->logger, LogLevel_INFO, "Average Turnaround Time : %5d\n\n", cpu->getAvgTurnAroundTime(cpu));
 
-    output(set);
 
+    if (!set->optfileProvided) {
+        Printf(set->logger, LogLevel_INFO, "\nREMINDER:: Output file not provided, defaulting to %s\n", set->jobOutputName);
+    }
+    output(set);
+    
     //>>	These _destruct functions are the opposite of the _init functions...
     //>>	Anything malloc'ed will be free'd, any lists will be emptied and the
     //>>	Associated object type will have it's _destruct function called, and
@@ -110,9 +116,7 @@ int main(int argc, char** argv) {
 
 void output(Settings* set) {
     char* toFileText = set->logger->doPrintResults(set->logger);
-    if (!set->optfileProvided) {
-        fprintf(stderr, "\nREMINDER:: Output file not provided, defaulting to %s\n", set->jobOutputName);
-    }
+
     //>>	Write the huge char* to file and free it!
     FW_write_lines(set, toFileText);
     free(toFileText);

@@ -25,7 +25,7 @@ MemoryRegion* MemoryRegion_initPag(int processId, int kiloStart, int kiloEnd, in
 void MemoryRegion_destruct(MemoryRegion * this);
 
 int MR_getSize(MemoryRegion* this);
-char* MR_toString(MemoryRegion* this, char* buffer);
+char* MR_toString(MemoryRegion* this, char* buffer, const char* holeName);
 void MR_reset(MemoryRegion* this);
 
 #endif	/* MEMORYREGION_H */

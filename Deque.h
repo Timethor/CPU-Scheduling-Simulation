@@ -73,16 +73,10 @@
     \
     void type##_deque_pushF(type##_deque * container, type* data) { \
         if (data == NULL){ \
-            if (container->trace) \
-                printf("ERROR:: Pushing NULL not allowed: %s_Deque Empty\n", #type); \
         } \
         if (container->head==NULL) { \
-            if (container->trace) \
-                printf("TRACE:: Pushing to First Place: %s_Deque Empty\n", #type); \
             type##_deque_first_insert(container, data); \
         } else { \
-            if (container->trace) \
-                printf("TRACE:: Pushing to First Place: %s_Deque !Empty\n", #type); \
             type##_deque_pushB(container, container->head, data); \
         } \
     } \
@@ -102,16 +96,10 @@
     \
     void type##_deque_pushL(type##_deque * container, type* data) { \
         if (data == NULL){ \
-            if (container->trace) \
-                printf("ERROR:: Pushing NULL not allowed: %s_Deque Empty\n", #type); \
         } \
         if (container->tail==NULL) { \
-            if (container->trace) \
-                printf("TRACE:: Pushing to Last Place: %s_Deque Empty\n", #type); \
             type##_deque_first_insert(container, data); \
         } else { \
-            if (container->trace) \
-                printf("TRACE:: Pushing to Last Place: %s_Deque !Empty\n", #type); \
             type##_deque_pushA(container, container->tail, data); \
         } \
     } \
@@ -133,8 +121,6 @@
 #define DEQUE_REMOVAL(type) \
     type* type##_deque_pollN(type##_deque* container, type* data){ \
         if (container->head==NULL) { \
-            if (container->trace) \
-                    printf("TRACE:: Polling Node: %s_Deque Empty\n", #type); \
             return NULL; \
         } \
         if (type##_deque_peekF(container) == data) { \
@@ -156,21 +142,15 @@
                 if (container->head!=NULL) container->head->prev = NULL; \
                 else container->tail=NULL; \
                 free(ret); \
-                if (container->trace) \
-                    printf("TRACE:: Polling Node: %s_Deque !Empty - Found it!\n", #type); \
                 return data; \
             } \
             first = first->next; \
         } \
-        if (container->trace) \
-                    printf("TRACE:: Polling Node: %s_Deque !Empty - NODE NOT FOUND!!\n", #type); \
         return NULL; \
     } \
     \
     type* type##_deque_pollF(type##_deque* container){ \
         if (container->head==NULL){ \
-            if (container->trace) \
-                    printf("TRACE:: Polling First Place: %s_Deque Empty\n", #type); \
             return NULL; \
         } \
         type##_dequeN* first = container->head; \
@@ -179,15 +159,11 @@
         if (container->head!=NULL) container->head->prev = NULL; \
         else container->tail=NULL; \
         free(first); \
-        if (container->trace) \
-                    printf("TRACE:: Polling First Place: %s_Deque !Empty\n", #type); \
         return data; \
     } \
     \
     type* type##_deque_pollL(type##_deque* container){ \
         if (container->tail==NULL) { \
-            if (container->trace) \
-                        printf("TRACE:: Polling Last Place: %s_Deque Empty\n", #type); \
             return NULL; \
         } \
         type##_dequeN* last = container->tail; \
@@ -196,8 +172,6 @@
         if (container->tail==NULL) container->head=NULL; \
         else container->tail->next = NULL; \
         free(last); \
-        if (container->trace) \
-                    printf("TRACE:: Polling Last Place: %s_Deque !Empty\n", #type); \
         return data; \
     } \
     \
@@ -212,12 +186,8 @@
 #define DEQUE_STATUS(type) \
     bool type##_deque_empty(type##_deque* container){ \
         if (container->head==NULL) { \
-            if (container->trace) \
-                        printf("TRACE:: Checking Empty?: %s_Deque Empty\n", #type); \
             return true; \
         } \
-        if (container->trace) \
-                        printf("TRACE:: Checking Empty?: %s_Deque !Empty\n", #type); \
         return false; \
     } \
     \
@@ -243,8 +213,6 @@
     \
     type##_dequeN* type##_deque_getCar(type##_deque* container, type* data){ \
         if (container->head==NULL) { \
-            if (container->trace) \
-                    printf("TRACE:: Getting Car: %s_Deque Empty\n", #type); \
             return NULL; \
         } \
         if (type##_deque_peekF(container) == data) { \
@@ -256,14 +224,10 @@
         type##_dequeN* first = container->head->next; \
         while (first != NULL) { \
             if (first->data == data) { \
-                if (container->trace) \
-                    printf("TRACE:: Getting Car: %s_Deque !Empty - Found it!\n", #type); \
                 return first; \
             } \
             first = first->next; \
         } \
-        if (container->trace) \
-                    printf("TRACE:: Getting Car: %s_Deque !Empty - NODE NOT FOUND!!\n", #type); \
         return NULL; \
     } \
     \

@@ -36,15 +36,12 @@ MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params
 void MemoryManager_destruct(MemoryManager * this);
 
 bool MMAN_checkAllocationPotential(MemoryManager * this, PCB* process);
-MemoryRegion* MMAN_getBestFitAllocation(MemoryManager * this, int sizeNeeded);
-MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager * this, int sizeNeeded);
-MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager * this, int sizeNeeded);
-MemoryRegion_deque* MMAN_getPageFitAllocation(MemoryManager* this, int sizeNeeded);
+MemoryRegion* MMAN_getFitAllocation(MemoryManager * this, int sizeNeeded);
+MemoryRegion_deque* MMAN_getPageFitAllocation(MemoryManager * this, int sizeNeeded);
 
-void MMAN_printMemoryMap(MemoryManager* this, Logger* logger);
-bool MMAN_allocateProcess(MemoryManager* this, PCB* process, Logger* logger);
-void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger);
-void MMAN_coaleseMemory(MemoryManager* this, MemoryRegion* data, Logger* logger);
+void MMAN_printMemoryMap(MemoryManager * this, Logger* logger);
+bool MMAN_allocateProcess(MemoryManager * this, PCB* process, Logger* logger);
+void MMAN_deAllocateProcess(MemoryManager * this, int id);
 
 #endif	/* MEMORYMANAGER_H */
 

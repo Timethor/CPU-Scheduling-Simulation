@@ -240,7 +240,7 @@ void PQ_printQueue(ProcessQueue* this, Logger* logs, enum LogLevel level) {
         PCB* pcb = PCB_dequeI_examine(&it);
         if (pcb == NULL)
             break;
-        if (pcb->state != PCB_RUNNING) {
+        if (pcb->state == PCB_WAITING || pcb->state == PCB_NEW) {
             char s[16];
             if (PCB_dequeI_next(&it) != NULL) {
                 sprintf(buffer2, "%s, ", PCB_toString(pcb, s));
