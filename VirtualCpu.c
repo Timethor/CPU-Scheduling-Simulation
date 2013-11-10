@@ -182,9 +182,6 @@ bool VCPU_canEnd(VirtualCPU* this) {
 void VCPU_doPrintQueues(VirtualCPU* this, enum LogLevel level) {
     ProcessQueue_deque_print(&this->queues, this->settings->logger, level);
     DeviceDescriptor_deque_print(&this->devices, this->settings->logger, level);
-    if (this->mman->policy != MP_INF) {
-        MMAN_printMemoryMap(this->mman, this->settings->logger);
-    }
 }
 
 //>>	=== The Bread & butter ==   <<//
@@ -271,11 +268,11 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
     ProcessQueue* currentPQ = ProcessQueue_dequeI_examine(&pqI);
     while (currentPQ != NULL) {
         PCB* requester = PQ_hasBurstEndedProcess(currentPQ);
-        if (requester != NULL) {
+        //>>	Do till there are no more terminating processes
+        while (requester != NULL) {
             char s[16];
             this->settings->logger->log(this->settings->logger, LogLevel_INFO, "CPU Burst of %s completes\n", PCB_toString(requester, s));
             VCPU_doPrintQueues(this, LogLevel_INFO);
-            VCPU_doCPUDispatcherProcessing(this);
             if (requester->state != PCB_TERMINATED) {
                 requester->state = PCB_WAITING;
                 DeviceDescriptor_deque_ProcArrival(&this->devices, requester, this->settings->logger);
@@ -283,12 +280,15 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doIODispatcherProcessing(this);
             } else {
                 //>>	Here our process is ending so lets unload it from memory
-                //>>	MMAN_deAllocateProcess(this->mman, requester, this->settings->logger);
+                MMAN_deAllocateProcess(this->mman, requester, this->settings->logger);
                 this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s completes, turnaround is %d cycles, waiting for %d cycles, running for %d\n", PCB_toString(requester, s), requester->turnaround_time, requester->waiting_time, requester->turnaround_time - requester->waiting_time);
                 PCB_deque_pushL(&this->terminated, requester);
                 VCPU_doPrintQueues(this, LogLevel_INFO);
+                MMAN_printMemoryMap(this->mman, this->settings->logger);
             }
+            requester = PQ_hasBurstEndedProcess(currentPQ);
         }
+        VCPU_doCPUDispatcherProcessing(this);
         currentPQ = ProcessQueue_dequeI_next(&pqI);
     }
 
@@ -303,7 +303,6 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
             char s[16];
             this->settings->logger->log(this->settings->logger, LogLevel_INFO, "I/O Burst of %s completes\n", PCB_toString(requester, s));
             VCPU_doPrintQueues(this, LogLevel_INFO);
-            VCPU_doIODispatcherProcessing(this);
             if (requester->state != PCB_TERMINATED) {
                 currentDD->state = DD_IDLE;
                 requester->state = PCB_WAITING;
@@ -316,6 +315,7 @@ void VCPU_doCheckProcessStateChange(VirtualCPU* this) {
                 VCPU_doPrintQueues(this, LogLevel_INFO);
             }
         }
+        VCPU_doIODispatcherProcessing(this);
         currentDD = DeviceDescriptor_dequeI_next(&ddI);
     }
 }
@@ -391,11 +391,12 @@ void VCPU_doCPUDispatcherProcessing(VirtualCPU * this) {
             //>>	Only start a process if there is enough memory
             PCB_deque* waitingList = PQ_getWaitingProcesses(waiting);
             PCB* waitingProc = PCB_deque_pollF(waitingList);
-            while (waitingProc != NULL){
+            while (waitingProc != NULL) {
                 if (MMAN_checkAllocationPotential(this->mman, waitingProc) && MMAN_allocateProcess(this->mman, waitingProc, this->settings->logger)) {
-                    PQ_startWaitingProcess(waiting, this->settings->logger);
-                    VCPU_doPrintQueues(this, LogLevel_INFO);
                     char s[16];
+                    MMAN_printMemoryMap(this->mman, this->settings->logger);
+                    PQ_startWaitingProcess_Specific(waiting, waitingProc, this->settings->logger);
+                    VCPU_doPrintQueues(this, LogLevel_INFO);
                     this->settings->logger->log(this->settings->logger, LogLevel_INFO, "%s starts running\n", PCB_toString(waitingProc, s));
                 }
                 waitingProc = PCB_deque_pollF(waitingList);

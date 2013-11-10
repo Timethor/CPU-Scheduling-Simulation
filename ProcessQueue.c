@@ -45,7 +45,7 @@ void ProcessQueue_destruct(ProcessQueue* this) {
 }
 
 PCB_deque* PQ_getWaitingProcesses(ProcessQueue * this) {
-    PCB_deque* waitingList = malloc(sizeof(PCB_deque));
+    PCB_deque* waitingList = malloc(sizeof (PCB_deque));
     PCB_deque_init(waitingList, false, false);
     if (!this->hasMultiProcessor) {
         PCB* firstInQueue = PCB_deque_peekF(&this->queue);
@@ -160,21 +160,64 @@ void PQ_systemWideTick(ProcessQueue* this, Logger* logs) {
 }
 
 void PQ_stopRunningProcess(ProcessQueue* this, Logger* logs) {
-    PCB* firstInQueue = PQ_getNextRunningProcess(this);
-    if (firstInQueue != NULL && firstInQueue->state == PCB_RUNNING) {
-        char s[16];
-        logs->log(logs, LogLevel_INFO, "%s is preempted\n", PCB_toString(firstInQueue, s));
-        firstInQueue->state = PCB_WAITING;
+    if (!this->hasMultiProcessor) {
+        PCB* firstInQueue = PQ_getNextRunningProcess(this);
+        if (firstInQueue != NULL && firstInQueue->state == PCB_RUNNING) {
+            char s[16];
+            logs->log(logs, LogLevel_INFO, "%s is preempted\n", PCB_toString(firstInQueue, s));
+            firstInQueue->state = PCB_WAITING;
+        }
+    } else {
+        PCB_dequeI it;
+        PCB_dequeI_init(&it, &this->queue);
+        PCB* pcb = PCB_dequeI_examine(&it);
+        while (pcb != NULL) {
+            if (pcb != NULL && pcb->state == PCB_RUNNING) {
+                char s[16];
+                logs->log(logs, LogLevel_INFO, "%s is preempted\n", PCB_toString(pcb, s));
+                pcb->state = PCB_WAITING;
+            }
+            pcb = PCB_dequeI_next(&it);
+        }
     }
 }
 
 void PQ_startWaitingProcess(ProcessQueue* this, Logger* logs) {
-    PCB* firstInQueue = PQ_getNextWaitingProcess(this);
-    if (firstInQueue != NULL && firstInQueue->state == PCB_WAITING) {
-        char s[16];
-        logs->log(logs, LogLevel_INFO, "Dispatcher moves %s to Running State\n", PCB_toString(firstInQueue, s));
-        firstInQueue->state = PCB_RUNNING;
+    if (!this->hasMultiProcessor) {
+        PCB* firstInQueue = PQ_getNextWaitingProcess(this);
+        if (firstInQueue != NULL && firstInQueue->state == PCB_WAITING) {
+            char s[16];
+            logs->log(logs, LogLevel_INFO, "Dispatcher moves %s to Running State\n", PCB_toString(firstInQueue, s));
+            firstInQueue->state = PCB_RUNNING;
+        }
+    } else {
+        PCB_dequeI it;
+        PCB_dequeI_init(&it, &this->queue);
+        PCB* pcb = PCB_dequeI_examine(&it);
+        while (pcb != NULL) {
+            if (pcb != NULL && pcb->state == PCB_WAITING) {
+                char s[16];
+                logs->log(logs, LogLevel_INFO, "Dispatcher moves %s to Running State\n", PCB_toString(pcb, s));
+                pcb->state = PCB_RUNNING;
+            }
+            pcb = PCB_dequeI_next(&it);
+        }
     }
+}
+
+void PQ_startWaitingProcess_Specific(ProcessQueue* this, PCB* process, Logger* logs) {
+    PCB_dequeI it;
+    PCB_dequeI_init(&it, &this->queue);
+    PCB* pcb = PCB_dequeI_examine(&it);
+    while (pcb != NULL) {
+        if (pcb == process && pcb->state == PCB_WAITING) {
+            char s[16];
+            logs->log(logs, LogLevel_INFO, "Dispatcher moves %s to Running State\n", PCB_toString(pcb, s));
+            pcb->state = PCB_RUNNING;
+        }
+        pcb = PCB_dequeI_next(&it);
+    }
+
 }
 
 void PQ_enqueueProcess(ProcessQueue* this, PCB* process, Logger* logs) {

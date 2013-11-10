@@ -72,6 +72,10 @@ int main(int argc, char** argv) {
         if (!haveWorkToDo) {
             haveWorkToDo = cpu->doClockCycle(cpu, &ss->notYetArrived);
         }
+        if (cpu->clockTime > 100000){
+            Printf(set->logger, LogLevel_CONFIG, "Probably have an inf loop sir :\\\n");
+            break;
+        }
     }
     //>>	Printing the Calculated values  at the end
 

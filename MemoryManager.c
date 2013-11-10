@@ -8,6 +8,7 @@
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <limits.h>
+#include <unistd.h>
 
 #include "MemoryManager.h"
 
@@ -16,23 +17,19 @@ MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params
     this->memKiloSize = size;
     this->policy = policy;
     this->policyParams = params;
-    this->freeSpace = (this->policy == MP_INF ? INT_MAX : 0);
     MemoryRegion_deque_init(&this->memory, false, false);
     if (policy == MP_PAG) {
         int index = 0;
-        while (index + params < size - 1) {
+        while (index + params <= size) {
             MemoryRegion* new = MemoryRegion_init(-1, index, index + (params - 1));
             MemoryRegion_deque_pushL(&this->memory, new);
             index += params;
-            //>>	Free space shall be calculated based on page size * number of pages
-            this->freeSpace += params;
         }
         //>>	Do paging setup
     } else if (policy == MP_INF) {
         //>>	Do setup for infinite memory, i.e. NOTHING :D
     } else if (policy == MP_SEG || policy == MP_VSP) {
         //>>	Do setup generic setup
-        this->freeSpace = size;
         MemoryRegion* new = MemoryRegion_init(-1, 0, size - 1);
         MemoryRegion_deque_pushL(&this->memory, new);
     }
@@ -40,10 +37,18 @@ MemoryManager* MemoryManager_init(enum MemoryPolicy policy, int size, int params
 }
 
 void MemoryManager_destruct(MemoryManager * this) {
+    MemoryRegion_deque_freeElements(&this->memory);
     free(this);
 }
 
 MemoryRegion* MMAN_getVSPAllocation(MemoryManager* this, PCB* process) {
+    if (process == NULL) {
+        return NULL;
+    }
+    AddressSpace* as = AddressSpace_deque_peekF(&process->a_space);
+    if (as == NULL) {
+        return NULL;
+    }
     int sizeNeeded = AddressSpace_deque_peekF(&process->a_space)->size;
     MemoryRegion* fit = NULL;
     if (this->policyParams == MFM_BEST)
@@ -59,12 +64,14 @@ bool MMAN_checkVSPAllocationPotential(MemoryManager* this, PCB* process) {
     return MMAN_getVSPAllocation(this, process) == NULL ? false : true;
 }
 
-MemoryRegion* MMAN_getPAGAllocation(MemoryManager* this, PCB* process) {
-    return MMAN_getVSPAllocation(this, process);
+MemoryRegion_deque* MMAN_getPAGAllocation(MemoryManager* this, PCB* process) {
+    int sizeNeeded = AddressSpace_deque_peekF(&process->a_space)->size;
+    return MMAN_getPageFitAllocation(this, sizeNeeded);
 }
 
 bool MMAN_checkPAGAllocationPotential(MemoryManager* this, PCB* process) {
-    return MMAN_checkVSPAllocationPotential(this, process);
+    int sizeNeeded = AddressSpace_deque_peekF(&process->a_space)->size;
+    return MMAN_getPageFitAllocation(this, sizeNeeded) == NULL ? false : true;
 }
 
 MemoryRegion_deque* MMAN_getSEGAllocation(MemoryManager* this, PCB* process) {
@@ -80,7 +87,6 @@ MemoryRegion_deque* MMAN_getSEGAllocation(MemoryManager* this, PCB* process) {
                 allAllocated = false;
                 break;
             }
-            seg->processId = -2;
             MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
         }
@@ -91,7 +97,6 @@ MemoryRegion_deque* MMAN_getSEGAllocation(MemoryManager* this, PCB* process) {
                 allAllocated = false;
                 break;
             }
-            seg->processId = -2;
             MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
         }
@@ -102,18 +107,12 @@ MemoryRegion_deque* MMAN_getSEGAllocation(MemoryManager* this, PCB* process) {
                 allAllocated = false;
                 break;
             }
-            seg->processId = -2;
             MemoryRegion_deque_pushL(segments, seg);
             as = AddressSpace_dequeI_next(&it);
-        }
+        }  
     }
     if (!allAllocated) {
-        MemoryRegion* r = MemoryRegion_deque_pollF(segments);
-        while (r != NULL) {
-            //>>	reset and delink prospective nodes
-            r->processId = -1;
-            r = MemoryRegion_deque_pollF(segments);
-        }
+        MemoryRegion_deque_empty(segments);
         free(segments);
         return NULL;
     }
@@ -126,7 +125,7 @@ bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
         MemoryRegion * r = MemoryRegion_deque_pollF(segments);
         while (r != NULL) {
             //>>	reset and delink prospective nodes
-            r->processId = -1;
+            MR_reset(r);
             r = MemoryRegion_deque_pollF(segments);
         }
         free(segments);
@@ -136,18 +135,6 @@ bool MMAN_checkSEGAllocationPotential(MemoryManager* this, PCB* process) {
 }
 
 bool MMAN_checkAllocationPotential(MemoryManager* this, PCB* process) {
-    AddressSpace_dequeI it;
-    AddressSpace_dequeI_init(&it, &process->a_space);
-    AddressSpace* as = AddressSpace_dequeI_examine(&it);
-    int totalAddressSize = 0;
-    while (as != NULL) {
-        totalAddressSize += as->size;
-        as = AddressSpace_dequeI_next(&it);
-    }
-    if (this->freeSpace < totalAddressSize) {
-        return false;
-    }
-    //>>	END basic Check
     if (this->policy == MP_PAG) {
         return MMAN_checkPAGAllocationPotential(this, process);
     }
@@ -163,35 +150,17 @@ bool MMAN_checkAllocationPotential(MemoryManager* this, PCB* process) {
     return false;
 }
 
-bool MMAN_getAllocation(MemoryManager* this, PCB* process) {
-    AddressSpace_dequeI it;
-    AddressSpace_dequeI_init(&it, &process->a_space);
-    AddressSpace* as = AddressSpace_dequeI_examine(&it);
-    int totalAddressSize = 0;
-    while (as != NULL) {
-        totalAddressSize += as->size;
-        as = AddressSpace_dequeI_next(&it);
-    }
-    if (this->freeSpace < totalAddressSize) {
-        return false;
-    }
-    //>>	END basic Check
-    if (this->policy == MP_PAG && MMAN_checkPAGAllocationPotential(this, process)) {
-        return MMAN_checkPAGAllocationPotential(this, process);
-    }
-    if (this->policy == MP_SEG) {
-        return MMAN_checkSEGAllocationPotential(this, process);
-    }
-    if (this->policy == MP_VSP) {
-        return MMAN_checkVSPAllocationPotential(this, process);
-    }
-    if (this->policy == MP_INF) {
-        return true;
-    }
-    return false;
-}
-
 /* === This section is messy and could be refactored to less code but it works well for now === */
+
+int MMAN_getNumPagesNeeded(MemoryManager* this, int sizeNeeded) {
+    //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
+    int neededPages = 0;
+    while (sizeNeeded > 0) {
+        neededPages++;
+        sizeNeeded -= this->policyParams;
+    }
+    return neededPages;
+}
 
 MemoryRegion* MMAN_getBestFitAllocation(MemoryManager* this, int sizeNeeded) {
     MemoryRegion_dequeI it;
@@ -210,51 +179,6 @@ MemoryRegion* MMAN_getBestFitAllocation(MemoryManager* this, int sizeNeeded) {
             }
             mr = MemoryRegion_dequeI_next(&it);
         }
-    } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
-        int neededPages = 0;
-        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
-        while (currentPages > 0) {
-            neededPages++;
-            currentPages -= this->policyParams;
-        }
-        currentPages = 0; //>>	Reset to real initial value
-        MemoryRegion* current = NULL;
-        while (mr != NULL) {
-            if (mr->processId == -1) {
-                //>>	Empty hole
-                if (currentPages == 0) {
-                    //>>	Starting to find big enough hole
-                    current = mr;
-                }
-                currentPages++;
-            } else if (currentPages != 0) {
-                //>>	Exiting an empty hole
-                if (currentPages >= neededPages) {
-                    if (currentPages < bestSize) {
-                        bestSize = currentPages;
-                        best = current;
-                    }
-                } else {
-                    current = NULL;
-                    currentPages = 0;
-                }
-            }
-            if (currentPages == neededPages) {
-                return current;
-            }
-            mr = MemoryRegion_dequeI_next(&it);
-        }
-        //>>	Make sure we get holes at the end of the space
-        if (currentPages >= neededPages) {
-            if (currentPages < bestSize) {
-                bestSize = currentPages;
-                best = current;
-            }
-        } else {
-            current = NULL;
-            currentPages = 0;
-        }
     }
     return best;
 }
@@ -272,44 +196,9 @@ MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager* this, int sizeNeeded) {
             }
             mr = MemoryRegion_dequeI_next(&it);
         }
-    } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
-        int neededPages = 0;
-        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
-        while (currentPages > 0) {
-            neededPages++;
-            currentPages -= this->policyParams;
-        }
-        currentPages = 0; //>>	Reset to real initial value
-        MemoryRegion* current = NULL;
-        while (mr != NULL) {
-            if (mr->processId == -1) {
-                //>>	Empty hole
-                if (currentPages == 0) {
-                    //>>	Starting to find big enough hole
-                    current = mr;
-                }
-                currentPages++;
-            } else if (currentPages != 0) {
-                //>>	Exiting an empty hole
-                if (currentPages >= neededPages) {
-                    return current;
-                } else {
-                    current = NULL;
-                    currentPages = 0;
-                }
-            }
-            mr = MemoryRegion_dequeI_next(&it);
-        }
-        //>>	Make sure we get holes at the end of the space
-        if (currentPages >= neededPages) {
-            return fit;
-        } else {
-            current = NULL;
-            currentPages = 0;
-        }
     }
     return fit;
+
 }
 
 MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager* this, int sizeNeeded) {
@@ -329,53 +218,35 @@ MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager* this, int sizeNeeded) {
             }
             mr = MemoryRegion_dequeI_next(&it);
         }
-    } else if (this->policy == MP_PAG) {
-        //>>	Ceiling function in <math.h> wasn't cooperating, i guess this will work :(
-        int neededPages = 0;
-        int currentPages = sizeNeeded; //>>	used temporarily to calculate pages needed
-        while (currentPages > 0) {
-            neededPages++;
-            currentPages -= this->policyParams;
-        }
-        currentPages = 0; //>>	Reset to real initial value
-        MemoryRegion* current = NULL;
-        while (mr != NULL) {
-            if (mr->processId == -1) {
-                //>>	Empty hole
-                if (currentPages == 0) {
-                    //>>	Starting to find big enough hole
-                    current = mr;
-                }
-                currentPages++;
-            } else if (currentPages != 0) {
-                //>>	Exiting an empty hole
-                if (currentPages >= neededPages) {
-                    if (currentPages > worstSize) {
-                        worstSize = currentPages;
-                        worst = current;
-                    }
-                } else {
-                    current = NULL;
-                    currentPages = 0;
-                }
-            }
-            if (currentPages == neededPages) {
-                return current;
-            }
-            mr = MemoryRegion_dequeI_next(&it);
-        }
-        //>>	Make sure we get holes at the end of the space
-        if (currentPages >= neededPages) {
-            if (currentPages > worstSize) {
-                worstSize = currentPages;
-                worst = current;
-            }
-        } else {
-            current = NULL;
-            currentPages = 0;
-        }
     }
     return worst;
+}
+
+MemoryRegion_deque* MMAN_getPageFitAllocation(MemoryManager* this, int sizeNeeded) {
+    MemoryRegion_dequeI it;
+    MemoryRegion_dequeI_init(&it, &this->memory);
+    MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
+
+    MemoryRegion_deque* pages = malloc(sizeof (*pages));
+    MemoryRegion_deque_init(pages, false, false);
+
+    int neededPages = MMAN_getNumPagesNeeded(this, sizeNeeded);
+    int currentPages = 0;
+    while (mr != NULL) {
+        if (mr->processId == -1) {
+            //>>	Empty hole
+            MemoryRegion_deque_pushL(pages, mr);
+            currentPages++;
+        }
+        //>>	Stop when we found enough
+        if (currentPages == neededPages) {
+            return pages;
+        }
+        mr = MemoryRegion_dequeI_next(&it);
+    }
+    //>>	getting here means we didn't find enough, lets cleanup
+    MemoryRegion_deque_empty(pages);
+    return NULL;
 }
 
 /* === END MESSINESS === */
@@ -385,25 +256,74 @@ void MMAN_printMemoryMap(MemoryManager* this, Logger* logger) {
     MemoryRegion_dequeI_init(&it, &this->memory);
     MemoryRegion* mr = MemoryRegion_dequeI_examine(&it);
     logger->log(logger, LogLevel_INFO, "Memory Map:\n");
-    if (this->policy == MP_PAG) {
-        while (mr != NULL) {
-            mr = MemoryRegion_dequeI_next(&it);
-            char s[30];
-            logger->log(logger, LogLevel_INFO, "\t%s\n", MR_toString(mr, s));
-        }
+    while (mr != NULL) {
+        char s[30];
+        logger->log(logger, LogLevel_INFO, "\t%7d-%-7d: %s\n", mr->kiloStart, mr->kiloEnd, MR_toString(mr, s));
+        mr = MemoryRegion_dequeI_next(&it);
     }
 }
 
 bool MMAN_allocateProcess(MemoryManager* this, PCB* process, Logger* logger) {
-    logger->log(logger, LogLevel_FINE, "Allocating Process\n");
+    char s[16];
+    logger->log(logger, LogLevel_INFO, "MM moves %s to memory\n", PCB_toString(process, s));
     if (this->policy == MP_VSP) {
         MemoryRegion* tobealloced = MMAN_getVSPAllocation(this, process);
+        //>>	Create a new Region with at the start address of allocatable space
+        //>>	and an ending address the approp. size away
+        //        this->freeSpace -= AddressSpace_deque_peekF(&process->a_space)->size;
+        MemoryRegion* new = MemoryRegion_init(process->id, tobealloced->kiloStart, tobealloced->kiloStart + AddressSpace_deque_pollF(&process->a_space)->size - 1);
+        //>>	allocatable space gets shortened to start right after new ends
+        tobealloced->kiloStart = new->kiloEnd + 1;
+        //>>	get the CAR of the data
+        MemoryRegion_dequeN* car = MemoryRegion_deque_getCar(&this->memory, tobealloced);
+        //>>	push new directly before CAR
+        MemoryRegion_deque_pushB(&this->memory, car, new);
+        if (MemoryRegion_deque_peekL(&this->memory)->kiloEnd >= this->memKiloSize || MemoryRegion_deque_peekL(&this->memory)->kiloStart >= this->memKiloSize) {
+            MemoryRegion_deque_pollL(&this->memory);
+        }
+        return true;
     } else if (this->policy == MP_SEG) {
-
+        MemoryRegion_deque* tobealloced = MMAN_getSEGAllocation(this, process);
+        MemoryRegion* procAlloc = MemoryRegion_deque_pollF(tobealloced);
+        int segmentId = 1;
+        while (procAlloc != NULL) {
+            //>>	Create a new Region with at the start address of allocatable space
+            //>>	and an ending address the approp. size away
+            //            this->freeSpace -= AddressSpace_deque_peekF(&process->a_space)->size;
+            MemoryRegion* new = MemoryRegion_initSeg(process->id, procAlloc->kiloStart, procAlloc->kiloStart + AddressSpace_deque_pollF(&process->a_space)->size - 1, segmentId++);
+            //>>	allocatable space gets shortened to start right after new ends
+            procAlloc->kiloStart = new->kiloEnd + 1;
+            //>>	get the CAR of the data
+            MemoryRegion_dequeN* car = MemoryRegion_deque_getCar(&this->memory, procAlloc);
+            //>>	push new directly before CAR
+            MemoryRegion_deque_pushB(&this->memory, car, new);
+            procAlloc = MemoryRegion_deque_pollF(tobealloced);
+        }
+        if (MemoryRegion_deque_peekL(&this->memory)->kiloEnd >= this->memKiloSize || MemoryRegion_deque_peekL(&this->memory)->kiloStart >= this->memKiloSize) {
+            MemoryRegion_deque_pollL(&this->memory);
+        }
+        MemoryRegion_deque_freeElements(tobealloced);
+        free(tobealloced);
+        return true;
     } else if (this->policy == MP_PAG) {
-
+        MemoryRegion_deque* pages = MMAN_getPAGAllocation(this, process);
+        if (pages != NULL) {
+            MemoryRegion_dequeI it;
+            MemoryRegion_dequeI_init(&it, pages);
+            MemoryRegion* page = MemoryRegion_dequeI_examine(&it);
+            int currentPage = 1;
+            while (page != NULL) {
+                page->isSeg = false;
+                page->partition = currentPage++;
+                page->processId = process->id;
+                page = MemoryRegion_dequeI_next(&it);
+            }
+            return true;
+        }
+        return false;
     }
-    return true;
+    return false;
+
 }
 
 void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger) {
@@ -413,9 +333,32 @@ void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger) {
     if (this->policy == MP_PAG) {
         while (mr != NULL) {
             if (mr->processId == process->id) {
-                mr->processId = -1;
+                MR_reset(mr);
+            }
+            mr = MemoryRegion_dequeI_next(&it);
+        }
+    } else if (this->policy == MP_SEG || this->policy == MP_VSP) {
+        while (mr != NULL) {
+            if (mr->processId == process->id) {
+                MR_reset(mr);
+                MMAN_coaleseMemory(this, mr, logger);
             }
             mr = MemoryRegion_dequeI_next(&it);
         }
     }
+}
+
+void MMAN_coaleseMemory(MemoryManager* this, MemoryRegion* data, Logger* logger) {
+    MemoryRegion_dequeN* car = MemoryRegion_deque_getCar(&this->memory, data);
+    if (car->prev != NULL && car->prev->data->processId == -1) {
+        MemoryRegion* previous = car->prev->data;
+        data->kiloStart = previous->kiloStart;
+        MemoryRegion_deque_pollN(&this->memory, previous);
+    }
+    if (car->next != NULL && car->next->data->processId == -1) {
+        MemoryRegion* next = car->next->data;
+        data->kiloEnd = next->kiloEnd;
+        MemoryRegion_deque_pollN(&this->memory, next);
+    }
+
 }

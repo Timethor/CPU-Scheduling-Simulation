@@ -26,7 +26,6 @@ typedef struct MemoryManager {
     enum MemoryPolicy policy;
     int memKiloSize;
     int policyParams;
-    int freeSpace;
     MemoryRegion_deque memory;
 } MemoryManager;
 
@@ -40,10 +39,12 @@ bool MMAN_checkAllocationPotential(MemoryManager * this, PCB* process);
 MemoryRegion* MMAN_getBestFitAllocation(MemoryManager * this, int sizeNeeded);
 MemoryRegion* MMAN_getFirstFitAllocation(MemoryManager * this, int sizeNeeded);
 MemoryRegion* MMAN_getWorstFitAllocation(MemoryManager * this, int sizeNeeded);
+MemoryRegion_deque* MMAN_getPageFitAllocation(MemoryManager* this, int sizeNeeded);
 
 void MMAN_printMemoryMap(MemoryManager* this, Logger* logger);
 bool MMAN_allocateProcess(MemoryManager* this, PCB* process, Logger* logger);
 void MMAN_deAllocateProcess(MemoryManager* this, PCB* process, Logger* logger);
+void MMAN_coaleseMemory(MemoryManager* this, MemoryRegion* data, Logger* logger);
 
 #endif	/* MEMORYMANAGER_H */
 

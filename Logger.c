@@ -5,7 +5,9 @@
  * Created on October 4, 2013, 4:03 PM
  */
 
+#define _GNU_SOURCE
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h> /* mmap() is defined in this header */
@@ -119,7 +121,8 @@ void LOG_LogStatement(Logger* this, enum LogLevel level, const char* format, ...
             this->clockHasChanged = false;
         } else
             sprintf(formatBuffer2, "%-16s %s", timeBuffer, formatBuffer);
-//                printf(formatBuffer2);
+//        printf(formatBuffer2);
+//        usleep(150);
         this->filesize += strlen(formatBuffer2) + 5;
         LogEntry* le = LogEntry_init(formatBuffer2, level);
         LogEntry_deque_pushL(&this->records, le);
@@ -142,7 +145,7 @@ void LOG_dumpToConsole(Logger* this) {
 }
 
 char* LOG_dumpToFile(Logger* this) {
-    char* text = (char*)malloc(this->filesize);
+    char* text = (char*) malloc(this->filesize);
     strcpy(text, "\n");
     LogEntry_dequeI it;
     LogEntry_dequeI_init(&it, &this->records);

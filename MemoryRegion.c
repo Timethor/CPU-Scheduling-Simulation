@@ -15,14 +15,31 @@ MemoryRegion* MemoryRegion_init(int processId, int kiloStart, int kiloEnd) {
     this->processId = processId;
     this->kiloStart = kiloStart;
     this->kiloEnd = kiloEnd;
-    this->segmentId = -1;
+    this->partition = -1;
+    this->isSeg = false;
+    return this;
+}
+
+MemoryRegion* MemoryRegion_initPart(int processId, int kiloStart, int kiloEnd, int partId) {
+    MemoryRegion* this = MemoryRegion_init(processId, kiloStart, kiloEnd);
+    this->partition = partId;
     return this;
 }
 
 MemoryRegion* MemoryRegion_initSeg(int processId, int kiloStart, int kiloEnd, int segmentId) {
-    MemoryRegion* this = MemoryRegion_init(processId, kiloStart, kiloEnd);
-    this->segmentId = segmentId;
+    MemoryRegion* this = MemoryRegion_initPart(processId, kiloStart, kiloEnd, segmentId);
+    this->isSeg = true;
     return this;
+}
+
+MemoryRegion* MemoryRegion_initPag(int processId, int kiloStart, int kiloEnd, int pageId) {
+    return MemoryRegion_initPart(processId, kiloStart, kiloEnd, pageId);
+}
+
+void MR_reset(MemoryRegion* this) {
+    this->processId = -1;
+    this->partition = -1;
+    this->isSeg = false;
 }
 
 void MemoryRegion_destruct(MemoryRegion* this) {
@@ -34,9 +51,13 @@ int MR_getSize(MemoryRegion* this) {
 }
 
 char* MR_toString(MemoryRegion* this, char* buffer) {
-    if (this->segmentId == -1)
-        sprintf(buffer, "Process %2d", this->processId);
-    else
-        sprintf(buffer, "Process %2d, Segment %2d", this->processId, this->segmentId);
+    if (this->processId == -1) {
+        sprintf(buffer, "Hole");
+    } else {
+        if (this->partition == -1)
+            sprintf(buffer, "Process %2d", this->processId);
+        else
+            sprintf(buffer, "Process %2d, %s %2d", this->processId, (this->isSeg ? "Segement" : "Page"), this->partition);
+    }
     return buffer;
 }

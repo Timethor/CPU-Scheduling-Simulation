@@ -37,9 +37,9 @@
     void type##_deque_init(type##_deque* container, bool debug, bool trace); \
     void type##_dequeN_init(type##_dequeN* container); \
     \
-    void type##_deque_pushB(type##_dequeN* node, type* data); \
+    void type##_deque_pushB(type##_deque* container, type##_dequeN* node, type* data); \
     void type##_deque_pushF(type##_deque* container, type* data); \
-    void type##_deque_pushA(type##_dequeN* node, type* data); \
+    void type##_deque_pushA(type##_deque* container, type##_dequeN* node, type* data); \
     void type##_deque_pushL(type##_deque* container, type* data); \
     \
     type* type##_deque_pollF(type##_deque* container); \
@@ -49,6 +49,7 @@
     \
     type* type##_deque_peekF(type##_deque* container); \
     type* type##_deque_peekL(type##_deque* container); \
+    type##_dequeN* type##_deque_getCar(type##_deque* container, type* data); \
     \
     bool  type##_deque_empty(type##_deque* container); \
     int   type##_deque_length(type##_deque* container); \
@@ -82,13 +83,15 @@
         } else { \
             if (container->trace) \
                 printf("TRACE:: Pushing to First Place: %s_Deque !Empty\n", #type); \
-            type##_deque_pushB(container->head, data); \
-            container->head=container->head->prev; \
+            type##_deque_pushB(container, container->head, data); \
         } \
     } \
     \
-    void type##_deque_pushA(type##_dequeN* node, type* data) { \
+    void type##_deque_pushA(type##_deque * container, type##_dequeN* node, type* data) { \
         type##_dequeN* newnode = malloc(sizeof(*newnode)); \
+        if (container->tail->data == node->data) { \
+            container->tail = newnode; \
+        } \
         newnode->data = data; \
         type##_dequeN* nextnode = node->next; \
         newnode->next = nextnode; \
@@ -109,18 +112,20 @@
         } else { \
             if (container->trace) \
                 printf("TRACE:: Pushing to Last Place: %s_Deque !Empty\n", #type); \
-            type##_deque_pushA(container->tail, data); \
-            container->tail=container->tail->next; \
+            type##_deque_pushA(container, container->tail, data); \
         } \
     } \
     \
-    void type##_deque_pushB(type##_dequeN* node, type* data) { \
+    void type##_deque_pushB(type##_deque * container, type##_dequeN* node, type* data) { \
         type##_dequeN* newnode = malloc(sizeof(*newnode)); \
+        if (container->head->data == node->data) { \
+            container->head = newnode; \
+        } \
         newnode->data = data; \
-        newnode->next = node; \
         type##_dequeN* prevnode = node->prev; \
         newnode->prev = prevnode; \
         if (prevnode != NULL) prevnode->next = newnode; \
+        newnode->next = node; \
         node->prev = newnode; \
     }
 
