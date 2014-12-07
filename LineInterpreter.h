@@ -27,7 +27,6 @@ enum FormatStage {
     FS_M_AS,
 };
 
-
 enum MemoryPolicy {
     MP_INF = -1,
     MP_VSP,
