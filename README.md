@@ -4,10 +4,7 @@ CPU-Scheduler-Simulator
 
 Author
 ------
-Nicholas \`Timethor\` Rich  - G00399909
-
-
-- System Preference for compilation: `zeus`
+Nicholas \`Timethor\` Rich
 
 Compilation & Running
 ---------------------
